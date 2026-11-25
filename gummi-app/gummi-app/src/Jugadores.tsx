@@ -10,6 +10,13 @@ export default function Jugadores({ yo }: { yo: any }) {
   const [nombre, setNombre] = useState('')
   const [pos, setPos] = useState('')
   const [ficha, setFicha] = useState<string | null>(null)
+  const [editId, setEditId] = useState<string | null>(null)
+  const [eNombre, setENombre] = useState('')
+  const [eApodo, setEApodo] = useState('')
+  const [ePos, setEPos] = useState('')
+  const [cuentas, setCuentas] = useState<any[]>([])
+  const [vincId, setVincId] = useState<string | null>(null)
+  const [vincCuenta, setVincCuenta] = useState('')
 
   const cargar = async () => {
     const { data } = await supabase.from('perfiles').select('*').order('nombre')
@@ -21,6 +28,8 @@ export default function Jugadores({ yo }: { yo: any }) {
         for (const r of n.data || []) m[r.jugador_id] = r
         setNotas(m)
       }
+      const cu = await supabase.rpc('cuentas_disponibles')
+      setCuentas(cu.error ? [] : cu.data || [])
       const mm = await supabase.from('notas_manuales').select('*')
       const o: Record<string, any> = {}
       for (const r of mm.data || []) o[r.jugador_id] = r
@@ -58,6 +67,28 @@ export default function Jugadores({ yo }: { yo: any }) {
     else cargar()
   }
 
+  const empezarEdicion = (j: any) => {
+    setEditId(j.id); setENombre(j.nombre); setEApodo(j.apodo || ''); setEPos(j.posicion || '')
+  }
+  const guardarEdicion = async () => {
+    if (!eNombre.trim()) return alert('El nombre no puede estar vacío')
+    const { error } = await supabase.from('perfiles')
+      .update({ nombre: eNombre.trim(), apodo: eApodo.trim() || null, posicion: ePos || null })
+      .eq('id', editId)
+    if (error) return alert(error.message)
+    setEditId(null)
+    cargar()
+  }
+  const vincular = async (externo: string) => {
+    const c = cuentas.find((x) => x.user_id === vincCuenta)
+    if (!c) return
+    if (!confirm(`Vincular este externo con la cuenta "${c.nombre}"? Conservará todo su histórico.`)) return
+    const { error } = await supabase.rpc('vincular_externo', { p_externo: externo, p_user_id: c.user_id })
+    if (error) return alert(error.message)
+    setVincId(null); setVincCuenta('')
+    cargar()
+  }
+
   if (ficha) return <Ficha id={ficha} yo={yo} onBack={() => setFicha(null)} />
 
   return (
@@ -81,6 +112,8 @@ export default function Jugadores({ yo }: { yo: any }) {
                   Nota: {n?.nota != null ? Number(n.nota).toFixed(1) : '–'}
                   {n?.fuente === 'votos' && ` (${n.num_votos} votos)`}
                   {n?.fuente === 'manual' && ' (manual)'}
+                  {n?.ajuste != null && Number(n.ajuste) !== 0 &&
+                    ` · base ${Number(n.nota_votos).toFixed(1)} ${Number(n.ajuste) > 0 ? '+' : ''}${Number(n.ajuste).toFixed(2)} por estadísticas`}
                 </span>
                 {(j.es_externo || n?.fuente !== 'votos') && (
                   <input
@@ -92,6 +125,45 @@ export default function Jugadores({ yo }: { yo: any }) {
                     onBlur={(e) => guardarManual(j.id, e.target.value)}
                   />
                 )}
+              </div>
+            )}
+            {(admin || j.id === yo.id) && editId !== j.id && (
+              <div className="row" style={{ marginTop: 6 }}>
+                <button className="sec mini" onClick={() => empezarEdicion(j)}>Editar perfil</button>
+                {admin && j.es_externo && cuentas.length > 0 && (
+                  <button className="sec mini" onClick={() => { setVincId(vincId === j.id ? null : j.id); setVincCuenta('') }}>
+                    Vincular con cuenta
+                  </button>
+                )}
+              </div>
+            )}
+            {editId === j.id && (
+              <div style={{ marginTop: 8 }}>
+                <form onSubmit={(e) => { e.preventDefault(); guardarEdicion() }}>
+                  <input placeholder="Nombre" value={eNombre} onChange={(e) => setENombre(e.target.value)} />
+                  <input placeholder="Apodo (opcional)" value={eApodo} onChange={(e) => setEApodo(e.target.value)} />
+                  <select value={ePos} onChange={(e) => setEPos(e.target.value)}>
+                    <option value="">Posición</option>
+                    <option value="portero">Portero</option>
+                    <option value="defensa">Defensa</option>
+                    <option value="medio">Medio</option>
+                    <option value="delantero">Delantero</option>
+                  </select>
+                  <div className="row">
+                    <button type="submit">Guardar</button>
+                    <button type="button" className="sec" onClick={() => setEditId(null)}>Cancelar</button>
+                  </div>
+                </form>
+              </div>
+            )}
+            {vincId === j.id && (
+              <div style={{ marginTop: 8 }}>
+                <p className="mut">Elige la cuenta recién creada de este jugador (debe estar sin partidos ni votos).</p>
+                <select value={vincCuenta} onChange={(e) => setVincCuenta(e.target.value)}>
+                  <option value="">Cuenta…</option>
+                  {cuentas.map((c) => <option key={c.user_id} value={c.user_id}>{c.nombre}</option>)}
+                </select>
+                <button style={{ marginLeft: 8 }} disabled={!vincCuenta} onClick={() => vincular(j.id)}>Vincular</button>
               </div>
             )}
           </div>
