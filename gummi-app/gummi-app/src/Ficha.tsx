@@ -17,7 +17,7 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
         ),
         traerTodo('participaciones', ['partido_id', 'jugador_id']),
         traerTodo('eventos', ['id'], (q) => q.eq('jugador_id', id)),
-        supabase.rpc('notas_jugadores'), // da error si las notas no son visibles para este usuario
+        supabase.rpc('notas_jugadores'), // solo funciona para el admin
         supabase.from('logros').select('*').order('orden'),
         supabase.from('logros_jugador').select('*').eq('jugador_id', id),
       ])
@@ -150,8 +150,8 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
       <div className="row" style={{ marginBottom: 10 }}>
         {perfil.posicion && <span className="tag">{perfil.posicion}</span>}
         {perfil.es_externo && <span className="tag">externo</span>}
-        {nota?.fuente === 'votos' && nota.nota != null && (
-          <span className="tag">Nota {Number(nota.nota).toFixed(1)}</span>
+        {nota?.nota != null && (
+          <span className="tag">Media {Math.round(Number(nota.nota))} (solo tú)</span>
         )}
       </div>
 

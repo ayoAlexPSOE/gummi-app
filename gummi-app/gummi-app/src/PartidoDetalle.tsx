@@ -157,9 +157,10 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
     const j = perfiles.find((x) => x.id === jid)
     return j ? j.apodo || j.nombre : '?'
   }
-  const notaDe = (jid: string) => (notas[jid]?.nota != null ? Number(notas[jid].nota) : NOTA_DEFECTO)
+  // El generador trabaja en escala 1-10; las medias vienen de 0 a 99.
+  const notaDe = (jid: string) => (notas[jid]?.nota != null ? Number(notas[jid].nota) / 10 : NOTA_DEFECTO)
   const media = (ids: string[]) =>
-    ids.length ? (ids.reduce((s, i) => s + notaDe(i), 0) / ids.length).toFixed(1) : '–'
+    ids.length ? Math.round((10 * ids.reduce((s, i) => s + notaDe(i), 0)) / ids.length) : '–'
   const respDe = (jid: string) => conv.find((c) => c.jugador_id === jid)?.respuesta || ''
   const golesDe = (jid: string, tipo: string) =>
     eventos.filter((e) => e.jugador_id === jid && e.tipo === tipo).length
@@ -293,7 +294,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
         >
           <span>{nombre(jid)}</span>
           <span className="mut">
-            {admin && !jugado && (notas[jid]?.nota ?? '–')}
+            {admin && !jugado && (notas[jid]?.nota != null ? Math.round(Number(notas[jid].nota)) : '–')}
             {jugado && golesDe(jid, 'gol') > 0 && ` ⚽${golesDe(jid, 'gol')}`}
             {jugado && golesDe(jid, 'asistencia') > 0 && ` 🅰️${golesDe(jid, 'asistencia')}`}
           </span>

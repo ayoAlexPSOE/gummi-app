@@ -57,7 +57,7 @@ export default function Jugadores({ yo }: { yo: any }) {
       return
     }
     const n = Number(t)
-    if (!(n >= 1 && n <= 10)) return alert('La nota debe estar entre 1 y 10')
+    if (!(n >= 0 && n <= 99)) return alert('La media debe estar entre 0 y 99')
     if (manuales[jid] && Number(manuales[jid].nota) === n) return
     const { error } = await supabase.from('notas_manuales').upsert(
       { jugador_id: jid, nota: n, updated_at: new Date().toISOString() },
@@ -94,7 +94,7 @@ export default function Jugadores({ yo }: { yo: any }) {
   return (
     <>
       <h2>Jugadores ({lista.length})</h2>
-      {admin && <p className="mut">Las notas solo las ves tú. A los externos y a quien aún no tenga votos les pones la nota a mano.</p>}
+      {admin && <p className="mut">Las medias (0-99) solo las ves tú y el generador de equipos. A los externos y a quien aún no tenga votos les pones la media a mano.</p>}
       {lista.map((j) => {
         const n = notas[j.id]
         const manual = manuales[j.id]
@@ -109,11 +109,11 @@ export default function Jugadores({ yo }: { yo: any }) {
             {admin && (
               <div className="row" style={{ marginTop: 6 }}>
                 <span className="mut" style={{ flex: 1 }}>
-                  Nota: {n?.nota != null ? Number(n.nota).toFixed(1) : '–'}
+                  Media: {n?.nota != null ? Math.round(Number(n.nota)) : '–'}
                   {n?.fuente === 'votos' && ` (${n.num_votos} votos)`}
                   {n?.fuente === 'manual' && ' (manual)'}
                   {n?.ajuste != null && Number(n.ajuste) !== 0 &&
-                    ` · base ${Number(n.nota_votos).toFixed(1)} ${Number(n.ajuste) > 0 ? '+' : ''}${Number(n.ajuste).toFixed(2)} por estadísticas`}
+                    ` · salió de ${Math.round(Number(n.nota_votos))} ${Number(n.ajuste) > 0 ? '+' : ''}${Number(n.ajuste).toFixed(1)}`}
                 </span>
                 {(j.es_externo || n?.fuente !== 'votos') && (
                   <input

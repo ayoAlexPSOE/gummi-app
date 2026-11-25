@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 
-const NOTAS = Array.from({ length: 19 }, (_, i) => 1 + i * 0.5)
+const NOTAS = Array.from({ length: 21 }, (_, i) => i * 0.5)
 
 function Selector({ valor, onChange }: { valor: string; onChange: (v: string) => void }) {
   return (
@@ -186,7 +186,7 @@ export default function Votar({ yo }: { yo: any }) {
         <div className="card">
           <b>Votación inicial</b>
           <div className="mut">
-            Puntúa a todos del 1 al 10 (a ti no). Es la base de la nota de cada jugador. Has votado a {votadosIni} de {candidatosIni.length}.
+            Puntúa a todos del 0 al 10 (a ti no). Es la base de la media de cada jugador, que solo ve el admin. Has votado a {votadosIni} de {candidatosIni.length}.
           </div>
           {candidatosIni.map((j) => (
             <div className="fila" key={j.id}>
@@ -209,25 +209,11 @@ export default function Votar({ yo }: { yo: any }) {
               </button>
             </div>
             <div className="fila">
-              <span>Notas visibles para todos</span>
-              <button className="sec mini" onClick={() => ajuste('notas_visibles', !cfg.notas_visibles)}>
-                {cfg.notas_visibles ? 'Sí · ocultar' : 'No · mostrar'}
-              </button>
-            </div>
-            <div className="fila">
               <span>Yo veo quién vota a quién</span>
               <button className="sec mini" onClick={() => ajuste('admin_ve_votos', !cfg.admin_ve_votos)}>
                 {cfg.admin_ve_votos ? 'Sí · ocultar' : 'No · ver'}
               </button>
             </div>
-            {cfg.usar_ajuste_stats !== undefined && (
-              <div className="fila">
-                <span>Ajustar notas con estadísticas</span>
-                <button className="sec mini" onClick={() => ajuste('usar_ajuste_stats', !cfg.usar_ajuste_stats)}>
-                  {cfg.usar_ajuste_stats ? 'Sí · desactivar' : 'No · activar'}
-                </button>
-              </div>
-            )}
           </div>
 
           {cfg.admin_ve_votos && (
