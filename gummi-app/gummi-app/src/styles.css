@@ -190,8 +190,8 @@ button.admin-tag { background:#3ddcff22; color:var(--acc); border:1px solid #3dd
 .hero-h { color:var(--acc); white-space:nowrap; }
 
 /* Fondo de estadio: arcos de luz detrás de todo, tenues para que las letras se lean */
-body::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.8;
-  background:url('./estrellas.svg') right bottom / min(560px,100vw) auto no-repeat, url('./fondo.svg') right top / min(1100px,140vw) auto no-repeat; }
+body::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.55;
+  background:url('./cupula.svg') center 40px / min(1000px,170vw) auto no-repeat; }
 .card, .tile, .jug, .once, .hero, .perfil-cab { backdrop-filter:blur(6px); }
 
 button.gen-equipos { width:100%; margin:12px 0 4px; padding:14px; display:flex; flex-direction:column; align-items:center; gap:2px; font-size:18px; font-family:var(--titulo); font-weight:800; letter-spacing:.8px; text-transform:uppercase; box-shadow:0 0 22px #3ddcff44; }
