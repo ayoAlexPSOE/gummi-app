@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import PartidoDetalle from './PartidoDetalle'
 
 const OPCIONES: [string, string][] = [['voy', 'Voy'], ['duda', 'Duda'], ['no_voy', 'No voy']]
 
@@ -9,6 +10,7 @@ export default function Partidos({ yo }: { yo: any }) {
   const [conv, setConv] = useState<any[]>([])
   const [fecha, setFecha] = useState('')
   const [lugar, setLugar] = useState('')
+  const [abierto, setAbierto] = useState<number | null>(null)
 
   const cargar = async () => {
     const p = await supabase.from('partidos').select('*').order('fecha', { ascending: false })
@@ -16,7 +18,7 @@ export default function Partidos({ yo }: { yo: any }) {
     setPartidos(p.data || [])
     setConv(c.data || [])
   }
-  useEffect(() => { cargar() }, [])
+  useEffect(() => { if (abierto === null) cargar() }, [abierto])
 
   const crear = async (e: any) => {
     e.preventDefault()
@@ -36,6 +38,10 @@ export default function Partidos({ yo }: { yo: any }) {
     else cargar()
   }
 
+  if (abierto !== null) {
+    return <PartidoDetalle id={abierto} yo={yo} onBack={() => setAbierto(null)} />
+  }
+
   return (
     <>
       <h2>Partidos</h2>
@@ -45,13 +51,16 @@ export default function Partidos({ yo }: { yo: any }) {
         const voy = conv.filter((c) => c.partido_id === p.id && c.respuesta === 'voy').length
         return (
           <div className="card" key={p.id}>
-            <div className="row">
+            <div className="row" style={{ cursor: 'pointer' }} onClick={() => setAbierto(p.id)}>
               <b style={{ flex: 1 }}>
                 {new Date(p.fecha).toLocaleString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
               </b>
+              {p.goles_a != null && <b>{p.goles_a} - {p.goles_b}</b>}
               <span className="tag">{p.estado}</span>
             </div>
-            <div className="mut">{p.lugar || 'Sin lugar'} · {voy} confirmados</div>
+            <div className="mut" style={{ cursor: 'pointer' }} onClick={() => setAbierto(p.id)}>
+              {p.lugar || 'Sin lugar'} · {voy} confirmados · Ver detalle ›
+            </div>
             {p.estado === 'convocatoria' && (
               <div className="row" style={{ marginTop: 8 }}>
                 {OPCIONES.map(([v, t]) => (
