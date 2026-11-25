@@ -193,3 +193,6 @@ button.admin-tag { background:#3ddcff22; color:var(--acc); border:1px solid #3dd
 body::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.8;
   background:url('./fondo.svg') right top / min(1100px,140vw) auto no-repeat; }
 .card, .tile, .jug, .once, .hero, .perfil-cab { backdrop-filter:blur(6px); }
+
+button.gen-equipos { width:100%; margin:12px 0 4px; padding:14px; display:flex; flex-direction:column; align-items:center; gap:2px; font-size:18px; font-family:var(--titulo); font-weight:800; letter-spacing:.8px; text-transform:uppercase; box-shadow:0 0 22px #3ddcff44; }
+button.gen-equipos span { font-family:Inter,system-ui,sans-serif; font-size:12px; font-weight:500; letter-spacing:0; text-transform:none; opacity:.85; }

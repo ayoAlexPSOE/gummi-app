@@ -190,6 +190,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
     if (confirmados.length < 2) return alert('Hacen falta al menos 2 jugadores con "Voy".')
     if (confirmados.length > 20) return alert('Demasiados jugadores para repartir (máximo 20).')
     setBorrador(generarEquipos(confirmados, notaDe))
+    setTimeout(() => document.getElementById('equipos')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
   }
 
   const mover = (jid: string) => {
@@ -329,6 +330,13 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
         </div>
       )}
 
+      {puedeEditarEquipos && !borrador && (
+        <button className="gen-equipos" onClick={generar}>
+          ⚡ {part.length > 0 ? 'Rehacer equipos' : 'Generar equipos automáticos'}
+          <span>{confirmados.length} {confirmados.length === 1 ? 'jugador va' : 'jugadores van'}{confirmados.length < 2 ? ' · marca antes quién va, más abajo' : ''}</span>
+        </button>
+      )}
+
       {jugado && p.goles_a != null && (
         <div className="card c" style={{ padding: '18px 0' }}>
           <div className="mut">Resultado</div>
@@ -350,6 +358,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
       )}
 
       {/* ---- Equipos ---- */}
+      <div id="equipos" style={{ scrollMarginTop: 70 }} />
       {(borrador || part.length > 0 || puedeEditarEquipos) && <h2>Equipos</h2>}
       {borrador ? (
         <>
