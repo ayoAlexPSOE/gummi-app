@@ -15,6 +15,7 @@ export default function OnceIdeal({ perfiles, onFicha }: { perfiles: any[]; onFi
   const [partidos, setPartidos] = useState<any[] | null>(null)
   const [idx, setIdx] = useState(0)
   const [filas, setFilas] = useState<any[] | null>(null)
+  const [sinSql, setSinSql] = useState(false)
 
   useEffect(() => {
     ;(async () => {
@@ -28,10 +29,20 @@ export default function OnceIdeal({ perfiles, onFicha }: { perfiles: any[]; onFi
   useEffect(() => {
     if (!partidos || partidos.length === 0) return
     setFilas(null)
-    supabase.rpc('once_ideal', { p_partido: partidos[idx].id }).then(({ data, error }) => setFilas(error ? [] : data || []))
+    supabase.rpc('once_ideal', { p_partido: partidos[idx].id }).then(({ data, error }) => { setSinSql(!!error); setFilas(error ? [] : data || []) })
   }, [partidos, idx])
 
-  if (!partidos || partidos.length === 0) return null
+  if (!partidos) return null
+  if (partidos.length === 0) {
+    return (
+      <div className="once">
+        <b className="once-t">⭐ Once ideal</b>
+        <p className="mut" style={{ margin: '6px 0 0' }}>
+          Aparecerá cuando termine la votación (48 h después de cerrar) de un partido en el que se haya votado.
+        </p>
+      </div>
+    )
+  }
   const hay = filas && filas.length > 0
   const cab = filas && filas[0]
 
@@ -75,7 +86,11 @@ export default function OnceIdeal({ perfiles, onFicha }: { perfiles: any[]; onFi
         <button className="sec mini" disabled={idx === 0} onClick={() => setIdx(idx - 1)} aria-label="Partido siguiente">›</button>
       </div>
       {!filas && <p className="mut c" style={{ padding: 12 }}>Cargando…</p>}
-      {filas && !hay && <p className="mut c" style={{ padding: 12 }}>Sin votos suficientes en este partido.</p>}
+      {filas && !hay && (
+        <p className="mut c" style={{ padding: 12 }}>
+          {sinSql ? 'Falta ejecutar en Supabase el script 12_once_ideal.sql.' : 'Sin votos suficientes en este partido.'}
+        </p>
+      )}
       {hay && (
         <div className="campo">
           {filasCampo.map((f, i) => (
