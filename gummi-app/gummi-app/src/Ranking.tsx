@@ -35,13 +35,29 @@ export default function Ranking({ yo }: { yo: any }) {
   const [cat, setCat] = useState('goles')
   const [ficha, setFicha] = useState<string | null>(null)
   const [fallo, setFallo] = useState(false)
+  const [temporadas, setTemporadas] = useState<any[]>([])
+  const [sel, setSel] = useState('') // id de temporada o 'todas'
+  const [version, setVersion] = useState(0)
+  const admin = yo.rol === 'admin'
 
   useEffect(() => {
     if (ficha !== null) return
     ;(async () => {
+      const t = await supabase.from('temporadas').select('*').order('id', { ascending: false })
+      const lista = t.data || []
+      setTemporadas(lista)
+      setSel((s) => s || String((lista.find((x: any) => x.activa) || lista[0])?.id ?? 'todas'))
+    })()
+  }, [ficha, version])
+
+  useEffect(() => {
+    if (ficha !== null || sel === '') return
+    ;(async () => {
       const [pr, rk] = await Promise.all([
         supabase.from('perfiles').select('*').eq('activo', true),
-        supabase.rpc('ranking_jugadores'),
+        sel === 'todas'
+          ? supabase.rpc('ranking_jugadores')
+          : supabase.rpc('ranking_jugadores', { p_temporada: Number(sel) }),
       ])
       if (rk.error) {
         setFallo(true)
@@ -57,14 +73,29 @@ export default function Ranking({ yo }: { yo: any }) {
         }))
       )
     })()
-  }, [ficha])
+  }, [ficha, sel, version])
+
+  const activa = temporadas.find((t) => t.activa)
+
+  const nuevaTemporada = async () => {
+    const nombre = prompt('Nombre de la nueva temporada (por ejemplo, 2026/27):')
+    if (!nombre || !nombre.trim()) return
+    const ok = confirm(
+      `Se cerrará${activa ? ` "${activa.nombre}"` : ' la temporada actual'} y empezará "${nombre.trim()}". Los partidos que crees desde ahora irán a la nueva. ¿Seguro?`
+    )
+    if (!ok) return
+    const { data, error } = await supabase.rpc('nueva_temporada', { p_nombre: nombre.trim() })
+    if (error) return alert(error.message)
+    setSel(String(data))
+    setVersion((v) => v + 1)
+  }
 
   if (ficha !== null) return <Ficha id={ficha} yo={yo} onBack={() => setFicha(null)} />
   if (fallo) {
     return (
       <>
         <h2>Ranking</h2>
-        <p className="mut">No se pudo cargar el ranking. Comprueba que se ha ejecutado el script 04_ranking.sql en Supabase.</p>
+        <p className="mut">No se pudo cargar el ranking. Comprueba que se han ejecutado en Supabase los scripts 04_ranking.sql y 05_temporadas.sql.</p>
       </>
     )
   }
@@ -90,6 +121,14 @@ export default function Ranking({ yo }: { yo: any }) {
   return (
     <>
       <h2>Ranking</h2>
+      <select value={sel} onChange={(e) => setSel(e.target.value)} style={{ marginBottom: 10 }}>
+        {temporadas.map((t) => (
+          <option key={t.id} value={String(t.id)}>
+            {t.nombre}{t.activa ? ' (actual)' : ''}
+          </option>
+        ))}
+        <option value="todas">Histórico (todas)</option>
+      </select>
       <div className="chips">
         {CATEGORIAS.map((c) => (
           <button key={c.id} className={'sec' + (cat === c.id ? ' on2' : '')} onClick={() => setCat(c.id)}>
@@ -118,6 +157,15 @@ export default function Ranking({ yo }: { yo: any }) {
           </span>
         </div>
       ))}
+
+      {admin && (
+        <div style={{ marginTop: 24 }}>
+          <button className="sec" onClick={nuevaTemporada}>Empezar nueva temporada</button>
+          <p className="mut">
+            Cierra la temporada actual y abre otra. Las notas de los jugadores no se reinician; solo cambia el ranking.
+          </p>
+        </div>
+      )}
     </>
   )
 }
