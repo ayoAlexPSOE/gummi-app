@@ -4,6 +4,7 @@ import Jugadores from './Jugadores'
 import Partidos from './Partidos'
 import Votar from './Votar'
 import Ranking from './Ranking'
+import Avisos from './Avisos'
 
 function Login() {
   const [email, setEmail] = useState('')
@@ -38,6 +39,9 @@ export default function App() {
   const [session, setSession] = useState<any>(undefined)
   const [yo, setYo] = useState<any>(null)
   const [tab, setTab] = useState('partidos')
+  const [sinLeer, setSinLeer] = useState(0)
+  const [irPartido, setIrPartido] = useState<number | null>(null)
+  const [vistaRanking, setVistaRanking] = useState('tabla')
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session))
@@ -51,6 +55,32 @@ export default function App() {
       .then(({ data }) => setYo(data))
   }, [session])
 
+  const contarAvisos = async () => {
+    const { count, error } = await supabase
+      .from('notificaciones').select('id', { count: 'exact', head: true }).eq('leida', false)
+    if (!error) setSinLeer(count || 0)
+  }
+
+  // Mantenimiento (logros, avisos por tiempo) y contador de avisos, cada minuto.
+  useEffect(() => {
+    if (!yo) return
+    let vivo = true
+    const ciclo = async () => {
+      try { await supabase.rpc('mantenimiento') } catch { /* si el SQL aún no está, se ignora */ }
+      if (vivo) await contarAvisos()
+    }
+    ciclo()
+    const t = setInterval(ciclo, 60000)
+    return () => { vivo = false; clearInterval(t) }
+  }, [yo?.id])
+
+  const irA = (destino: string | null, ref: number | null) => {
+    if (destino === 'partido' && ref) { setIrPartido(ref); setTab('partidos') }
+    else if (destino === 'votar') setTab('votar')
+    else if (destino === 'logros') { setVistaRanking('logros'); setTab('ranking') }
+    else setTab('partidos')
+  }
+
   if (session === undefined) return <p className="c">Cargando…</p>
   if (!session) return <Login />
 
@@ -59,19 +89,23 @@ export default function App() {
       <header>
         <b>Gummi ⚽</b>
         <span>{yo?.apodo || yo?.nombre}{yo?.rol === 'admin' ? ' · admin' : ''}</span>
+        <button className="bell" onClick={() => setTab('avisos')} aria-label="Avisos">
+          🔔{sinLeer > 0 && <span className="badge">{sinLeer}</span>}
+        </button>
         <button className="sec" onClick={() => supabase.auth.signOut()}>Salir</button>
       </header>
       <main>
         {!yo ? <p className="c">Cargando perfil…</p>
-          : tab === 'partidos' ? <Partidos yo={yo} />
+          : tab === 'partidos' ? <Partidos yo={yo} abrirInicial={irPartido} onUsado={() => setIrPartido(null)} />
+          : tab === 'avisos' ? <Avisos onIr={irA} onCambio={contarAvisos} />
           : tab === 'votar' ? <Votar yo={yo} />
-          : tab === 'ranking' ? <Ranking yo={yo} />
+          : tab === 'ranking' ? <Ranking key={vistaRanking} yo={yo} vistaInicial={vistaRanking} />
           : <Jugadores yo={yo} />}
       </main>
       <nav>
         <button className={tab === 'partidos' ? 'on' : ''} onClick={() => setTab('partidos')}>Partidos</button>
         <button className={tab === 'votar' ? 'on' : ''} onClick={() => setTab('votar')}>Votar</button>
-        <button className={tab === 'ranking' ? 'on' : ''} onClick={() => setTab('ranking')}>Ranking</button>
+        <button className={tab === 'ranking' ? 'on' : ''} onClick={() => { setVistaRanking('tabla'); setTab('ranking') }}>Ranking</button>
         <button className={tab === 'jugadores' ? 'on' : ''} onClick={() => setTab('jugadores')}>Jugadores</button>
       </nav>
     </div>

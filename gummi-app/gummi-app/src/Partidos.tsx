@@ -4,7 +4,7 @@ import PartidoDetalle from './PartidoDetalle'
 
 const OPCIONES: [string, string][] = [['voy', 'Voy'], ['duda', 'Duda'], ['no_voy', 'No voy']]
 
-export default function Partidos({ yo }: { yo: any }) {
+export default function Partidos({ yo, abrirInicial, onUsado }: { yo: any; abrirInicial?: number | null; onUsado?: () => void }) {
   const admin = yo.rol === 'admin'
   const [partidos, setPartidos] = useState<any[]>([])
   const [conv, setConv] = useState<any[]>([])
@@ -23,6 +23,9 @@ export default function Partidos({ yo }: { yo: any }) {
     setConv(c.data || [])
   }
   useEffect(() => { if (abierto === null) cargar() }, [abierto])
+  useEffect(() => {
+    if (abrirInicial) { setAbierto(abrirInicial); onUsado && onUsado() }
+  }, [abrirInicial])
 
   const crear = async (e: any) => {
     e.preventDefault()

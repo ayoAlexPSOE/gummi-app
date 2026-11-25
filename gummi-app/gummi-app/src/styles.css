@@ -33,3 +33,6 @@ button:disabled { opacity:.5; }
 .chip.V { background:#16a34a; }
 .chip.E { background:#64748b; }
 .chip.D { background:#dc2626; }
+.badge { background:#ef4444; color:#fff; border-radius:99px; font-size:11px; padding:1px 6px; margin-left:4px; font-weight:700; }
+.card.unread { border-left:4px solid var(--acc); }
+header button.bell { background:none; padding:4px 8px; font-size:20px; position:relative; }
