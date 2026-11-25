@@ -38,6 +38,8 @@ export default function Votar({ yo }: { yo: any }) {
   const [ed, setEd] = useState<Record<string, string>>({})
   const [mvpEd, setMvpEd] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState(false)
+  const [editando, setEditando] = useState<Record<string, boolean>>({})
+  const [aviso, setAviso] = useState('')
 
   const cargar = async () => {
     const [cf, pr, vo, mv, pt] = await Promise.all([
@@ -129,6 +131,11 @@ export default function Votar({ yo }: { yo: any }) {
     setBusy(false)
     if (fallo) alert('No se pudo guardar todo. Puede que la votación haya terminado.\n\n' + fallo)
     await cargar()
+    if (!fallo) {
+      setEditando((x) => ({ ...x, [pid === null ? 'ini' : String(pid)]: false }))
+      setAviso('✅ Voto guardado')
+      setTimeout(() => setAviso(''), 3000)
+    }
   }
 
   const ajuste = async (campo: string, v: boolean) => {
@@ -164,8 +171,28 @@ export default function Votar({ yo }: { yo: any }) {
         <p className="mut">Ahora mismo no hay nada que votar.</p>
       )}
 
+      {aviso && <div className="toast">{aviso}</div>}
+
       {abiertos.map((p) => {
         const cands = candidatosPartido(p.id)
+        const nVotados = mios.filter((v) => v.partido_id === p.id).length
+        const tiene = nVotados > 0 || misMvp.some((m) => m.partido_id === p.id)
+        if (tiene && !editando[String(p.id)]) {
+          return (
+            <div className="card hecho" key={p.id}>
+              <div className="row">
+                <span style={{ fontSize: 26 }}>✅</span>
+                <span style={{ flex: 1 }}>
+                  <b>Voto guardado</b>
+                  <div className="mut">
+                    Partido del {fmt(p.fecha)} · has puntuado a {nVotados}. Puedes cambiarlo hasta el {fmt(p.votacion_hasta)}.
+                  </div>
+                </span>
+                <button className="sec mini" onClick={() => setEditando({ ...editando, [String(p.id)]: true })}>Editar</button>
+              </div>
+            </div>
+          )
+        }
         return (
           <div className="card" key={p.id}>
             <b>Partido del {fmt(p.fecha)}</b>
@@ -190,7 +217,21 @@ export default function Votar({ yo }: { yo: any }) {
         )
       })}
 
-      {cfg.votacion_inicial_abierta && (
+      {cfg.votacion_inicial_abierta && votadosIni > 0 && !editando['ini'] && (
+        <div className="card hecho">
+          <div className="row">
+            <span style={{ fontSize: 26 }}>{votadosIni >= candidatosIni.length ? '✅' : '📝'}</span>
+            <span style={{ flex: 1 }}>
+              <b>{votadosIni >= candidatosIni.length ? 'Votación inicial guardada' : 'Votación inicial a medias'}</b>
+              <div className="mut">Has puntuado a {votadosIni} de {candidatosIni.length}.</div>
+            </span>
+            <button className="sec mini" onClick={() => setEditando({ ...editando, ini: true })}>
+              {votadosIni >= candidatosIni.length ? 'Editar' : 'Seguir'}
+            </button>
+          </div>
+        </div>
+      )}
+      {cfg.votacion_inicial_abierta && (votadosIni === 0 || editando['ini']) && (
         <div className="card">
           <b>Votación inicial</b>
           <div className="mut">

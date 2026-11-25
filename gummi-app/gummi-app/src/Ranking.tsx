@@ -9,24 +9,28 @@ type Cat = {
   unidad: string
   valor: (r: any) => number | null
   nota?: string
+  corto: string
+  icono: string
 }
 
 const MIN_PARTIDOS = 3
 
 const CATEGORIAS: Cat[] = [
-  { id: 'goles', titulo: 'Goleadores', unidad: 'goles', valor: (r) => r.goles },
-  { id: 'asistencias', titulo: 'Asistentes', unidad: 'asist.', valor: (r) => r.asistencias },
-  { id: 'ga', titulo: 'Goles + asist.', unidad: 'G+A', valor: (r) => r.goles + r.asistencias },
-  { id: 'mvps', titulo: 'MVP', unidad: 'MVP', valor: (r) => r.mvps },
-  { id: 'victorias', titulo: 'Victorias', unidad: 'victorias', valor: (r) => r.victorias },
+  { id: 'goles', titulo: 'Goleadores', corto: 'Goles', icono: '⚽', unidad: 'goles', valor: (r) => r.goles },
+  { id: 'asistencias', titulo: 'Asistentes', corto: 'Asist.', icono: '🅰️', unidad: 'asist.', valor: (r) => r.asistencias },
+  { id: 'ga', titulo: 'Goles + asist.', corto: 'G+A', icono: '⚡', unidad: 'G+A', valor: (r) => r.goles + r.asistencias },
+  { id: 'mvps', titulo: 'MVP', corto: 'MVP', icono: '🏆', unidad: 'MVP', valor: (r) => r.mvps },
+  { id: 'victorias', titulo: 'Victorias', corto: 'Victorias', icono: '✅', unidad: 'victorias', valor: (r) => r.victorias },
   {
     id: 'pct',
     titulo: '% victorias',
+    corto: '% Vict.',
+    icono: '📈',
     unidad: '%',
     valor: (r) => (r.partidos >= MIN_PARTIDOS ? Math.round((100 * r.victorias) / r.partidos) : null),
     nota: `Hace falta haber jugado al menos ${MIN_PARTIDOS} partidos.`,
   },
-  { id: 'partidos', titulo: 'Partidos', unidad: 'partidos', valor: (r) => r.partidos },
+  { id: 'partidos', titulo: 'Partidos', corto: 'Partidos', icono: '👟', unidad: 'partidos', valor: (r) => r.partidos },
 ]
 
 const MEDALLAS = ['🥇', '🥈', '🥉']
@@ -147,13 +151,15 @@ export default function Ranking({ yo, vistaInicial }: { yo: any; vistaInicial?: 
         ))}
         <option value="todas">Histórico (todas)</option>
       </select>
-      <div className="chips">
+      <div className="cats">
         {CATEGORIAS.map((c) => (
           <button key={c.id} className={'sec' + (cat === c.id ? ' on2' : '')} onClick={() => setCat(c.id)}>
-            {c.titulo}
+            <span className="ic">{c.icono}</span>
+            {c.corto}
           </button>
         ))}
       </div>
+      <h2 style={{ marginTop: 14 }}>{actual.titulo}</h2>
       {actual.nota && <p className="mut">{actual.nota}</p>}
 
       {ordenados.length === 0 && (

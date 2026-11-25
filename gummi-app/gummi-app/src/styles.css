@@ -111,3 +111,12 @@ button.grande.sel { background:var(--acc); color:var(--acc-t); box-shadow:0 0 18
 @keyframes entra { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
 @media (prefers-reduced-motion:reduce) { * { animation:none !important; transition:none !important; } }
 @media (min-width:700px) { .app { border-left:1px solid var(--line); border-right:1px solid var(--line); } }
+
+/* Ranking: categorías en cuadrícula (sin scroll lateral) */
+.cats { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:8px 0 4px; }
+.cats button { display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 2px; min-height:56px; font-size:12px; font-weight:700; line-height:1.1; }
+.cats button .ic { font-size:18px; }
+.cats button.on2 { background:var(--acc); color:var(--acc-t); outline:0; box-shadow:0 0 14px #c6ff3d44; }
+/* Aviso de voto guardado */
+.toast { position:fixed; top:calc(64px + env(safe-area-inset-top)); left:50%; transform:translateX(-50%); z-index:20; background:var(--acc); color:var(--acc-t); font-weight:700; padding:10px 18px; border-radius:99px; box-shadow:0 6px 24px #000a; animation:entra .25s ease both; }
+.card.hecho { border-color:#c6ff3d55; }
