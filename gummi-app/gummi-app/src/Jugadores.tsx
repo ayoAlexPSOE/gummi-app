@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import Ficha from './Ficha'
 import Avatar from './Avatar'
+import OnceIdeal from './OnceIdeal'
 
 export default function Jugadores({ yo }: { yo: any }) {
   const admin = yo.rol === 'admin'
@@ -18,6 +19,7 @@ export default function Jugadores({ yo }: { yo: any }) {
   const [cuentas, setCuentas] = useState<any[]>([])
   const [vincId, setVincId] = useState<string | null>(null)
   const [vincCuenta, setVincCuenta] = useState('')
+  const [abierto, setAbierto] = useState<string | null>(null)
 
   const cargar = async () => {
     const { data } = await supabase.from('perfiles').select('*').order('nombre')
@@ -94,78 +96,79 @@ export default function Jugadores({ yo }: { yo: any }) {
 
   return (
     <>
-      <h2>Jugadores ({lista.length})</h2>
+      <OnceIdeal perfiles={lista} onFicha={(id) => setFicha(id)} />
+      <h2>Plantilla ({lista.length})</h2>
       {admin && <p className="mut">Las medias (0-99) solo las ves tú y el generador de equipos. A los externos y a quien aún no tenga votos les pones la media a mano.</p>}
       {lista.map((j) => {
         const n = notas[j.id]
         const manual = manuales[j.id]
+        const desplegado = abierto === j.id
         return (
-          <div className="card" key={j.id}>
-            <div className="row">
-              <Avatar p={j} size={34} />
-              <b style={{ flex: 1, cursor: 'pointer' }} onClick={() => setFicha(j.id)}>{j.apodo || j.nombre} ›</b>
-              {j.posicion && <span className={'tag pos-' + j.posicion}>{j.posicion}</span>}
-              {j.es_externo && <span className="tag">externo</span>}
-              {j.rol === 'admin' && <span className="tag">admin</span>}
+          <div className="jug" key={j.id}>
+            <div className="jug-fila">
+              <Avatar p={j} size={32} />
+              <span className="jug-nombre" onClick={() => setFicha(j.id)}>{j.apodo || j.nombre}</span>
+              {j.posicion && <span className={'tag pos-' + j.posicion}>{j.posicion.slice(0, 3)}</span>}
+              {j.es_externo && <span className="tag">ext</span>}
+              {j.rol === 'admin' && <span className="tag">adm</span>}
+              {admin && <span className="media-badge">{n?.nota != null ? Math.round(Number(n.nota)) : '–'}</span>}
+              {admin && (
+                <button className="sec mini ico" onClick={() => setAbierto(desplegado ? null : j.id)} aria-label="Opciones">⋯</button>
+              )}
             </div>
-            {admin && (
-              <div className="row" style={{ marginTop: 6 }}>
-                <span className="mut" style={{ flex: 1 }}>
-                  Media: {n?.nota != null ? Math.round(Number(n.nota)) : '–'}
-                  {n?.fuente === 'votos' && ` (${n.num_votos} votos)`}
-                  {n?.fuente === 'manual' && ' (manual)'}
+            {admin && desplegado && (
+              <div className="jug-extra">
+                <div className="mut">
+                  {n?.fuente === 'votos' && `${n.num_votos} votos recibidos`}
+                  {n?.fuente === 'manual' && 'Media puesta a mano'}
                   {n?.ajuste != null && Number(n.ajuste) !== 0 &&
                     ` · salió de ${Math.round(Number(n.nota_votos))} ${Number(n.ajuste) > 0 ? '+' : ''}${Number(n.ajuste).toFixed(1)}`}
-                </span>
-                {(j.es_externo || n?.fuente !== 'votos') && (
-                  <input
-                    key={j.id + ':' + (manual?.nota ?? '')}
-                    style={{ width: 90 }}
-                    inputMode="decimal"
-                    placeholder="Manual"
-                    defaultValue={manual ? String(Number(manual.nota)) : ''}
-                    onBlur={(e) => guardarManual(j.id, e.target.value)}
-                  />
+                </div>
+                <div className="row" style={{ marginTop: 6 }}>
+                  {(j.es_externo || n?.fuente !== 'votos') && (
+                    <input
+                      key={j.id + ':' + (manual?.nota ?? '')}
+                      style={{ width: 110 }}
+                      inputMode="decimal"
+                      placeholder="Media manual"
+                      defaultValue={manual ? String(Number(manual.nota)) : ''}
+                      onBlur={(e) => guardarManual(j.id, e.target.value)}
+                    />
+                  )}
+                  {editId !== j.id && <button className="sec mini" onClick={() => empezarEdicion(j)}>Editar perfil</button>}
+                  {j.es_externo && cuentas.length > 0 && (
+                    <button className="sec mini" onClick={() => { setVincId(vincId === j.id ? null : j.id); setVincCuenta('') }}>
+                      Vincular con cuenta
+                    </button>
+                  )}
+                </div>
+                {editId === j.id && (
+                  <form style={{ marginTop: 8 }} onSubmit={(e) => { e.preventDefault(); guardarEdicion() }}>
+                    <input placeholder="Nombre" value={eNombre} onChange={(e) => setENombre(e.target.value)} />
+                    <input placeholder="Apodo (opcional)" value={eApodo} onChange={(e) => setEApodo(e.target.value)} />
+                    <select value={ePos} onChange={(e) => setEPos(e.target.value)}>
+                      <option value="">Posición</option>
+                      <option value="portero">Portero</option>
+                      <option value="defensa">Defensa</option>
+                      <option value="medio">Medio</option>
+                      <option value="delantero">Delantero</option>
+                    </select>
+                    <div className="row">
+                      <button type="submit">Guardar</button>
+                      <button type="button" className="sec" onClick={() => setEditId(null)}>Cancelar</button>
+                    </div>
+                  </form>
                 )}
-              </div>
-            )}
-            {(admin || j.id === yo.id) && editId !== j.id && (
-              <div className="row" style={{ marginTop: 6 }}>
-                <button className="sec mini" onClick={() => empezarEdicion(j)}>Editar perfil</button>
-                {admin && j.es_externo && cuentas.length > 0 && (
-                  <button className="sec mini" onClick={() => { setVincId(vincId === j.id ? null : j.id); setVincCuenta('') }}>
-                    Vincular con cuenta
-                  </button>
-                )}
-              </div>
-            )}
-            {editId === j.id && (
-              <div style={{ marginTop: 8 }}>
-                <form onSubmit={(e) => { e.preventDefault(); guardarEdicion() }}>
-                  <input placeholder="Nombre" value={eNombre} onChange={(e) => setENombre(e.target.value)} />
-                  <input placeholder="Apodo (opcional)" value={eApodo} onChange={(e) => setEApodo(e.target.value)} />
-                  <select value={ePos} onChange={(e) => setEPos(e.target.value)}>
-                    <option value="">Posición</option>
-                    <option value="portero">Portero</option>
-                    <option value="defensa">Defensa</option>
-                    <option value="medio">Medio</option>
-                    <option value="delantero">Delantero</option>
-                  </select>
-                  <div className="row">
-                    <button type="submit">Guardar</button>
-                    <button type="button" className="sec" onClick={() => setEditId(null)}>Cancelar</button>
+                {vincId === j.id && (
+                  <div style={{ marginTop: 8 }}>
+                    <p className="mut">Elige la cuenta recién creada de este jugador (debe estar sin partidos ni votos).</p>
+                    <select value={vincCuenta} onChange={(e) => setVincCuenta(e.target.value)}>
+                      <option value="">Cuenta…</option>
+                      {cuentas.map((c) => <option key={c.user_id} value={c.user_id}>{c.nombre}</option>)}
+                    </select>
+                    <button style={{ marginLeft: 8 }} disabled={!vincCuenta} onClick={() => vincular(j.id)}>Vincular</button>
                   </div>
-                </form>
-              </div>
-            )}
-            {vincId === j.id && (
-              <div style={{ marginTop: 8 }}>
-                <p className="mut">Elige la cuenta recién creada de este jugador (debe estar sin partidos ni votos).</p>
-                <select value={vincCuenta} onChange={(e) => setVincCuenta(e.target.value)}>
-                  <option value="">Cuenta…</option>
-                  {cuentas.map((c) => <option key={c.user_id} value={c.user_id}>{c.nombre}</option>)}
-                </select>
-                <button style={{ marginLeft: 8 }} disabled={!vincCuenta} onClick={() => vincular(j.id)}>Vincular</button>
+                )}
               </div>
             )}
           </div>

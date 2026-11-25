@@ -141,9 +141,16 @@ export default function Perfil({ yo, onGuardado }: { yo: any; onGuardado: () => 
           <div className="row" style={{ marginTop: 6 }}>
             {yo.posicion && <span className={'tag pos-' + yo.posicion}>{yo.posicion}</span>}
             {(yo.posiciones_secundarias || []).map((s: string) => <span key={s} className={'tag pos-' + s} style={{ opacity: 0.7 }}>{s}</span>)}
-            {yo.dorsal != null && <span className="tag">#{yo.dorsal}</span>}
             {yo.rol === 'admin' && <span className="tag">admin</span>}
           </div>
+        </div>
+        <div className="perfil-info">
+          {yo.dorsal != null && <div className="dorsal">{yo.dorsal}</div>}
+          <div>📅 Desde {new Date(yo.created_at).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' })}</div>
+          {stats && stats.partidos > 0 && <div>⚽ {(stats.goles / stats.partidos).toFixed(2)} goles/partido</div>}
+          {stats && stats.partidos > 0 && <div>🏆 {Math.round((100 * stats.victorias) / stats.partidos)}% victorias</div>}
+          {yo.pierna && <div>🦶 Pierna {yo.pierna}</div>}
+          {logros.length > 0 && <div>🏅 {logros.length} logros</div>}
         </div>
       </div>
 
