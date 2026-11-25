@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import Ficha from './Ficha'
+import Logros from './Logros'
 
 type Cat = {
   id: string
@@ -30,7 +31,8 @@ const CATEGORIAS: Cat[] = [
 
 const MEDALLAS = ['🥇', '🥈', '🥉']
 
-export default function Ranking({ yo }: { yo: any }) {
+export default function Ranking({ yo, vistaInicial }: { yo: any; vistaInicial?: string }) {
+  const [vista, setVista] = useState(vistaInicial === 'logros' ? 'logros' : 'tabla')
   const [filas, setFilas] = useState<any[] | null>(null)
   const [cat, setCat] = useState('goles')
   const [ficha, setFicha] = useState<string | null>(null)
@@ -91,9 +93,24 @@ export default function Ranking({ yo }: { yo: any }) {
   }
 
   if (ficha !== null) return <Ficha id={ficha} yo={yo} onBack={() => setFicha(null)} />
+  const selectorVista = (
+    <div className="row" style={{ margin: '12px 0 4px' }}>
+      <button className={'sec' + (vista === 'tabla' ? ' on2' : '')} onClick={() => setVista('tabla')}>Clasificación</button>
+      <button className={'sec' + (vista === 'logros' ? ' on2' : '')} onClick={() => setVista('logros')}>🏅 Logros</button>
+    </div>
+  )
+  if (vista === 'logros') {
+    return (
+      <>
+        {selectorVista}
+        <Logros yo={yo} onFicha={(id) => setFicha(id)} />
+      </>
+    )
+  }
   if (fallo) {
     return (
       <>
+        {selectorVista}
         <h2>Ranking</h2>
         <p className="mut">No se pudo cargar el ranking. Comprueba que se han ejecutado en Supabase los scripts 04_ranking.sql y 05_temporadas.sql.</p>
       </>
@@ -120,6 +137,7 @@ export default function Ranking({ yo }: { yo: any }) {
 
   return (
     <>
+      {selectorVista}
       <h2>Ranking</h2>
       <select value={sel} onChange={(e) => setSel(e.target.value)} style={{ marginBottom: 10 }}>
         {temporadas.map((t) => (

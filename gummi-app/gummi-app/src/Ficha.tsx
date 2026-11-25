@@ -9,7 +9,7 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
 
   useEffect(() => {
     ;(async () => {
-      const [pr, rk, ps, pa, ev, nt] = await Promise.all([
+      const [pr, rk, ps, pa, ev, nt, lg, lj] = await Promise.all([
         supabase.from('perfiles').select('*').eq('activo', true),
         supabase.rpc('ranking_jugadores'),
         traerTodo('partidos', ['fecha', 'id'], (q) =>
@@ -18,6 +18,8 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
         traerTodo('participaciones', ['partido_id', 'jugador_id']),
         traerTodo('eventos', ['id'], (q) => q.eq('jugador_id', id)),
         supabase.rpc('notas_jugadores'), // da error si las notas no son visibles para este usuario
+        supabase.from('logros').select('*').order('orden'),
+        supabase.from('logros_jugador').select('*').eq('jugador_id', id),
       ])
 
       const perfiles: any[] = pr.data || []
@@ -92,8 +94,14 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
       let nota: any = null
       if (!nt.error) nota = (nt.data || []).find((r: any) => r.jugador_id === id) || null
 
+      const logros: any[] = []
+      for (const l of lg.data || []) {
+        const n = (lj.data || []).filter((x: any) => x.logro_id === l.id).length
+        if (n > 0) logros.push({ ...l, n })
+      }
+
       setD({
-        perfil, stats, historial, racha, nota,
+        perfil, stats, historial, racha, nota, logros,
         mejorComp: mejorComp ? { nombre: nombre(mejorComp[0]), ...mejorComp[1] } : null,
         peorRival:
           peorRival && peorRival[1].v / peorRival[1].n < 0.5
@@ -104,7 +112,7 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
   }, [id])
 
   if (!d) return <p className="c">Cargando ficha…</p>
-  const { perfil, stats, historial, racha, nota, mejorComp, peorRival } = d
+  const { perfil, stats, historial, racha, nota, mejorComp, peorRival, logros } = d
   if (!perfil) {
     return (
       <>
@@ -158,6 +166,19 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
       <p className="mut">
         {stats.victorias} victorias · {stats.empates} empates · {stats.derrotas} derrotas
       </p>
+
+      {logros.length > 0 && (
+        <div className="card">
+          <b>🏅 Logros ({logros.length})</b>
+          <div className="row" style={{ marginTop: 8 }}>
+            {logros.map((l: any) => (
+              <span key={l.id} className="tag" title={l.descripcion}>
+                {l.icono} {l.nombre}{l.n > 1 ? ` ×${l.n}` : ''}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {historial.length > 0 && (
         <div className="card">
