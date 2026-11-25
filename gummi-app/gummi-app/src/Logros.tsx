@@ -81,12 +81,6 @@ export default function Logros({ yo, onFicha }: { yo: any; onFicha: (id: string)
           </div>
         )
       })}
-      {admin && (
-        <div style={{ marginTop: 20 }}>
-          <button className="sec" disabled={busy} onClick={recalcular}>Recalcular todos los logros</button>
-          <p className="mut">Útil si has corregido un resultado antiguo. No avisa a nadie.</p>
-        </div>
-      )}
     </>
   )
 }

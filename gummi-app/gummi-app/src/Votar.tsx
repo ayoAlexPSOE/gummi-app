@@ -55,12 +55,6 @@ export default function Votar({ yo }: { yo: any }) {
       : { data: [] }
     let todosV: any[] = []
     let todosM: any[] = []
-    if (admin && cf.data?.admin_ve_votos) {
-      const a = await supabase.from('votos').select('*').order('created_at', { ascending: false }).limit(1000)
-      const b = await supabase.from('votos_mvp').select('*').order('created_at', { ascending: false }).limit(1000)
-      todosV = a.data || []
-      todosM = b.data || []
-    }
     setCfg(cf.data)
     setPerfiles(pr.data || [])
     setMios(vo.data || [])
@@ -247,55 +241,6 @@ export default function Votar({ yo }: { yo: any }) {
         </div>
       )}
 
-      {admin && (
-        <>
-          <h2>Ajustes (admin)</h2>
-          <div className="card">
-            <div className="fila">
-              <span>Votación inicial</span>
-              <button className="sec mini" onClick={() => ajuste('votacion_inicial_abierta', !cfg.votacion_inicial_abierta)}>
-                {cfg.votacion_inicial_abierta ? 'Abierta · cerrar' : 'Cerrada · abrir'}
-              </button>
-            </div>
-            <div className="fila">
-              <span>Yo veo quién vota a quién</span>
-              <button className="sec mini" onClick={() => ajuste('admin_ve_votos', !cfg.admin_ve_votos)}>
-                {cfg.admin_ve_votos ? 'Sí · ocultar' : 'No · ver'}
-              </button>
-            </div>
-          </div>
-
-          {cfg.admin_ve_votos && (
-            <details className="card">
-              <summary>Ver votos de todos (solo tú)</summary>
-              {perfiles.filter((j) => votos.some((v) => v.votado_id === j.id)).map((j) => (
-                <div key={j.id} style={{ margin: '10px 0' }}>
-                  <b>{j.apodo || j.nombre}</b>
-                  <div className="mut">
-                    {votos
-                      .filter((v) => v.votado_id === j.id)
-                      .map((v) => {
-                        const pt = partidos.find((p) => p.id === v.partido_id)
-                        const donde = v.partido_id === null ? 'ini' : pt ? new Date(pt.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'numeric' }) : 'partido'
-                        return `${nombre(v.votante_id)} ${Number(v.nota)} (${donde})`
-                      })
-                      .join(' · ')}
-                  </div>
-                </div>
-              ))}
-              {mvps.length > 0 && (
-                <div style={{ marginTop: 14 }}>
-                  <b>🏆 Votos de MVP</b>
-                  <div className="mut">
-                    {mvps.map((m) => `${nombre(m.votante_id)} → ${nombre(m.votado_id)}`).join(' · ')}
-                  </div>
-                </div>
-              )}
-              {votos.length === 0 && mvps.length === 0 && <p className="mut">Todavía no hay votos.</p>}
-            </details>
-          )}
-        </>
-      )}
     </>
   )
 }

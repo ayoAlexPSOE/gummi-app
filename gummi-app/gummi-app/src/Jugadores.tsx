@@ -174,22 +174,6 @@ export default function Jugadores({ yo }: { yo: any }) {
           </div>
         )
       })}
-      {admin && (
-        <>
-          <h2>Añadir externo</h2>
-          <form onSubmit={anadir}>
-            <input placeholder="Nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} />
-            <select value={pos} onChange={(e) => setPos(e.target.value)}>
-              <option value="">Posición (opcional)</option>
-              <option value="portero">Portero</option>
-              <option value="defensa">Defensa</option>
-              <option value="medio">Medio</option>
-              <option value="delantero">Delantero</option>
-            </select>
-            <button type="submit">Añadir</button>
-          </form>
-        </>
-      )}
     </>
   )
 }

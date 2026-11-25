@@ -78,16 +78,6 @@ export default function Partidos({ yo, abrirInicial, onUsado }: { yo: any; abrir
           </div>
         )
       })}
-      {admin && (
-        <>
-          <h2>Nuevo partido</h2>
-          <form onSubmit={crear}>
-            <input type="datetime-local" value={fecha} onChange={(e) => setFecha(e.target.value)} />
-            <input placeholder="Lugar (opcional)" value={lugar} onChange={(e) => setLugar(e.target.value)} />
-            <button type="submit">Crear partido</button>
-          </form>
-        </>
-      )}
     </>
   )
 }

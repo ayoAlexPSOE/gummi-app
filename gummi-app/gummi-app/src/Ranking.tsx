@@ -184,14 +184,6 @@ export default function Ranking({ yo, vistaInicial }: { yo: any; vistaInicial?: 
         </div>
       ))}
 
-      {admin && (
-        <div style={{ marginTop: 24 }}>
-          <button className="sec" onClick={nuevaTemporada}>Empezar nueva temporada</button>
-          <p className="mut">
-            Cierra la temporada actual y abre otra. Las notas de los jugadores no se reinician; solo cambia el ranking.
-          </p>
-        </div>
-      )}
     </>
   )
 }

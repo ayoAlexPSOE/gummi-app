@@ -24,7 +24,7 @@ async function reducir(file: File): Promise<Blob> {
   )
 }
 
-export default function Perfil({ yo, onGuardado }: { yo: any; onGuardado: () => void }) {
+export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardado: () => void; onAdmin?: () => void }) {
   const extras = yo.foto_url !== undefined // false si aún no se ha ejecutado 11_perfil.sql
   const [nombre, setNombre] = useState(yo.nombre || '')
   const [apodo, setApodo] = useState(yo.apodo || '')
@@ -141,7 +141,9 @@ export default function Perfil({ yo, onGuardado }: { yo: any; onGuardado: () => 
           <div className="row" style={{ marginTop: 6 }}>
             {yo.posicion && <span className={'tag pos-' + yo.posicion}>{yo.posicion}</span>}
             {(yo.posiciones_secundarias || []).map((s: string) => <span key={s} className={'tag pos-' + s} style={{ opacity: 0.7 }}>{s}</span>)}
-            {yo.rol === 'admin' && <span className="tag">admin</span>}
+            {yo.rol === 'admin' && (
+              <button type="button" className="tag admin-tag" onClick={onAdmin}>🔧 admin ›</button>
+            )}
           </div>
         </div>
         <div className="perfil-info">

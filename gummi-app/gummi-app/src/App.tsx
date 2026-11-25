@@ -7,6 +7,7 @@ import Ranking from './Ranking'
 import Avisos from './Avisos'
 import Inicio from './Inicio'
 import Perfil from './Perfil'
+import Admin from './Admin'
 import Avatar from './Avatar'
 
 function Login() {
@@ -107,7 +108,8 @@ export default function App() {
         {!yo ? <p className="c">Cargando perfil…</p>
           : tab === 'inicio' ? <Inicio yo={yo} onPartido={(id) => irA('partido', id)} onVotar={() => setTab('votar')} />
           : tab === 'partidos' ? <Partidos yo={yo} abrirInicial={irPartido} onUsado={() => setIrPartido(null)} />
-          : tab === 'perfil' ? <Perfil yo={yo} onGuardado={cargarYo} />
+          : tab === 'perfil' ? <Perfil yo={yo} onGuardado={cargarYo} onAdmin={() => setTab('admin')} />
+          : tab === 'admin' && yo.rol === 'admin' ? <Admin yo={yo} onBack={() => setTab('perfil')} onPartido={(id) => irA('partido', id)} onTab={setTab} />
           : tab === 'avisos' ? <Avisos onIr={irA} onCambio={contarAvisos} />
           : tab === 'votar' ? <Votar yo={yo} />
           : tab === 'ranking' ? <Ranking key={vistaRanking} yo={yo} vistaInicial={vistaRanking} />
