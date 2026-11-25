@@ -102,7 +102,7 @@ export default function Jugadores({ yo }: { yo: any }) {
           <div className="card" key={j.id}>
             <div className="row">
               <b style={{ flex: 1, cursor: 'pointer' }} onClick={() => setFicha(j.id)}>{j.apodo || j.nombre} ›</b>
-              {j.posicion && <span className="tag">{j.posicion}</span>}
+              {j.posicion && <span className={'tag pos-' + j.posicion}>{j.posicion}</span>}
               {j.es_externo && <span className="tag">externo</span>}
               {j.rol === 'admin' && <span className="tag">admin</span>}
             </div>

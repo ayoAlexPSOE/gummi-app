@@ -1,16 +1,24 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 
-const NOTAS = Array.from({ length: 21 }, (_, i) => i * 0.5)
+const NOTAS = Array.from({ length: 11 }, (_, i) => i)
 
+// Fila de casillas 0-10: toca una nota para ponerla y vuelve a tocarla para quitarla.
 function Selector({ valor, onChange }: { valor: string; onChange: (v: string) => void }) {
   return (
-    <select value={valor} onChange={(e) => onChange(e.target.value)}>
-      <option value="">—</option>
+    <div className="nota-chips">
       {NOTAS.map((n) => (
-        <option key={n} value={String(n)}>{n}</option>
+        <button
+          type="button"
+          key={n}
+          className={'nc' + (valor === String(n) ? ' on' : '')}
+          style={{ ['--c' as any]: `hsl(${n * 12}, 80%, 52%)` }}
+          onClick={() => onChange(valor === String(n) ? '' : String(n))}
+        >
+          {n}
+        </button>
       ))}
-    </select>
+    </div>
   )
 }
 
@@ -163,7 +171,7 @@ export default function Votar({ yo }: { yo: any }) {
             <b>Partido del {fmt(p.fecha)}</b>
             <div className="mut">Puedes votar hasta el {fmt(p.votacion_hasta)}. Toca solo a quien quieras puntuar.</div>
             {cands.map((j: any) => (
-              <div className="fila" key={j.id}>
+              <div className="fila voto" key={j.id}>
                 <span>{j.apodo || j.nombre}</span>
                 <Selector valor={valor(p.id, j.id)} onChange={(v) => setEd({ ...ed, [clave(p.id, j.id)]: v })} />
               </div>
@@ -189,7 +197,7 @@ export default function Votar({ yo }: { yo: any }) {
             Puntúa a todos del 0 al 10 (a ti no). Es la base de la media de cada jugador, que solo ve el admin. Has votado a {votadosIni} de {candidatosIni.length}.
           </div>
           {candidatosIni.map((j) => (
-            <div className="fila" key={j.id}>
+            <div className="fila voto" key={j.id}>
               <span>{j.apodo || j.nombre}</span>
               <Selector valor={valor(null, j.id)} onChange={(v) => setEd({ ...ed, [clave(null, j.id)]: v })} />
             </div>

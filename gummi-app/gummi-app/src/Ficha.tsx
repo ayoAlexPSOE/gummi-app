@@ -148,7 +148,7 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
       </div>
       <h2 style={{ marginTop: 0 }}>{perfil.apodo || perfil.nombre}</h2>
       <div className="row" style={{ marginBottom: 10 }}>
-        {perfil.posicion && <span className="tag">{perfil.posicion}</span>}
+        {perfil.posicion && <span className={'tag pos-' + perfil.posicion}>{perfil.posicion}</span>}
         {perfil.es_externo && <span className="tag">externo</span>}
         {nota?.nota != null && (
           <span className="tag">Media {Math.round(Number(nota.nota))} (solo tú)</span>

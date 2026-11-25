@@ -23,7 +23,7 @@ function Login() {
   return (
     <div className="app">
       <main>
-        <h2 style={{ marginTop: 60 }}>Gummi ⚽</h2>
+        <div className="brand-big">GUMMI<i>⚽</i></div>
         <p className="mut">Inicia sesión con la cuenta que te ha creado el admin.</p>
         <form onSubmit={entrar}>
           <input placeholder="Usuario" autoCapitalize="none" autoCorrect="off" value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -88,8 +88,11 @@ export default function App() {
   return (
     <div className="app">
       <header>
-        <b>Gummi ⚽</b>
-        <span>{yo?.apodo || yo?.nombre}{yo?.rol === 'admin' ? ' · admin' : ''}</span>
+        <b className="brand">GUMMI<i>⚽</i></b>
+        <span className="quien">
+          <b>{yo?.apodo || yo?.nombre}{yo?.rol === 'admin' ? ' · admin' : ''}</b>
+          <span className="avatar">{(yo?.apodo || yo?.nombre || '?').slice(0, 2).toUpperCase()}</span>
+        </span>
         <button className="bell" onClick={() => setTab('avisos')} aria-label="Avisos">
           🔔{sinLeer > 0 && <span className="badge">{sinLeer}</span>}
         </button>
