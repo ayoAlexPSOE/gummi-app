@@ -5,6 +5,7 @@ import Partidos from './Partidos'
 import Votar from './Votar'
 import Ranking from './Ranking'
 import Avisos from './Avisos'
+import Inicio from './Inicio'
 
 function Login() {
   const [email, setEmail] = useState('')
@@ -38,7 +39,7 @@ function Login() {
 export default function App() {
   const [session, setSession] = useState<any>(undefined)
   const [yo, setYo] = useState<any>(null)
-  const [tab, setTab] = useState('partidos')
+  const [tab, setTab] = useState('inicio')
   const [sinLeer, setSinLeer] = useState(0)
   const [irPartido, setIrPartido] = useState<number | null>(null)
   const [vistaRanking, setVistaRanking] = useState('tabla')
@@ -96,6 +97,7 @@ export default function App() {
       </header>
       <main>
         {!yo ? <p className="c">Cargando perfil…</p>
+          : tab === 'inicio' ? <Inicio yo={yo} onPartido={(id) => irA('partido', id)} onVotar={() => setTab('votar')} />
           : tab === 'partidos' ? <Partidos yo={yo} abrirInicial={irPartido} onUsado={() => setIrPartido(null)} />
           : tab === 'avisos' ? <Avisos onIr={irA} onCambio={contarAvisos} />
           : tab === 'votar' ? <Votar yo={yo} />
@@ -103,10 +105,11 @@ export default function App() {
           : <Jugadores yo={yo} />}
       </main>
       <nav>
-        <button className={tab === 'partidos' ? 'on' : ''} onClick={() => setTab('partidos')}>Partidos</button>
-        <button className={tab === 'votar' ? 'on' : ''} onClick={() => setTab('votar')}>Votar</button>
-        <button className={tab === 'ranking' ? 'on' : ''} onClick={() => { setVistaRanking('tabla'); setTab('ranking') }}>Ranking</button>
-        <button className={tab === 'jugadores' ? 'on' : ''} onClick={() => setTab('jugadores')}>Jugadores</button>
+        {([['inicio', '🏠', 'Inicio'], ['partidos', '⚽', 'Partidos'], ['votar', '🗳️', 'Votar'], ['ranking', '🏆', 'Ranking'], ['jugadores', '👥', 'Plantilla']] as const).map(([id, ic, tx]) => (
+          <button key={id} className={tab === id ? 'on' : ''} onClick={() => { if (id === 'ranking') setVistaRanking('tabla'); setTab(id) }}>
+            <span className="ic">{ic}</span>{tx}
+          </button>
+        ))}
       </nav>
     </div>
   )
