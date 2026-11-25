@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import { traerTodo } from './util'
+import Avatar from './Avatar'
 
 const MIN_PAREJA = 3
 
@@ -146,9 +147,16 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
       <div className="row" style={{ margin: '12px 0' }}>
         <button className="sec mini" onClick={onBack}>← Volver</button>
       </div>
-      <h2 style={{ marginTop: 0 }}>{perfil.apodo || perfil.nombre}</h2>
+      <div className="row" style={{ marginBottom: 8, flexWrap: 'nowrap' }}>
+        <Avatar p={perfil} size={64} />
+        <h2 style={{ margin: 0 }}>{perfil.apodo || perfil.nombre}</h2>
+      </div>
       <div className="row" style={{ marginBottom: 10 }}>
         {perfil.posicion && <span className={'tag pos-' + perfil.posicion}>{perfil.posicion}</span>}
+        {(perfil.posiciones_secundarias || []).map((s: string) => (
+          <span key={s} className={'tag pos-' + s} style={{ opacity: 0.7 }}>{s}</span>
+        ))}
+        {perfil.dorsal != null && <span className="tag">#{perfil.dorsal}</span>}
         {perfil.es_externo && <span className="tag">externo</span>}
         {nota?.nota != null && (
           <span className="tag">Media {Math.round(Number(nota.nota))} (solo tú)</span>

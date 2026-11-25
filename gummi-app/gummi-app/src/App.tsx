@@ -6,6 +6,8 @@ import Votar from './Votar'
 import Ranking from './Ranking'
 import Avisos from './Avisos'
 import Inicio from './Inicio'
+import Perfil from './Perfil'
+import Avatar from './Avatar'
 
 function Login() {
   const [email, setEmail] = useState('')
@@ -50,10 +52,14 @@ export default function App() {
     return () => data.subscription.unsubscribe()
   }, [])
 
+  const cargarYo = async () => {
+    if (!session) return
+    const { data } = await supabase.from('perfiles').select('*').eq('user_id', session.user.id).single()
+    setYo(data)
+  }
   useEffect(() => {
     if (!session) { setYo(null); return }
-    supabase.from('perfiles').select('*').eq('user_id', session.user.id).single()
-      .then(({ data }) => setYo(data))
+    cargarYo()
   }, [session])
 
   const contarAvisos = async () => {
@@ -89,19 +95,19 @@ export default function App() {
     <div className="app">
       <header>
         <b className="brand">GUMMI<i>⚽</i></b>
-        <span className="quien">
+        <span className="quien" style={{ cursor: 'pointer' }} onClick={() => setTab('perfil')}>
           <b>{yo?.apodo || yo?.nombre}{yo?.rol === 'admin' ? ' · admin' : ''}</b>
-          <span className="avatar">{(yo?.apodo || yo?.nombre || '?').slice(0, 2).toUpperCase()}</span>
+          <Avatar p={yo} size={32} />
         </span>
         <button className="bell" onClick={() => setTab('avisos')} aria-label="Avisos">
           🔔{sinLeer > 0 && <span className="badge">{sinLeer}</span>}
         </button>
-        <button className="sec" onClick={() => supabase.auth.signOut()}>Salir</button>
       </header>
       <main>
         {!yo ? <p className="c">Cargando perfil…</p>
           : tab === 'inicio' ? <Inicio yo={yo} onPartido={(id) => irA('partido', id)} onVotar={() => setTab('votar')} />
           : tab === 'partidos' ? <Partidos yo={yo} abrirInicial={irPartido} onUsado={() => setIrPartido(null)} />
+          : tab === 'perfil' ? <Perfil yo={yo} onGuardado={cargarYo} />
           : tab === 'avisos' ? <Avisos onIr={irA} onCambio={contarAvisos} />
           : tab === 'votar' ? <Votar yo={yo} />
           : tab === 'ranking' ? <Ranking key={vistaRanking} yo={yo} vistaInicial={vistaRanking} />

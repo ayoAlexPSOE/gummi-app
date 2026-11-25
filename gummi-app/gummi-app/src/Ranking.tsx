@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import Ficha from './Ficha'
 import Logros from './Logros'
+import Avatar from './Avatar'
 
 type Cat = {
   id: string
@@ -170,6 +171,7 @@ export default function Ranking({ yo, vistaInicial }: { yo: any; vistaInicial?: 
           <span style={{ width: 32, textAlign: 'center', fontWeight: 700 }}>
             {puestos[i] <= 3 ? MEDALLAS[puestos[i] - 1] : puestos[i]}
           </span>
+          <Avatar p={x.r} size={36} />
           <span style={{ flex: 1 }}>
             <b>{x.r.apodo || x.r.nombre}</b>
             {x.r.es_externo && <span className="tag" style={{ marginLeft: 6 }}>externo</span>}

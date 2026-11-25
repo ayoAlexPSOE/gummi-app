@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import Ficha from './Ficha'
+import Avatar from './Avatar'
 
 export default function Jugadores({ yo }: { yo: any }) {
   const admin = yo.rol === 'admin'
@@ -101,6 +102,7 @@ export default function Jugadores({ yo }: { yo: any }) {
         return (
           <div className="card" key={j.id}>
             <div className="row">
+              <Avatar p={j} size={34} />
               <b style={{ flex: 1, cursor: 'pointer' }} onClick={() => setFicha(j.id)}>{j.apodo || j.nombre} ›</b>
               {j.posicion && <span className={'tag pos-' + j.posicion}>{j.posicion}</span>}
               {j.es_externo && <span className="tag">externo</span>}

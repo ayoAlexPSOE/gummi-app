@@ -120,3 +120,15 @@ button.grande.sel { background:var(--acc); color:var(--acc-t); box-shadow:0 0 18
 /* Aviso de voto guardado */
 .toast { position:fixed; top:calc(64px + env(safe-area-inset-top)); left:50%; transform:translateX(-50%); z-index:20; background:var(--acc); color:var(--acc-t); font-weight:700; padding:10px 18px; border-radius:99px; box-shadow:0 6px 24px #000a; animation:entra .25s ease both; }
 .card.hecho { border-color:#c6ff3d55; }
+
+/* Avatares y perfil */
+.avatar { object-fit:cover; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; background:var(--acc); color:var(--acc-t); font-family:var(--titulo); font-weight:800; flex:none; border:2px solid #c6ff3d66; }
+img.avatar { background:#0b1a13; }
+.perfil-cab { display:flex; align-items:center; gap:14px; margin:14px 0 6px; padding:14px; border-radius:16px; border:1px solid #24503a; background:linear-gradient(165deg,#12331f,#0b1f15); }
+.perfil-nombre { font-family:var(--titulo); font-size:30px; font-weight:800; line-height:1.05; text-transform:uppercase; }
+.grid4 { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.pos-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+.pos-grid button { display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 2px; font-size:12px; min-height:60px; }
+.pos-grid button.on2 { background:var(--acc); color:var(--acc-t); outline:0; }
+details summary { cursor:pointer; font-weight:600; min-height:28px; }
+label.mut { margin-top:6px; }
