@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 760" preserveAspectRatio="xMaxYMin slice">
+  <defs>
+    <linearGradient id="borde" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff7ad9"/>
+      <stop offset=".35" stop-color="#4f7bff"/>
+      <stop offset=".7" stop-color="#3ddcff"/>
+      <stop offset="1" stop-color="#c8f6ff"/>
+    </linearGradient>
+    <linearGradient id="borde2" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3ddcff"/>
+      <stop offset=".5" stop-color="#5a78ff"/>
+      <stop offset="1" stop-color="#b678ff"/>
+    </linearGradient>
+    <linearGradient id="cuerpo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2a4cff" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#0a1a8a" stop-opacity=".05"/>
+    </linearGradient>
+    <radialGradient id="halo" cx=".78" cy=".12" r=".7">
+      <stop offset="0" stop-color="#3a62ff" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#3a62ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1000" height="760" fill="url(#halo)"/>
+  <!-- cubierta de estadio: arco grande -->
+  <path d="M1000 40 C760 20 560 120 470 330 C610 230 800 190 1000 230 Z" fill="url(#cuerpo)"/>
+  <path d="M1000 40 C760 20 560 120 470 330" fill="none" stroke="url(#borde)" stroke-width="4" stroke-linecap="round"/>
+  <path d="M1000 230 C800 190 610 230 470 330" fill="none" stroke="url(#borde2)" stroke-width="2.5" stroke-linecap="round" opacity=".8"/>
+  <!-- arco inferior -->
+  <path d="M1000 470 C860 440 740 480 650 600 C780 560 900 570 1000 610 Z" fill="url(#cuerpo)" opacity=".7"/>
+  <path d="M1000 470 C860 440 740 480 650 600" fill="none" stroke="url(#borde)" stroke-width="3" stroke-linecap="round" opacity=".85"/>
+  <!-- luces lejanas -->
+  <g fill="#9fd8ff" opacity=".55">
+    <circle cx="130" cy="560" r="1.6"/><circle cx="190" cy="580" r="1.2"/><circle cx="260" cy="545" r="1.8"/>
+    <circle cx="330" cy="590" r="1.2"/><circle cx="410" cy="565" r="1.6"/><circle cx="90" cy="600" r="1.2"/>
+    <circle cx="520" cy="610" r="1.4"/><circle cx="60" cy="520" r="1.4"/><circle cx="300" cy="640" r="1.2"/>
+  </g>
+</svg>
