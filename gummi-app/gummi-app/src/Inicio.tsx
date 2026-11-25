@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { horario } from './util'
 
 const OPCIONES: [string, string, string][] = [['voy', 'Voy', '✅'], ['duda', 'Duda', '🤔'], ['no_voy', 'No voy', '❌']]
 
@@ -43,7 +44,7 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
 
   // Próximo partido: el más cercano que aún no ha terminado
   const proximos = d.lista
-    .filter((p: any) => (p.estado === 'convocatoria' || p.estado === 'equipos') && new Date(p.fecha).getTime() > ahora - 3 * 3600000)
+    .filter((p: any) => (p.estado === 'convocatoria' || p.estado === 'equipos') && (p.fecha_fin ? new Date(p.fecha_fin).getTime() : new Date(p.fecha).getTime() + 3 * 3600000) > ahora)
     .sort((a: any, b: any) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime())
   const prox = proximos[0]
   const ultimo = d.lista.find((p: any) => (p.estado === 'jugado' || p.estado === 'cerrado') && p.goles_a != null)
@@ -83,7 +84,7 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
         return (
           <div className="hero">
             <div className="mut" style={{ textTransform: 'uppercase', letterSpacing: 1, fontSize: 11 }}>Próximo partido</div>
-            <div className="hero-t" onClick={() => onPartido(prox.id)}>{fmt(prox.fecha, true)}</div>
+            <div className="hero-t" onClick={() => onPartido(prox.id)}>{horario(prox, true)}</div>
             <div className="mut">{prox.lugar || 'Sin lugar'} · {voy} confirmados</div>
             {empezado ? (
               <div className="mut" style={{ margin: '10px 0' }}>En juego ahora</div>

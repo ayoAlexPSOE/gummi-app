@@ -19,3 +19,13 @@ export async function traerTodo(
   }
   return salida
 }
+
+// "jue, 27 nov · 14:00–15:00" (la hora de fin solo si el partido la tiene)
+export function horario(p: any, largo = false): string {
+  const d = new Date(p.fecha)
+  const dia = d.toLocaleDateString('es-ES', largo
+    ? { weekday: 'long', day: 'numeric', month: 'long' }
+    : { weekday: 'short', day: 'numeric', month: 'short' })
+  const h = (x: Date) => x.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+  return `${dia} · ${h(d)}${p.fecha_fin ? '–' + h(new Date(p.fecha_fin)) : ''}`
+}

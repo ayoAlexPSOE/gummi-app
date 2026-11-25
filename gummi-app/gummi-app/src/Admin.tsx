@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { horario } from './util'
+import HorarioPicker, { Horario, horarioVacio, aTimestamps } from './HorarioPicker'
 
 const fmt = (iso: string) =>
   new Date(iso).toLocaleString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
@@ -19,7 +21,7 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
   const [cuentas, setCuentas] = useState(0)
   const [votos, setVotos] = useState<any[]>([])
   const [mvps, setMvps] = useState<any[]>([])
-  const [fecha, setFecha] = useState('')
+  const [hor, setHor] = useState<Horario>(horarioVacio())
   const [lugar, setLugar] = useState('')
   const [nombre, setNombre] = useState('')
   const [pos, setPos] = useState('')
@@ -65,12 +67,18 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
 
   const crearPartido = async (e: any) => {
     e.preventDefault()
-    if (!fecha) return aviso('Elige fecha y hora')
-    const { error } = await supabase.from('partidos')
-      .insert({ fecha: new Date(fecha).toISOString(), lugar: lugar || null, creado_por: yo.id })
-    if (error) return alert(error.message)
-    setFecha(''); setLugar('')
-    aviso('✅ Partido creado y avisado a todos')
+    if (!hor.fecha) return aviso('Elige el día del partido')
+    const t = aTimestamps(hor)
+    const base = { fecha: t.fecha, lugar: lugar || null, creado_por: yo.id }
+    let r: any = await supabase.from('partidos').insert({ ...base, fecha_fin: t.fecha_fin })
+    let sinFin = false
+    if (r.error && /fecha_fin/.test(r.error.message)) {
+      sinFin = true // aún no se ha ejecutado 13_horario.sql: se crea solo con la hora de inicio
+      r = await supabase.from('partidos').insert(base)
+    }
+    if (r.error) return alert(r.error.message)
+    setHor({ ...horarioVacio() }); setLugar('')
+    aviso(sinFin ? '✅ Partido creado (sin hora de fin: falta ejecutar 13_horario.sql)' : '✅ Partido creado y avisado a todos')
     cargar()
   }
 
@@ -130,7 +138,7 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
       <div className="card">
         <b>Crear convocatoria</b>
         <form onSubmit={crearPartido} style={{ marginTop: 8 }}>
-          <input type="datetime-local" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+          <HorarioPicker valor={hor} onChange={setHor} />
           <input placeholder="Lugar (opcional)" value={lugar} onChange={(e) => setLugar(e.target.value)} />
           <button type="submit">Crear partido</button>
         </form>
@@ -142,7 +150,7 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
           {partidos.map((p) => (
             <div className="fila" key={p.id} style={{ cursor: 'pointer' }} onClick={() => onPartido(p.id)}>
               <span>
-                {fmt(p.fecha)}
+                {horario(p)}
                 {p.goles_a != null && <b> · {p.goles_a}-{p.goles_b}</b>}
               </span>
               <span className="tag">{ESTADO[p.estado] || p.estado}</span>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { horario } from './util'
 import PartidoDetalle from './PartidoDetalle'
 
 const OPCIONES: [string, string][] = [['voy', 'Voy'], ['duda', 'Duda'], ['no_voy', 'No voy']]
@@ -60,7 +61,7 @@ export default function Partidos({ yo, abrirInicial, onUsado }: { yo: any; abrir
           <div className="card" key={p.id}>
             <div className="row" style={{ cursor: 'pointer' }} onClick={() => setAbierto(p.id)}>
               <b style={{ flex: 1 }}>
-                {new Date(p.fecha).toLocaleString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                {horario(p)}
               </b>
               {p.goles_a != null && <b>{p.goles_a} - {p.goles_b}</b>}
               <span className="tag">{p.estado}</span>

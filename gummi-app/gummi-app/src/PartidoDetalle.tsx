@@ -71,11 +71,8 @@ function generarEquipos(jug: any[], notaDe: (id: string) => number): Record<stri
   return res
 }
 
-const aLocal = (iso: string) => {
-  const d = new Date(iso)
-  const z = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`
-}
+import { horario } from './util'
+import HorarioPicker, { Horario, aTimestamps, desdePartido } from './HorarioPicker'
 
 export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any; onBack: () => void }) {
   const admin = yo.rol === 'admin'
@@ -92,6 +89,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
   const [gb, setGb] = useState('')
   const [manual, setManual] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [editDatos, setEditDatos] = useState<{ hor: Horario; lugar: string } | null>(null)
   const [mvp, setMvp] = useState<any[]>([])
 
   const cargar = async () => {
@@ -253,16 +251,18 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
     setBusy(false)
   }
 
-  const editarDatos = async () => {
-    const f = prompt('Fecha y hora (AAAA-MM-DD HH:MM):', aLocal(p.fecha))
-    if (f === null) return
-    const d = new Date(f.trim().replace(' ', 'T'))
-    if (isNaN(d.getTime())) return alert('Fecha no válida. Formato: 2026-12-03 21:00')
-    const l = prompt('Lugar:', p.lugar || '')
-    if (l === null) return
-    const { error } = await supabase.from('partidos').update({ fecha: d.toISOString(), lugar: l.trim() || null }).eq('id', id)
-    if (error) alert(error.message)
-    else cargar()
+  const editarDatos = () => setEditDatos({ hor: desdePartido(p), lugar: p.lugar || '' })
+  const guardarDatos = async () => {
+    if (!editDatos || !editDatos.hor.fecha) return
+    const t = aTimestamps(editDatos.hor)
+    let r: any = await supabase.from('partidos')
+      .update({ fecha: t.fecha, fecha_fin: t.fecha_fin, lugar: editDatos.lugar.trim() || null }).eq('id', id)
+    if (r.error && /fecha_fin/.test(r.error.message)) {
+      r = await supabase.from('partidos').update({ fecha: t.fecha, lugar: editDatos.lugar.trim() || null }).eq('id', id)
+    }
+    if (r.error) return alert(r.error.message)
+    setEditDatos(null)
+    cargar()
   }
 
   const borrar = async () => {
@@ -313,15 +313,21 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
         <button className="sec mini" onClick={onBack}>← Volver</button>
         <span className="tag">{ESTADOS[p.estado]}</span>
       </div>
-      <h2 style={{ marginTop: 0 }}>
-        {new Date(p.fecha).toLocaleString('es-ES', {
-          weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
-        })}
-      </h2>
+      <h2 style={{ marginTop: 0 }}>{horario(p, true)}</h2>
       <div className="mut">
         {p.lugar || 'Sin lugar'}
-        {admin && <button className="sec mini" style={{ marginLeft: 10 }} onClick={editarDatos}>Editar fecha/lugar</button>}
+        {admin && !editDatos && <button className="sec mini" style={{ marginLeft: 10 }} onClick={editarDatos}>Editar horario/lugar</button>}
       </div>
+      {admin && editDatos && (
+        <div className="card">
+          <HorarioPicker valor={editDatos.hor} onChange={(hor) => setEditDatos({ ...editDatos, hor })} />
+          <input style={{ marginTop: 8 }} placeholder="Lugar" value={editDatos.lugar} onChange={(e) => setEditDatos({ ...editDatos, lugar: e.target.value })} />
+          <div className="row" style={{ marginTop: 8 }}>
+            <button onClick={guardarDatos}>Guardar</button>
+            <button className="sec" onClick={() => setEditDatos(null)}>Cancelar</button>
+          </div>
+        </div>
+      )}
 
       {jugado && p.goles_a != null && (
         <div className="card c" style={{ padding: '18px 0' }}>
