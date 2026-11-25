@@ -64,9 +64,9 @@ export default function OnceIdeal({ perfiles, onFicha }: { perfiles: any[]; onFi
         </div>
         <div className="n">{p?.apodo || p?.nombre || '?'}</div>
         <div className="s">
-          {Number(r.nota).toFixed(1)}
-          {r.goles > 0 && ` ⚽${r.goles}`}
-          {r.asistencias > 0 && ` 🅰️${r.asistencias}`}
+          {r.goles > 0 && `⚽${r.goles}`}
+          {r.goles > 0 && r.asistencias > 0 && ' '}
+          {r.asistencias > 0 && `🅰️${r.asistencias}`}
         </div>
       </div>
     )
@@ -100,7 +100,7 @@ export default function OnceIdeal({ perfiles, onFicha }: { perfiles: any[]; onFi
           ))}
         </div>
       )}
-      {hay && <div className="mut" style={{ textAlign: 'center', marginTop: 4, fontSize: 11 }}>Los 6 de campo mejor votados · nota media del partido · 👑 MVP</div>}
+      {hay && <div className="mut" style={{ textAlign: 'center', marginTop: 4, fontSize: 11 }}>Los 6 de campo mejor votados · 👑 MVP</div>}
     </div>
   )
 }
