@@ -220,6 +220,14 @@ export default function Votar({ yo }: { yo: any }) {
                 {cfg.admin_ve_votos ? 'Sí · ocultar' : 'No · ver'}
               </button>
             </div>
+            {cfg.usar_ajuste_stats !== undefined && (
+              <div className="fila">
+                <span>Ajustar notas con estadísticas</span>
+                <button className="sec mini" onClick={() => ajuste('usar_ajuste_stats', !cfg.usar_ajuste_stats)}>
+                  {cfg.usar_ajuste_stats ? 'Sí · desactivar' : 'No · activar'}
+                </button>
+              </div>
+            )}
           </div>
 
           {cfg.admin_ve_votos && (

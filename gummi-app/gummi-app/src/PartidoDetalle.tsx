@@ -71,6 +71,12 @@ function generarEquipos(jug: any[], notaDe: (id: string) => number): Record<stri
   return res
 }
 
+const aLocal = (iso: string) => {
+  const d = new Date(iso)
+  const z = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`
+}
+
 export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any; onBack: () => void }) {
   const admin = yo.rol === 'admin'
   const [p, setP] = useState<any>(null)
@@ -241,8 +247,21 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
       .eq('id', id)
     if (upd.error) { setBusy(false); return alert(upd.error.message) }
     setEditando(false)
+    try { await supabase.rpc('mantenimiento', { p_forzar: true }) } catch { /* sin SQL de avisos todavía */ }
     await cargar()
     setBusy(false)
+  }
+
+  const editarDatos = async () => {
+    const f = prompt('Fecha y hora (AAAA-MM-DD HH:MM):', aLocal(p.fecha))
+    if (f === null) return
+    const d = new Date(f.trim().replace(' ', 'T'))
+    if (isNaN(d.getTime())) return alert('Fecha no válida. Formato: 2026-12-03 21:00')
+    const l = prompt('Lugar:', p.lugar || '')
+    if (l === null) return
+    const { error } = await supabase.from('partidos').update({ fecha: d.toISOString(), lugar: l.trim() || null }).eq('id', id)
+    if (error) alert(error.message)
+    else cargar()
   }
 
   const borrar = async () => {
@@ -298,7 +317,10 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
           weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
         })}
       </h2>
-      <div className="mut">{p.lugar || 'Sin lugar'}</div>
+      <div className="mut">
+        {p.lugar || 'Sin lugar'}
+        {admin && <button className="sec mini" style={{ marginLeft: 10 }} onClick={editarDatos}>Editar fecha/lugar</button>}
+      </div>
 
       {jugado && p.goles_a != null && (
         <div className="card c" style={{ padding: '18px 0' }}>
