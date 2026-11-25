@@ -4,7 +4,7 @@
   --bg:#040826; --card:#0b1348; --card2:#101b63; --line:#24378f;
   --txt:#f0f4ff; --mut:#9aa8e0; --acc:#3ddcff; --acc-t:#02122e; --acc2:#ffc83d;
   --rojo:#ff4d5e; --azul:#4da3ff;
-  --titulo:'Saira Condensed','Barlow Condensed','Arial Narrow',system-ui,sans-serif;
+  --titulo:Inter,system-ui,-apple-system,sans-serif;
 }
 * { box-sizing:border-box; }
 html { -webkit-text-size-adjust:100%; }
