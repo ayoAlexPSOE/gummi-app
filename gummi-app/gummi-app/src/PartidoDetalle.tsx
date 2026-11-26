@@ -271,7 +271,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
           </div>
         )
       })}
-      <div className="mut" style={{ fontSize: 12 }}>Los tachados se confunden con el color del otro equipo.</div>
+      <div className="mut" style={{ fontSize: 12 }}>Tachado: se confunde con el color del otro equipo.</div>
     </div>
   )
 

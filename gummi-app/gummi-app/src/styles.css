@@ -33,8 +33,8 @@ body::before { content:''; position:fixed; inset:0; z-index:-2; pointer-events:n
   background:url('./estrellas.svg') center / cover no-repeat; }
 body::after { content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
   background:
-    radial-gradient(120% 60% at 50% 0%, #04082600 0%, #04082626 60%, #04082680 100%),
-    linear-gradient(180deg, #04082600, #04082633); }
+    radial-gradient(120% 60% at 50% 0%, #04082600 0%, #04082640 60%, #040826a6 100%),
+    linear-gradient(180deg, #04082626, #04082659); }
 
 .app { max-width:560px; margin:0 auto; min-height:100dvh; display:flex; flex-direction:column; }
 .app > main:first-child { padding-top:calc(6px + env(safe-area-inset-top)); }
@@ -91,12 +91,9 @@ h2::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,#3d
 @keyframes fluye { from { background-position:0 0; } to { background-position:100% 0; } }
 
 /* ---------- Tarjetas de cristal ---------- */
-/* Rendimiento: el desenfoque real (backdrop-filter) solo en piezas sueltas; en listas largas
-   (tarjetas, filas de plantilla, casillas) un cristal "falso" un poco más opaco que pinta mucho más rápido. */
 .card, .tile, .jug, .once, .perfil-cab {
-  background:var(--cristal); border:1px solid var(--line); box-shadow:var(--sombra); }
-.card, .jug { background:linear-gradient(165deg,#1a2a8a99 0%,#0b145080 55%,#070e3d73 100%); }
-.once, .perfil-cab { backdrop-filter:blur(12px) saturate(1.3); -webkit-backdrop-filter:blur(12px) saturate(1.3); }
+  background:var(--cristal); border:1px solid var(--line); box-shadow:var(--sombra);
+  backdrop-filter:blur(12px) saturate(1.3); -webkit-backdrop-filter:blur(12px) saturate(1.3); }
 .card { border-radius:var(--r); padding:14px 16px; margin:12px 0; position:relative; transition:transform .25s var(--suave), border-color .25s; }
 .card[style*="cursor: pointer"]:active, .card.alerta:active { transform:scale(.98); }
 .card.unread { border-left:3px solid var(--acc); }
