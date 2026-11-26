@@ -11,12 +11,15 @@ import Admin from './Admin'
 import Avatar from './Avatar'
 import { Cargando, useAtras } from './movil'
 import { refrescarSuscripcion } from './push'
+import logo from './logo.webp'
+import logoCab from './logo-cab.webp'
 
 function Login() {
   const [email, setEmail] = useState('')
   const [pass, setPass] = useState('')
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
+  const [ver, setVer] = useState(false)
 
   const entrar = async (e: any) => {
     e.preventDefault()
@@ -30,17 +33,25 @@ function Login() {
   }
 
   return (
-    <div className="app">
-      <main className="vista login">
-        <div className="brand-big"><span className="brand-tx">GUMMI</span><i>⚽</i></div>
-        <p className="mut">Inicia sesión con la cuenta que te ha creado el admin.</p>
-        <form onSubmit={entrar}>
-          <input placeholder="Usuario" autoCapitalize="none" autoCorrect="off" autoComplete="username" name="username" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <input type="password" placeholder="Contraseña" autoComplete="current-password" name="password" value={pass} onChange={(e) => setPass(e.target.value)} />
-          {err && <div className="err" key={err + Date.now()}>{err}</div>}
-          <button type="submit" disabled={busy}>{busy ? 'Entrando…' : 'Entrar'}</button>
-        </form>
-      </main>
+    <div className="login">
+      <div className="login-cab">
+        <img className="login-logo" src={logo} alt="Gummi" width={625} height={492} />
+        <p className="login-lema">La app de la peña</p>
+      </div>
+      <form className="login-form" onSubmit={entrar} noValidate>
+        <label className="login-campo">
+          <span className="login-ic" aria-hidden>👤</span>
+          <input placeholder="Usuario" aria-label="Usuario" autoCapitalize="none" autoCorrect="off" spellCheck={false} autoComplete="username" name="username" enterKeyHint="next" value={email} onChange={(e) => { setEmail(e.target.value); setErr('') }} />
+        </label>
+        <label className="login-campo">
+          <span className="login-ic" aria-hidden>🔒</span>
+          <input type={ver ? 'text' : 'password'} placeholder="Contraseña" aria-label="Contraseña" autoComplete="current-password" name="password" enterKeyHint="go" value={pass} onChange={(e) => { setPass(e.target.value); setErr('') }} />
+          <button type="button" className="login-ver" onClick={() => setVer(!ver)} aria-label={ver ? 'Ocultar contraseña' : 'Ver contraseña'}>{ver ? '🙈' : '👁️'}</button>
+        </label>
+        {err && <div className="err login-err" key={err + Date.now()}>{err}</div>}
+        <button type="submit" className="login-entrar" disabled={busy}>{busy ? <span className="login-cargando">⚽</span> : 'Entrar'}</button>
+      </form>
+      <p className="login-pie">¿No tienes cuenta? Pídesela al admin de la peña.</p>
     </div>
   )
 }
@@ -187,7 +198,7 @@ export default function App() {
   return (
     <div className="app">
       <header>
-        <b className="brand"><span className="brand-tx">GUMMI</span><i>⚽</i></b>
+        <b className="brand" onClick={() => irTab('inicio')}><img className="brand-logo" src={logoCab} alt="Gummi" /></b>
         <span className="quien" style={{ cursor: 'pointer' }} onClick={() => irTab('perfil')}>
           <b>{yo?.apodo || yo?.nombre}{yo?.rol === 'admin' ? ' · admin' : ''}</b>
           <Avatar p={yo} size={32} />

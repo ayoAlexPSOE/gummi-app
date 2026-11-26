@@ -103,6 +103,26 @@ export function TarjetaAvisos({ compacta = false, onCerrar }: { compacta?: boole
   // En Inicio la tarjeta desaparece cuando ya están activos, salvo justo después de activarlos (para confirmarlo)
   if (compacta && ((estado === 'activo' && !msg) || estado === 'no-soportado' || estado === 'denegado')) return null
 
+  // En Inicio, justo después de activarlos: confirmación clara y botón para cerrar la tarjeta
+  if (compacta && estado === 'activo') {
+    return (
+      <div className="card avisos-movil compacta listo">
+        <div className="row" style={{ flexWrap: 'nowrap', alignItems: 'flex-start' }}>
+          <span className="avisos-ic">✅</span>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <b>¡Avisos activados!</b>
+            <div className="mut">Ya está todo listo: te llegarán al móvil aunque tengas la app cerrada. Puedes cambiarlo cuando quieras en Perfil › Avisos.</div>
+          </span>
+        </div>
+        <div className="row" style={{ marginTop: 10, flexWrap: 'nowrap' }}>
+          <button className="sec" style={{ flex: 1 }} disabled={busy} onClick={probar}>Enviar prueba</button>
+          <button style={{ flex: 1 }} onClick={onCerrar}>Perfecto, cerrar</button>
+        </div>
+        {msg && !msg.startsWith('✅') && <div className="mut" style={{ marginTop: 8 }}>{msg}</div>}
+      </div>
+    )
+  }
+
   return (
     <div className={'card avisos-movil' + (compacta ? ' compacta' : '')}>
       <div className="row" style={{ flexWrap: 'nowrap', alignItems: 'flex-start' }}>
