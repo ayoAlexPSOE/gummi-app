@@ -5,6 +5,7 @@ import HorarioPicker, { Horario, aTimestamps, desdePartido } from './HorarioPick
 import Avatar from './Avatar'
 import { Cargando, anadirCalendario, compartir, vibra } from './movil'
 import { COLORES, color, elegirColores, nombreEquipo, seParecen } from './equipos'
+import { compartirImagen } from './imagen'
 
 type Eq = 'A' | 'B'
 
@@ -96,6 +97,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
   const [editDatos, setEditDatos] = useState<{ hor: Horario; lugar: string } | null>(null)
   const [mvp, setMvp] = useState<any[]>([])
   const [plazas, setPlazas] = useState(PLAZAS_DEFECTO)
+  const [haciendoImg, setHaciendoImg] = useState(false)
 
   const cargar = async () => {
     const [pp, pr, cv, pa, ev] = await Promise.all([
@@ -334,6 +336,27 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
     onBack()
   }
 
+  // ---------- imagen para compartir ----------
+  const imagen = async () => {
+    setHaciendoImg(true)
+    const eq = (letra: Eq) => ({
+      nombre: nombreEquipo(letra, colorDe(letra)),
+      hex: color(colorDe(letra))?.hex || null,
+      jugadores: idsGuardados(letra).map((jid) => ({ nombre: nombre(jid), g: golesDe(jid, 'gol'), a: golesDe(jid, 'asistencia') })),
+    })
+    try {
+      await compartirImagen({
+        modo: jugado && p.goles_a != null ? 'resultado' : 'equipos',
+        fecha: horario(p, true).replace(/^./, (x: string) => x.toUpperCase()),
+        lugar: p.lugar,
+        a: eq('A'), b: eq('B'),
+        golesA: p.goles_a, golesB: p.goles_b,
+        mvp: mvp.length ? mvp.filter((m) => m.num_votos === mvp[0].num_votos).map((m) => nombre(m.jugador_id)).join(' y ') : null,
+      }, `gummi-${p.id}.png`)
+    } catch (e: any) { alert(e?.message || 'No se pudo crear la imagen') }
+    setHaciendoImg(false)
+  }
+
   // ---------- compartir ----------
   const textoCompartir = () => {
     const cab = `⚽ Partido · ${horario(p, true)}${p.lugar ? ' · ' + p.lugar : ''}`
@@ -399,7 +422,8 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
         <span className={'tag estado-' + p.estado}>{ESTADOS[p.estado]}</span>
         <span style={{ flex: 1 }} />
         {proximo && <button className="sec mini ico" onClick={() => anadirCalendario(p)} aria-label="Añadir al calendario" title="Añadir al calendario">🗓️</button>}
-        <button className="sec mini ico" onClick={() => compartir(textoCompartir())} aria-label="Compartir" title="Compartir por WhatsApp">📤</button>
+        {part.length > 0 && <button className="sec mini ico" disabled={haciendoImg} onClick={imagen} aria-label="Compartir imagen" title="Compartir imagen">🖼️</button>}
+        <button className="sec mini ico" onClick={() => compartir(textoCompartir())} aria-label="Compartir texto" title="Compartir por WhatsApp">📤</button>
       </div>
       <h2 className="titulo-partido">{horario(p, true)}</h2>
       <div className="mut">

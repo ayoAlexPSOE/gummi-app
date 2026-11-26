@@ -107,7 +107,7 @@ export default function Ranking({ yo, vistaInicial }: { yo: any; vistaInicial?: 
 
   if (ficha !== null) return <Ficha id={ficha} yo={yo} onBack={() => setFicha(null)} />
   const selectorVista = (
-    <div className="row" style={{ margin: '12px 0 4px' }}>
+    <div className="vistas">
       <button className={'sec' + (vista === 'tabla' ? ' on2' : '')} onClick={() => setVista('tabla')}>Clasificación</button>
       <button className={'sec' + (vista === 'premios' ? ' on2' : '')} onClick={() => setVista('premios')}>🏆 Premios</button>
       <button className={'sec' + (vista === 'logros' ? ' on2' : '')} onClick={() => setVista('logros')}>🏅 Logros</button>

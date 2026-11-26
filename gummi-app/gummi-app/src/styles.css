@@ -485,6 +485,8 @@ button.login-entrar { min-height:56px; border-radius:16px; font-size:18px; lette
 .card.plazas .contador { flex:none; }
 
 /* Premios de temporada */
+.vistas { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin:12px 0 4px; }
+.vistas button { padding:8px 4px; font-size:14px; }
 .sel-temporada { width:100%; margin:8px 0 4px; }
 .card.premios-cab { display:flex; gap:12px; align-items:center; border-color:#ffc83d59; background:linear-gradient(150deg,#ffc83d26,#0b145099 60%); }
 .premios-trofeo { font-size:34px; filter:drop-shadow(0 0 12px #ffc83d88); animation:flota2 3s ease-in-out infinite; }
