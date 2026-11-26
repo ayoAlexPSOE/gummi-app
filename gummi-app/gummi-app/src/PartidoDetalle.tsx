@@ -554,7 +554,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
                     </span>
                     <span className="seg">
                       {[['voy', '✅'], ['duda', '🤔'], ['no_voy', '❌']].map(([v, ic]) => (
-                        <button key={v} className={r === v ? 'on' : ''} onClick={() => setResp(j.id, r === v ? '' : v)} aria-label={v}>{ic}</button>
+                        <button key={v} className={r === v ? 'on' : ''} onClick={() => setResp(j.id, r === v ? '' : v)} aria-pressed={r === v} aria-label={`${j.apodo || j.nombre}: ${v === 'voy' ? 'va' : v === 'duda' ? 'duda' : 'no va'}`}>{ic}</button>
                       ))}
                     </span>
                   </div>
