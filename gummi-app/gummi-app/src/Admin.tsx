@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { Cargando } from './movil'
 import { horario } from './util'
 import HorarioPicker, { Horario, horarioVacio, aTimestamps } from './HorarioPicker'
 
@@ -118,7 +119,7 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
     aviso('✅ Mantenimiento hecho: logros y avisos al día')
   }
 
-  if (!cfg) return <p className="c">Cargando…</p>
+  if (!cfg) return <Cargando />
 
   const nom = (jid: string) => {
     const j = perfiles.find((x) => x.id === jid)

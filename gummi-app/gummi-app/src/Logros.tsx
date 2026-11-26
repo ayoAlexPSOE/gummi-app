@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { Cargando } from './movil'
 import { traerTodo } from './util'
 
 export default function Logros({ yo, onFicha }: { yo: any; onFicha: (id: string) => void }) {
@@ -38,7 +39,7 @@ export default function Logros({ yo, onFicha }: { yo: any; onFicha: (id: string)
   if (fallo) {
     return <p className="mut">No se pudieron cargar los logros. Comprueba que se ha ejecutado en Supabase el script 06_logros.sql.</p>
   }
-  if (!cat) return <p className="c">Cargando…</p>
+  if (!cat) return <Cargando />
 
   const nombre = (jid: string) => {
     const j = perfiles.find((x) => x.id === jid)

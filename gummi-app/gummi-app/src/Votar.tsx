@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import Avatar from './Avatar'
+import { Cargando, vibra } from './movil'
 
 const NOTAS = Array.from({ length: 11 }, (_, i) => i)
 
@@ -13,7 +15,7 @@ function Selector({ valor, onChange }: { valor: string; onChange: (v: string) =>
           key={n}
           className={'nc' + (valor === String(n) ? ' on' : '')}
           style={{ ['--c' as any]: `hsl(${n * 12}, 80%, 52%)` }}
-          onClick={() => onChange(valor === String(n) ? '' : String(n))}
+          onClick={() => { vibra(6); onChange(valor === String(n) ? '' : String(n)) }}
         >
           {n}
         </button>
@@ -26,13 +28,10 @@ const fmt = (iso: string) =>
   new Date(iso).toLocaleString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 
 export default function Votar({ yo }: { yo: any }) {
-  const admin = yo.rol === 'admin'
   const [cfg, setCfg] = useState<any>(null)
   const [perfiles, setPerfiles] = useState<any[]>([])
   const [mios, setMios] = useState<any[]>([]) // mis votos
   const [misMvp, setMisMvp] = useState<any[]>([]) // mis votos de MVP
-  const [votos, setVotos] = useState<any[]>([]) // votos de todos (solo admin, si lo tiene activado)
-  const [mvps, setMvps] = useState<any[]>([])
   const [partidos, setPartidos] = useState<any[]>([])
   const [part, setPart] = useState<any[]>([])
   const [ed, setEd] = useState<Record<string, string>>({})
@@ -53,14 +52,10 @@ export default function Votar({ yo }: { yo: any }) {
     const pa: any = ids.length
       ? await supabase.from('participaciones').select('*').in('partido_id', ids)
       : { data: [] }
-    let todosV: any[] = []
-    let todosM: any[] = []
     setCfg(cf.data)
     setPerfiles(pr.data || [])
     setMios(vo.data || [])
     setMisMvp(mv.data || [])
-    setVotos(todosV)
-    setMvps(todosM)
     setPartidos(pt.data || [])
     setPart(pa.data || [])
     setEd({})
@@ -68,7 +63,7 @@ export default function Votar({ yo }: { yo: any }) {
   }
   useEffect(() => { cargar() }, [])
 
-  if (!cfg) return <p className="c">Cargando…</p>
+  if (!cfg) return <Cargando />
 
   const nombre = (jid: string) => {
     const j = perfiles.find((x) => x.id === jid)
@@ -126,16 +121,11 @@ export default function Votar({ yo }: { yo: any }) {
     if (fallo) alert('No se pudo guardar todo. Puede que la votación haya terminado.\n\n' + fallo)
     await cargar()
     if (!fallo) {
+      vibra(25)
       setEditando((x) => ({ ...x, [pid === null ? 'ini' : String(pid)]: false }))
       setAviso('✅ Voto guardado')
       setTimeout(() => setAviso(''), 3000)
     }
-  }
-
-  const ajuste = async (campo: string, v: boolean) => {
-    const { error } = await supabase.from('configuracion').update({ [campo]: v }).eq('id', true)
-    if (error) alert(error.message)
-    else cargar()
   }
 
   // ---------- votación inicial ----------
@@ -162,7 +152,7 @@ export default function Votar({ yo }: { yo: any }) {
       <h2>Votar</h2>
 
       {abiertos.length === 0 && !cfg.votacion_inicial_abierta && (
-        <p className="mut">Ahora mismo no hay nada que votar.</p>
+        <div className="vacio"><span>🗳️</span><b>Nada que votar ahora</b><div className="mut">Después de cada partido tendrás 48 h para puntuar a tus compañeros y elegir al MVP.</div></div>
       )}
 
       {aviso && <div className="toast">{aviso}</div>}
@@ -193,20 +183,24 @@ export default function Votar({ yo }: { yo: any }) {
             <div className="mut">Puedes votar hasta el {fmt(p.votacion_hasta)}. Toca solo a quien quieras puntuar.</div>
             {cands.map((j: any) => (
               <div className="fila voto" key={j.id}>
-                <span>{j.apodo || j.nombre}</span>
+                <span className="voto-nombre"><Avatar p={j} size={24} />{j.apodo || j.nombre}{valor(p.id, j.id) !== '' && <b className="voto-val">{valor(p.id, j.id)}</b>}</span>
                 <Selector valor={valor(p.id, j.id)} onChange={(v) => setEd({ ...ed, [clave(p.id, j.id)]: v })} />
               </div>
             ))}
-            <div className="fila">
-              <b>🏆 MVP</b>
-              <select value={valorMvp(p.id)} onChange={(e) => setMvpEd({ ...mvpEd, [p.id]: e.target.value })}>
-                <option value="">—</option>
-                {cands.map((j: any) => (
-                  <option key={j.id} value={j.id}>{j.apodo || j.nombre}</option>
-                ))}
-              </select>
+            <div className="mvp-elige">
+              <b>👑 Tu MVP</b>
+              <div className="mvp-opciones">
+                {cands.map((j: any) => {
+                  const sel = valorMvp(p.id) === j.id
+                  return (
+                    <button type="button" key={j.id} className={'sec' + (sel ? ' on2' : '')} onClick={() => { vibra(); setMvpEd({ ...mvpEd, [p.id]: sel ? '' : j.id }) }}>
+                      <Avatar p={j} size={30} /><span>{j.apodo || j.nombre}</span>
+                    </button>
+                  )
+                })}
+              </div>
             </div>
-            <button style={{ marginTop: 10 }} disabled={busy} onClick={() => guardar(p.id, cands)}>Guardar votos del partido</button>
+            <button className="guardar-fijo" disabled={busy} onClick={() => guardar(p.id, cands)}>{busy ? 'Guardando…' : 'Guardar votos del partido'}</button>
           </div>
         )
       })}
@@ -233,11 +227,11 @@ export default function Votar({ yo }: { yo: any }) {
           </div>
           {candidatosIni.map((j) => (
             <div className="fila voto" key={j.id}>
-              <span>{j.apodo || j.nombre}</span>
+              <span className="voto-nombre"><Avatar p={j} size={24} />{j.apodo || j.nombre}{valor(null, j.id) !== '' && <b className="voto-val">{valor(null, j.id)}</b>}</span>
               <Selector valor={valor(null, j.id)} onChange={(v) => setEd({ ...ed, [clave(null, j.id)]: v })} />
             </div>
           ))}
-          <button style={{ marginTop: 10 }} disabled={busy} onClick={() => guardar(null, candidatosIni)}>Guardar votación inicial</button>
+          <button className="guardar-fijo" disabled={busy} onClick={() => guardar(null, candidatosIni)}>{busy ? 'Guardando…' : 'Guardar votación inicial'}</button>
         </div>
       )}
 

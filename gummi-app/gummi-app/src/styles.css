@@ -35,10 +35,11 @@ body::after { content:''; position:fixed; inset:0; z-index:-1; pointer-events:no
     radial-gradient(120% 60% at 50% 0%, #04082600 0%, #04082640 60%, #040826a6 100%),
     linear-gradient(180deg, #04082626, #04082659); }
 
-.app { max-width:560px; margin:0 auto; min-height:100dvh; display:flex; flex-direction:column; padding-top:env(safe-area-inset-top); }
+.app { max-width:560px; margin:0 auto; min-height:100dvh; display:flex; flex-direction:column; }
+.app > main:first-child { padding-top:calc(6px + env(safe-area-inset-top)); }
 
 /* ---------- Cabecera ---------- */
-header { display:flex; gap:10px; align-items:center; padding:10px 16px; position:sticky; top:0; z-index:5;
+header { display:flex; gap:10px; align-items:center; padding:calc(10px + env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left)); position:sticky; top:0; z-index:5;
   background:linear-gradient(#040826eb,#040826b3); backdrop-filter:blur(14px) saturate(1.4); -webkit-backdrop-filter:blur(14px) saturate(1.4);
   border-bottom:1px solid var(--line); }
 .brand { font-family:var(--titulo); font-size:26px; font-weight:800; letter-spacing:1px; font-style:italic; display:flex; align-items:center; gap:6px; }
@@ -56,7 +57,7 @@ header button.bell:has(.badge) { animation:campana 5s ease-in-out infinite; tran
 @keyframes campana { 0%,86%,100% { transform:none; } 89% { transform:rotate(14deg); } 92% { transform:rotate(-12deg); } 95% { transform:rotate(7deg); } 98% { transform:rotate(-3deg); } }
 .badge { background:linear-gradient(135deg,#ff5f7e,#ff3d5a); color:#fff; border-radius:99px; font-size:11px; padding:1px 6px; font-weight:800; position:absolute; top:0; right:-2px; box-shadow:0 0 0 2px #040826, 0 0 12px #ff4d6a99; }
 
-main { flex:1; padding:6px 16px 112px; }
+main { flex:1; padding:6px 16px calc(112px + env(safe-area-inset-bottom)); }
 /* Cambio de pestaña: entrada suave y en cascada */
 main.vista > * { animation:entra .5s var(--suave) both; }
 main.vista > *:nth-child(2) { animation-delay:.05s; } main.vista > *:nth-child(3) { animation-delay:.1s; }
@@ -89,13 +90,15 @@ h2::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,#3d
 @keyframes fluye { from { background-position:0 0; } to { background-position:100% 0; } }
 
 /* ---------- Tarjetas de cristal ---------- */
+/* Rendimiento: el desenfoque real (backdrop-filter) solo en piezas sueltas; en listas largas
+   (tarjetas, filas de plantilla, casillas) un cristal "falso" un poco más opaco que pinta mucho más rápido. */
 .card, .tile, .jug, .once, .perfil-cab {
-  background:var(--cristal); border:1px solid var(--line); box-shadow:var(--sombra);
-  backdrop-filter:blur(12px) saturate(1.3); -webkit-backdrop-filter:blur(12px) saturate(1.3); }
+  background:var(--cristal); border:1px solid var(--line); box-shadow:var(--sombra); }
+.card, .jug { background:linear-gradient(165deg,#1a2a8ab3 0%,#0b1450a6 55%,#070e3d99 100%); }
+.once, .perfil-cab { backdrop-filter:blur(12px) saturate(1.3); -webkit-backdrop-filter:blur(12px) saturate(1.3); }
 .card { border-radius:var(--r); padding:14px 16px; margin:12px 0; position:relative; transition:transform .25s var(--suave), border-color .25s; }
 .card[style*="cursor: pointer"]:active, .card.alerta:active { transform:scale(.98); }
 .card.unread { border-left:3px solid var(--acc); }
-.card.unread::after { content:''; position:absolute; top:14px; right:14px; width:8px; height:8px; border-radius:50%; background:var(--acc); box-shadow:0 0 10px var(--acc); animation:late 2s ease-in-out infinite; }
 @keyframes late { 0%,100% { transform:scale(1); opacity:1; } 50% { transform:scale(.6); opacity:.5; } }
 .card.alerta { border-color:#ffc83d59; background:linear-gradient(150deg,#ffc83d26 0%,#2a241066 45%,#0b134866 100%); cursor:pointer; overflow:hidden; }
 .card.alerta::before { content:''; position:absolute; inset:0; background:linear-gradient(100deg,transparent 30%,#ffffff1a 50%,transparent 70%); transform:translateX(-100%); animation:barrido 4s ease-in-out infinite; pointer-events:none; }
@@ -217,7 +220,8 @@ button.admin-tag { background:linear-gradient(135deg,#3ddcff33,#ff6fe026); color
 .jug-nombre { flex:1; font-weight:650; cursor:pointer; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .jug .tag { font-size:10px; padding:1px 6px; }
 .media-badge { font-family:var(--titulo); font-weight:800; font-size:18px; min-width:26px; text-align:center; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
-button.ico { padding:0 10px; min-height:32px; font-size:18px; line-height:1; }
+button.ico { padding:0 10px; min-height:36px; font-size:17px; line-height:1; }
+button.sec.ico:not(.mini) { min-height:46px; padding:0 15px; }
 .jug-extra { border-top:1px solid var(--line); margin-top:6px; padding:8px 0 4px; animation:entra .3s var(--suave) both; }
 main.vista .jug { animation:entra .45s var(--suave) both; }
 main.vista .jug:nth-child(2) { animation-delay:.03s; } main.vista .jug:nth-child(3) { animation-delay:.06s; } main.vista .jug:nth-child(4) { animation-delay:.09s; }
@@ -262,7 +266,7 @@ button.gen-equipos span { font-family:Inter,system-ui,sans-serif; font-size:12px
   .app { max-width:900px; }
   nav { max-width:620px; }
   main { padding:8px 28px 120px; }
-  header { padding:12px 28px; }
+  header { padding:calc(12px + env(safe-area-inset-top)) 28px 12px; }
   nav button { flex-direction:row; justify-content:center; gap:8px; font-size:14px; min-height:50px; }
   nav button.on::after { display:none; }
   .campo { padding:26px 20px 14px; gap:14px; }
@@ -273,6 +277,143 @@ button.gen-equipos span { font-family:Inter,system-ui,sans-serif; font-size:12px
   .perfil-nombre { font-size:38px; }
 }
 @media (min-width:1300px) { .app { max-width:1040px; } }
+
+/* =====================================================================
+   Piezas añadidas en la revisión general
+   ===================================================================== */
+html { scroll-behavior:auto; }
+body { -webkit-user-select:none; user-select:none; }
+input, select, textarea, .card .mut, .perfil-nombre { -webkit-user-select:text; user-select:text; }
+:focus-visible { outline:2px solid var(--acc); outline-offset:2px; }
+
+/* Carga */
+.cargando { display:flex; flex-direction:column; align-items:center; gap:10px; padding:56px 0; color:var(--mut); font-size:14px; animation:aparece .4s .15s both; }
+.cargando .balon { font-size:34px; display:inline-block; animation:rueda 1s linear infinite; filter:drop-shadow(0 0 12px #3ddcff66); }
+@keyframes rueda { to { transform:rotate(360deg); } }
+
+/* Tirar para refrescar */
+.tirar { position:fixed; left:50%; top:calc(58px + env(safe-area-inset-top)); z-index:4; font-size:26px; width:42px; height:42px; display:flex; align-items:center; justify-content:center;
+  border-radius:50%; background:#0b1450e6; border:1px solid var(--line2); box-shadow:0 6px 18px #000a; pointer-events:none; }
+.tirar.listo { box-shadow:0 0 0 2px var(--acc), 0 0 22px #3ddcffaa; }
+
+/* Pantallas vacías */
+.vacio { text-align:center; padding:34px 12px; display:flex; flex-direction:column; align-items:center; gap:6px; }
+.vacio > span { font-size:42px; filter:drop-shadow(0 0 16px #3ddcff55); animation:flota2 3s ease-in-out infinite; }
+.vacio .mut { max-width:300px; }
+@keyframes flota2 { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-5px); } }
+
+/* Lista de partidos */
+.card.partido { cursor:pointer; }
+.card.partido:active { transform:scale(.985); }
+.partido-dia { display:block; font-size:15.5px; }
+.partido-dia::first-letter { text-transform:uppercase; }
+.marcador-mini { display:flex; align-items:center; gap:8px; flex:none; }
+.marcador-mini b { font-family:var(--titulo); font-size:22px; font-weight:800; letter-spacing:-.5px; }
+.marcador-mini i { font-style:normal; color:var(--mut); margin:0 3px; }
+.tag.estado-convocatoria { background:#3ddcff1f; border-color:#3ddcff59; color:#9feeff; }
+.tag.estado-equipos { background:#7b6bff26; border-color:#7b6bff66; color:#c4bbff; }
+.tag.estado-jugado { background:#2ee59d1a; border-color:#2ee59d4d; color:#79f2bf; }
+.tag.estado-cerrado { color:var(--mut); }
+
+/* Detalle de partido */
+.barra-detalle { margin:12px 0 6px; flex-wrap:nowrap; }
+h2.titulo-partido { display:block; margin:8px 0 4px; font-size:21px; text-transform:none; letter-spacing:0; }
+h2.titulo-partido::first-letter { text-transform:uppercase; }
+h2.titulo-partido::before, h2.titulo-partido::after { display:none; }
+.marcador { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px; margin:14px 0; padding:16px 10px; border-radius:22px;
+  background:radial-gradient(70% 120% at 0% 50%, #3ddcff2e, transparent 60%), radial-gradient(70% 120% at 100% 50%, #ff6fe02e, transparent 60%), var(--cristal);
+  border:1px solid var(--line); box-shadow:var(--sombra); animation:pop .5s var(--muelle) both; }
+.marcador.sin-caja { background:none; border:0; box-shadow:none; margin:4px 0; padding:6px 0; animation:none; }
+.marcador-eq { display:flex; flex-direction:column; align-items:center; line-height:1.1; }
+.marcador-eq b { font-family:var(--titulo); font-size:26px; font-weight:800; }
+.marcador-eq:first-child b { color:var(--acc); } .marcador-eq:last-child b { color:var(--rosa); }
+.marcador-num { font-family:var(--titulo); font-size:46px; font-weight:800; letter-spacing:-1px; display:flex; align-items:center; gap:10px; }
+.marcador-num i { font-style:normal; color:var(--mut); font-size:30px; }
+.marcador.editable input { width:72px; text-align:center; font-family:var(--titulo); font-size:30px; font-weight:800; padding:4px; min-height:56px; }
+.card.mvp { display:flex; align-items:center; gap:12px; border-color:#ffc83d59; background:linear-gradient(150deg,#ffc83d2b,#0b1450a6 60%); }
+.mvp-corona { font-size:30px; animation:flota2 2.6s ease-in-out infinite; filter:drop-shadow(0 0 10px #ffc83daa); }
+
+.equipos-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:8px 0 10px; }
+.equipos-grid .card { margin:0; padding:10px; }
+.equipo-cab { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; padding-bottom:6px; border-bottom:2px solid var(--eq); }
+.equipo-cab b { color:var(--eq); font-family:var(--titulo); font-weight:800; text-transform:uppercase; letter-spacing:.4px; font-size:14px; }
+.eq-A { --eq:var(--acc); } .eq-B { --eq:var(--rosa); }
+.card.equipo { background:linear-gradient(180deg, color-mix(in srgb, var(--eq) 14%, transparent), #0b1450a6 45%); }
+.eq-jug { display:flex; align-items:center; gap:6px; padding:5px 2px; border-radius:10px; min-height:36px; transition:background .2s, transform .2s var(--muelle); }
+.eq-jug.movible { cursor:pointer; }
+.eq-jug.movible:active { transform:scale(.95); background:#ffffff14; }
+.eq-jug.yo .eq-nombre { color:var(--eq); font-weight:800; }
+.eq-nombre { flex:1; min-width:0; font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.eq-dato { font-size:11.5px; white-space:nowrap; }
+
+.conv-grupo { margin:6px 0 10px; }
+.conv-grupo:last-child { margin-bottom:0; }
+.conv-lista { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+.conv-jug { display:inline-flex; align-items:center; gap:5px; padding:3px 9px 3px 3px; border-radius:99px; background:#ffffff0f; border:1px solid var(--line); font-size:13px; font-weight:600; }
+.conv-jug.yo { border-color:#3ddcff80; background:#3ddcff1f; }
+.conv-admin { padding:6px 0; }
+.conv-nombre { display:flex; align-items:center; gap:8px; min-width:0; flex:1; }
+.conv-nombre > span:not(.avatar):not(.tag) { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600; }
+.seg { display:flex; gap:3px; background:#00000040; padding:3px; border-radius:12px; flex:none; }
+.seg button { min-height:36px; width:40px; padding:0; font-size:16px; border-radius:9px; background:transparent; box-shadow:none; filter:grayscale(1) opacity(.55); }
+.seg button.on { background:#ffffff26; filter:none; box-shadow:inset 0 0 0 1px #ffffff40; animation:pop .3s var(--muelle); }
+
+.editor-eq { margin:10px 0 2px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; font-size:11px; }
+.editor-eq:first-child { margin-top:0; }
+.editor-fila { flex-wrap:wrap; gap:6px 10px; }
+.editor-fila .conv-nombre { flex-basis:100%; }
+.contador { display:flex; align-items:center; gap:4px; flex:1; justify-content:center; background:#00000033; border-radius:12px; padding:3px; }
+.contador button { min-height:36px; width:40px; padding:0; font-size:20px; border-radius:9px; }
+.contador span { min-width:44px; text-align:center; font-weight:800; color:var(--mut); }
+.contador span.on { color:var(--txt); }
+button.peligro { color:#ff94a6; border-color:#ff4d6a4d; }
+
+/* Votar */
+.voto-nombre { display:flex; align-items:center; gap:8px; font-weight:600; }
+.voto-val { margin-left:auto; font-family:var(--titulo); font-size:15px; color:var(--acc); }
+.mvp-elige { margin-top:14px; padding-top:12px; border-top:1px solid var(--line); }
+.mvp-opciones { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:8px; }
+.mvp-opciones button { display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 2px; font-size:12px; font-weight:700; min-height:0; }
+.mvp-opciones button span:last-child { max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mvp-opciones button.on2 { color:#1a1400; background:linear-gradient(135deg,#ffe27a,#ffc83d 60%,#ffa63d); box-shadow:0 4px 16px -4px #ffc83dcc; }
+button.guardar-fijo { width:100%; margin-top:12px; position:sticky; bottom:calc(84px + env(safe-area-inset-bottom)); z-index:2; }
+
+/* Ranking: podio */
+.podio { display:grid; grid-template-columns:1fr 1.15fr 1fr; align-items:end; gap:6px; margin:14px 0 6px; }
+.podio-p { display:flex; flex-direction:column; align-items:center; text-align:center; cursor:pointer; min-width:0; animation:sube .6s var(--muelle) both; }
+.podio-p.p1 { animation-delay:.15s; } .podio-p.p3 { animation-delay:.08s; }
+@keyframes sube { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:none; } }
+.podio-foto { position:relative; margin-bottom:4px; }
+.podio-p.p1 .avatar { box-shadow:0 0 0 3px #040826, 0 0 0 5px #ffc83d, 0 0 26px #ffc83d88; }
+.podio-p.p2 .avatar { box-shadow:0 0 0 3px #040826, 0 0 0 4.5px #cfd8f0; }
+.podio-p.p3 .avatar { box-shadow:0 0 0 3px #040826, 0 0 0 4.5px #e0975a; }
+.podio-medalla { position:absolute; bottom:-6px; right:-8px; font-size:20px; z-index:1; filter:drop-shadow(0 2px 3px #000a); }
+.podio-n { font-weight:700; font-size:13px; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:4px; }
+.podio-p.yo .podio-n { color:var(--acc); }
+.podio-v { font-family:var(--titulo); font-weight:800; font-size:20px; }
+.podio-v span { font-family:Inter,sans-serif; font-size:11px; font-weight:500; color:var(--mut); }
+.podio-base { width:100%; margin-top:6px; border-radius:12px 12px 4px 4px; display:flex; align-items:flex-start; justify-content:center; padding-top:6px;
+  font-family:var(--titulo); font-weight:800; font-size:22px; color:#ffffff55; border:1px solid var(--line); border-bottom:0;
+  background:linear-gradient(180deg,#ffffff1f,#ffffff05); }
+.podio-p.p1 .podio-base { height:74px; background:linear-gradient(180deg,#ffc83d40,#ffc83d0a); border-color:#ffc83d59; color:#ffd76a99; }
+.podio-p.p2 .podio-base { height:54px; }
+.podio-p.p3 .podio-base { height:40px; background:linear-gradient(180deg,#e0975a33,#e0975a08); }
+.card.rank-fila { cursor:pointer; flex-wrap:nowrap; padding:10px 12px; margin:8px 0; }
+.card.rank-fila:active { transform:scale(.985); }
+.card.rank-fila.yo, .jug.yo { border-color:#3ddcff73; box-shadow:var(--sombra), 0 0 0 1px #3ddcff40; }
+.rank-pos { width:30px; text-align:center; font-weight:800; color:var(--mut); flex:none; }
+.rank-val { font-family:var(--titulo); font-size:22px; font-weight:800; white-space:nowrap; }
+.rank-val .mut { font-family:Inter,sans-serif; font-size:11px; font-weight:500; }
+
+/* Inicio: quién va */
+.pila { display:flex; align-items:center; gap:10px; margin:10px 0 2px; cursor:pointer; min-height:30px; }
+.pila-fotos { display:flex; }
+.pila-fotos .avatar { margin-left:-8px; box-shadow:0 0 0 2px #0a1250; animation:pop .4s var(--muelle) both; }
+.pila-fotos .avatar:first-child { margin-left:0; }
+.avatar.mas { background:#ffffff26; color:var(--txt); font-size:11px; }
+
+.dorsal-mini { font-family:var(--titulo); font-weight:800; font-size:13px; color:transparent; -webkit-text-stroke:1px var(--acc); min-width:18px; text-align:center; }
+.aviso-ic { font-size:22px; line-height:1.2; }
 
 /* Accesibilidad / ahorro: sin animaciones si el móvil lo pide */
 @media (prefers-reduced-motion:reduce) {

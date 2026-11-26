@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { horario } from './util'
+import HorarioPicker, { Horario, aTimestamps, desdePartido } from './HorarioPicker'
+import Avatar from './Avatar'
+import { Cargando, anadirCalendario, compartir, vibra } from './movil'
 
 type Eq = 'A' | 'B'
 
 const ESTADOS: Record<string, string> = {
   convocatoria: 'Convocatoria',
-  equipos: 'Equipos',
+  equipos: 'Equipos hechos',
   jugado: 'Jugado',
   cerrado: 'Cerrado',
 }
@@ -71,8 +75,6 @@ function generarEquipos(jug: any[], notaDe: (id: string) => number): Record<stri
   return res
 }
 
-import { horario } from './util'
-import HorarioPicker, { Horario, aTimestamps, desdePartido } from './HorarioPicker'
 
 export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any; onBack: () => void }) {
   const admin = yo.rol === 'admin'
@@ -149,10 +151,11 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
     setGb(String(b))
   }, [cont, manual, part])
 
-  if (!p) return <p className="c">Cargando…</p>
+  if (!p) return <Cargando />
 
+  const perfilDe = (jid: string) => perfiles.find((x) => x.id === jid)
   const nombre = (jid: string) => {
-    const j = perfiles.find((x) => x.id === jid)
+    const j = perfilDe(jid)
     return j ? j.apodo || j.nombre : '?'
   }
   // El generador trabaja en escala 1-10; las medias vienen de 0 a 99.
@@ -169,6 +172,8 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
   }
 
   const setResp = async (jugador_id: string, respuesta: string) => {
+    vibra()
+    setConv((cs) => [...cs.filter((x) => x.jugador_id !== jugador_id), ...(respuesta ? [{ partido_id: id, jugador_id, respuesta }] : [])])
     if (!respuesta) {
       const { error } = await supabase
         .from('convocatorias').delete().eq('partido_id', id).eq('jugador_id', jugador_id)
@@ -189,12 +194,14 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
   const generar = () => {
     if (confirmados.length < 2) return alert('Hacen falta al menos 2 jugadores con "Voy".')
     if (confirmados.length > 20) return alert('Demasiados jugadores para repartir (máximo 20).')
+    vibra(20)
     setBorrador(generarEquipos(confirmados, notaDe))
     setTimeout(() => document.getElementById('equipos')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
   }
 
   const mover = (jid: string) => {
     if (!borrador) return
+    vibra(8)
     setBorrador({ ...borrador, [jid]: borrador[jid] === 'A' ? 'B' : 'A' })
   }
 
@@ -273,51 +280,75 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
     onBack()
   }
 
+  // ---------- compartir ----------
+  const textoCompartir = () => {
+    const cab = `⚽ Partido · ${horario(p, true)}${p.lugar ? ' · ' + p.lugar : ''}`
+    const lista = (ids: string[]) => ids.map(nombre).join(', ')
+    if (jugado && p.goles_a != null) {
+      const goleadores = Object.entries(eventos.reduce((m: any, e: any) => {
+        if (e.tipo === 'gol') m[e.jugador_id] = (m[e.jugador_id] || 0) + 1
+        return m
+      }, {})).map(([j, n]: any) => `${nombre(j)}${n > 1 ? ' ×' + n : ''}`).join(', ')
+      return `${cab}\n🏁 Equipo A ${p.goles_a} – ${p.goles_b} Equipo B${goleadores ? '\n⚽ ' + goleadores : ''}${p.votacion_hasta && new Date(p.votacion_hasta).getTime() > Date.now() ? '\n🗳️ ¡Votación abierta 48 h!' : ''}`
+    }
+    if (part.length > 0) {
+      return `${cab}\n🔵 Equipo A: ${lista(idsGuardados('A'))}\n🟣 Equipo B: ${lista(idsGuardados('B'))}`
+    }
+    const van = confirmados.map((j) => j.apodo || j.nombre)
+    const dudan = perfiles.filter((j) => respDe(j.id) === 'duda').map((j) => j.apodo || j.nombre)
+    return `${cab}\n✅ Van (${van.length}): ${van.join(', ') || 'nadie todavía'}${dudan.length ? `\n🤔 Dudan: ${dudan.join(', ')}` : ''}\n¿Te apuntas?`
+  }
+
   // ---------- pintado ----------
   const puedeEditarEquipos = admin && (p.estado === 'convocatoria' || p.estado === 'equipos')
   const mostrarEditor = admin && part.length > 0 && (p.estado === 'equipos' || (p.estado === 'jugado' && editando))
   const jugado = p.estado === 'jugado' || p.estado === 'cerrado'
 
   const renderEquipo = (letra: Eq, ids: string[], editable: boolean) => (
-    <div className="card" key={letra}>
-      <div className="row">
-        <b style={{ flex: 1 }}>Equipo {letra}</b>
-        <span className="mut">
-          {ids.length}{admin ? ` · media ${media(ids)}` : ''}
-        </span>
+    <div className={'card equipo eq-' + letra} key={letra}>
+      <div className="equipo-cab">
+        <b>Equipo {letra}</b>
+        <span className="mut">{ids.length}{admin && !jugado ? ` · ${media(ids)}` : ''}</span>
       </div>
-      {ids.map((jid) => (
-        <div
-          key={jid}
-          className="fila"
-          onClick={editable ? () => mover(jid) : undefined}
-          style={{ cursor: editable ? 'pointer' : 'default' }}
-        >
-          <span>{nombre(jid)}</span>
-          <span className="mut">
-            {admin && !jugado && (notas[jid]?.nota != null ? Math.round(Number(notas[jid].nota)) : '–')}
-            {jugado && golesDe(jid, 'gol') > 0 && ` ⚽${golesDe(jid, 'gol')}`}
-            {jugado && golesDe(jid, 'asistencia') > 0 && ` 🅰️${golesDe(jid, 'asistencia')}`}
-          </span>
-        </div>
-      ))}
+      {ids.map((jid) => {
+        const g = jugado ? golesDe(jid, 'gol') : 0
+        const a = jugado ? golesDe(jid, 'asistencia') : 0
+        return (
+          <div key={jid} className={'eq-jug' + (editable ? ' movible' : '') + (jid === yo.id ? ' yo' : '')} onClick={editable ? () => mover(jid) : undefined}>
+            <Avatar p={perfilDe(jid)} size={26} />
+            <span className="eq-nombre">{nombre(jid)}</span>
+            <span className="mut eq-dato">
+              {admin && !jugado && (notas[jid]?.nota != null ? Math.round(Number(notas[jid].nota)) : '–')}
+              {g > 0 && `⚽${g > 1 ? g : ''}`}
+              {a > 0 && ` 🅰️${a > 1 ? a : ''}`}
+            </span>
+          </div>
+        )
+      })}
+      {ids.length === 0 && <div className="mut">Nadie</div>}
     </div>
   )
-
   const idsGuardados = (eq: Eq) => part.filter((x) => x.equipo === eq).map((x) => x.jugador_id)
   const idsBorrador = (eq: Eq) =>
     Object.keys(borrador || {}).filter((k) => (borrador as any)[k] === eq)
 
+  const proximo = !jugado && new Date(p.fecha_fin || p.fecha).getTime() > Date.now()
+  const sinResponder = perfiles.filter((j) => !respDe(j.id) && !j.es_externo)
+  const miResp = respDe(yo.id)
+
   return (
     <>
-      <div className="row" style={{ margin: '12px 0' }}>
+      <div className="row barra-detalle">
         <button className="sec mini" onClick={onBack}>← Volver</button>
-        <span className="tag">{ESTADOS[p.estado]}</span>
+        <span className={'tag estado-' + p.estado}>{ESTADOS[p.estado]}</span>
+        <span style={{ flex: 1 }} />
+        {proximo && <button className="sec mini ico" onClick={() => anadirCalendario(p)} aria-label="Añadir al calendario" title="Añadir al calendario">📅</button>}
+        <button className="sec mini ico" onClick={() => compartir(textoCompartir())} aria-label="Compartir" title="Compartir por WhatsApp">📤</button>
       </div>
-      <h2 style={{ marginTop: 0 }}>{horario(p, true)}</h2>
+      <h2 className="titulo-partido">{horario(p, true)}</h2>
       <div className="mut">
-        {p.lugar || 'Sin lugar'}
-        {admin && !editDatos && <button className="sec mini" style={{ marginLeft: 10 }} onClick={editarDatos}>Editar horario/lugar</button>}
+        📍 {p.lugar || 'Sin lugar'}
+        {admin && !editDatos && <button className="sec mini" style={{ marginLeft: 10 }} onClick={editarDatos}>Editar</button>}
       </div>
       {admin && editDatos && (
         <div className="card">
@@ -330,6 +361,17 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
         </div>
       )}
 
+      {/* ---- Mi respuesta (jugadores) ---- */}
+      {!admin && p.estado === 'convocatoria' && (
+        <div className="grid3" style={{ marginTop: 14 }}>
+          {[['voy', 'Voy', '✅'], ['duda', 'Duda', '🤔'], ['no_voy', 'No voy', '❌']].map(([v, t, ic]) => (
+            <button key={v} className={'grande' + (miResp === v ? ' sel' : ' sec')} onClick={() => setResp(yo.id, v)}>
+              <div style={{ fontSize: 20 }}>{ic}</div>{t}
+            </button>
+          ))}
+        </div>
+      )}
+
       {puedeEditarEquipos && !borrador && (
         <button className="gen-equipos" onClick={generar}>
           ⚡ {part.length > 0 ? 'Rehacer equipos' : 'Generar equipos automáticos'}
@@ -338,56 +380,50 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
       )}
 
       {jugado && p.goles_a != null && (
-        <div className="card c" style={{ padding: '18px 0' }}>
-          <div className="mut">Resultado</div>
-          <div style={{ fontSize: 34, fontWeight: 700 }}>{p.goles_a} - {p.goles_b}</div>
+        <div className="marcador">
+          <div className="marcador-eq"><span className="mut">Equipo</span><b>A</b></div>
+          <div className="marcador-num">{p.goles_a}<i>–</i>{p.goles_b}</div>
+          <div className="marcador-eq"><span className="mut">Equipo</span><b>B</b></div>
         </div>
       )}
 
       {jugado && mvp.length > 0 && (
-        <div className="card c" style={{ padding: '14px 0' }}>
-          <div className="mut">🏆 MVP del partido</div>
-          <b>
-            {mvp.filter((m) => m.num_votos === mvp[0].num_votos).map((m) => nombre(m.jugador_id)).join(' y ')}
-          </b>
-          <span className="mut"> · {mvp[0].num_votos} {mvp[0].num_votos === 1 ? 'voto' : 'votos'}</span>
+        <div className="card mvp">
+          <span className="mvp-corona">👑</span>
+          <span style={{ flex: 1 }}>
+            <div className="mut">MVP del partido</div>
+            <b>{mvp.filter((m) => m.num_votos === mvp[0].num_votos).map((m) => nombre(m.jugador_id)).join(' y ')}</b>
+          </span>
+          <span className="mut">{mvp[0].num_votos} {mvp[0].num_votos === 1 ? 'voto' : 'votos'}</span>
         </div>
       )}
       {jugado && p.votacion_hasta && new Date(p.votacion_hasta).getTime() > Date.now() && (
-        <p className="mut">Votación abierta hasta el {new Date(p.votacion_hasta).toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}. Ve a la pestaña Votar.</p>
+        <div className="aviso">🗳️ Votación abierta hasta el {new Date(p.votacion_hasta).toLocaleString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}. Ve a la pestaña <b>Votar</b>.</div>
       )}
 
       {/* ---- Equipos ---- */}
       <div id="equipos" style={{ scrollMarginTop: 70 }} />
-      {(borrador || part.length > 0 || puedeEditarEquipos) && <h2>Equipos</h2>}
+      {(borrador || part.length > 0) && <h2>Equipos</h2>}
       {borrador ? (
         <>
           <p className="mut">Toca un jugador para pasarlo al otro equipo.</p>
-          {renderEquipo('A', idsBorrador('A'), true)}
-          {renderEquipo('B', idsBorrador('B'), true)}
-          <div className="row">
-            <button className="sec" onClick={generar}>Regenerar</button>
+          <div className="equipos-grid">
+            {renderEquipo('A', idsBorrador('A'), true)}
+            {renderEquipo('B', idsBorrador('B'), true)}
+          </div>
+          <div className="grid3">
+            <button className="sec" onClick={generar}>🔀 Otra</button>
             <button className="sec" onClick={() => setBorrador(null)}>Cancelar</button>
-            <button disabled={busy} onClick={guardarEquipos}>Guardar equipos</button>
+            <button disabled={busy} onClick={guardarEquipos}>Guardar</button>
           </div>
         </>
+      ) : part.length > 0 ? (
+        <div className="equipos-grid">
+          {renderEquipo('A', idsGuardados('A'), false)}
+          {renderEquipo('B', idsGuardados('B'), false)}
+        </div>
       ) : (
-        <>
-          {part.length > 0 && (
-            <>
-              {renderEquipo('A', idsGuardados('A'), false)}
-              {renderEquipo('B', idsGuardados('B'), false)}
-            </>
-          )}
-          {puedeEditarEquipos && (
-            <button onClick={generar}>
-              {part.length > 0 ? 'Rehacer equipos' : `Generar equipos (${confirmados.length} confirmados)`}
-            </button>
-          )}
-          {part.length === 0 && !puedeEditarEquipos && (
-            <p className="mut">Los equipos todavía no están hechos.</p>
-          )}
-        </>
+        !puedeEditarEquipos && (p.estado === 'convocatoria') && <p className="mut" style={{ marginTop: 14 }}>Los equipos se harán cuando se cierre la convocatoria.</p>
       )}
 
       {/* ---- Convocatoria ---- */}
@@ -395,42 +431,49 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
         <>
           <h2>Convocatoria · {confirmados.length} van</h2>
           {!admin && (
-            <>
-              <div className="row" style={{ marginBottom: 8 }}>
-                {[['voy', 'Voy'], ['duda', 'Duda'], ['no_voy', 'No voy']].map(([v, t]) => (
-                  <button key={v} className={'sec' + (respDe(yo.id) === v ? ' on2' : '')}
-                    onClick={() => setResp(yo.id, v)}>{t}</button>
-                ))}
-              </div>
-              <div className="card">
-                {['voy', 'duda', 'no_voy'].map((r) => {
-                  const lista = perfiles.filter((j) => respDe(j.id) === r)
-                  if (!lista.length) return null
-                  return (
-                    <div key={r} style={{ margin: '4px 0' }}>
-                      <span className="tag">{r === 'voy' ? 'Van' : r === 'duda' ? 'Dudan' : 'No van'}</span>{' '}
-                      {lista.map((j) => j.apodo || j.nombre).join(', ')}
+            <div className="card">
+              {[['voy', '✅ Van'], ['duda', '🤔 Dudan'], ['no_voy', '❌ No van']].map(([r, t]) => {
+                const lista = perfiles.filter((j) => respDe(j.id) === r)
+                if (!lista.length) return null
+                return (
+                  <div key={r} className="conv-grupo">
+                    <div className="mut">{t} ({lista.length})</div>
+                    <div className="conv-lista">
+                      {lista.map((j) => (
+                        <span key={j.id} className={'conv-jug' + (j.id === yo.id ? ' yo' : '')}><Avatar p={j} size={22} />{j.apodo || j.nombre}</span>
+                      ))}
                     </div>
-                  )
-                })}
-              </div>
-            </>
+                  </div>
+                )
+              })}
+              {sinResponder.length > 0 && (
+                <div className="conv-grupo">
+                  <div className="mut">⏳ Sin responder ({sinResponder.length})</div>
+                  <div className="mut" style={{ fontSize: 12 }}>{sinResponder.map((j) => j.apodo || j.nombre).join(', ')}</div>
+                </div>
+              )}
+            </div>
           )}
           {admin && (
             <div className="card">
-              {perfiles.map((j) => (
-                <div key={j.id} className="fila">
-                  <span>
-                    {j.apodo || j.nombre} {j.es_externo && <span className="tag">externo</span>}
-                  </span>
-                  <select value={respDe(j.id)} onChange={(e) => setResp(j.id, e.target.value)}>
-                    <option value="">—</option>
-                    <option value="voy">Voy</option>
-                    <option value="duda">Duda</option>
-                    <option value="no_voy">No voy</option>
-                  </select>
-                </div>
-              ))}
+              <p className="mut" style={{ marginTop: 0 }}>Marca la respuesta de cada uno (vuelve a tocar para quitarla).</p>
+              {perfiles.map((j) => {
+                const r = respDe(j.id)
+                return (
+                  <div key={j.id} className="fila conv-admin">
+                    <span className="conv-nombre">
+                      <Avatar p={j} size={26} />
+                      <span>{j.apodo || j.nombre}</span>
+                      {j.es_externo && <span className="tag">ext</span>}
+                    </span>
+                    <span className="seg">
+                      {[['voy', '✅'], ['duda', '🤔'], ['no_voy', '❌']].map(([v, ic]) => (
+                        <button key={v} className={r === v ? 'on' : ''} onClick={() => setResp(j.id, r === v ? '' : v)} aria-label={v}>{ic}</button>
+                      ))}
+                    </span>
+                  </div>
+                )
+              })}
             </div>
           )}
         </>
@@ -439,56 +482,58 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
       {/* ---- Resultado, goles y asistencias ---- */}
       {mostrarEditor && (
         <>
-          <h2>Resultado, goles y asistencias</h2>
-          <p className="mut">Apúntalos después del partido.</p>
+          <h2>Goles y asistencias</h2>
+          <p className="mut">Apúntalos después del partido. El marcador se suma solo.</p>
           <div className="card">
-            {part.map((x) => {
-              const c = cont[x.jugador_id] || { g: 0, a: 0 }
-              return (
-                <div key={x.jugador_id} className="fila">
-                  <span>{nombre(x.jugador_id)} <span className="tag">{x.equipo}</span></span>
-                  <span className="row" style={{ gap: 4 }}>
-                    <button className="sec mini" onClick={() => ajustar(x.jugador_id, 'g', -1)}>−</button>
-                    <span>⚽ {c.g}</span>
-                    <button className="sec mini" onClick={() => ajustar(x.jugador_id, 'g', 1)}>+</button>
-                    <span style={{ width: 8 }} />
-                    <button className="sec mini" onClick={() => ajustar(x.jugador_id, 'a', -1)}>−</button>
-                    <span>🅰️ {c.a}</span>
-                    <button className="sec mini" onClick={() => ajustar(x.jugador_id, 'a', 1)}>+</button>
-                  </span>
-                </div>
-              )
-            })}
+            {(['A', 'B'] as Eq[]).map((eq) => (
+              <div key={eq}>
+                <div className="mut editor-eq">Equipo {eq}</div>
+                {part.filter((x) => x.equipo === eq).map((x) => {
+                  const c = cont[x.jugador_id] || { g: 0, a: 0 }
+                  return (
+                    <div key={x.jugador_id} className="fila editor-fila">
+                      <span className="conv-nombre"><Avatar p={perfilDe(x.jugador_id)} size={24} /><span>{nombre(x.jugador_id)}</span></span>
+                      <span className="contador">
+                        <button className="sec" onClick={() => ajustar(x.jugador_id, 'g', -1)} disabled={!c.g} aria-label="Quitar gol">−</button>
+                        <span className={c.g ? 'on' : ''}>⚽{c.g}</span>
+                        <button className="sec" onClick={() => { vibra(8); ajustar(x.jugador_id, 'g', 1) }} aria-label="Sumar gol">+</button>
+                      </span>
+                      <span className="contador">
+                        <button className="sec" onClick={() => ajustar(x.jugador_id, 'a', -1)} disabled={!c.a} aria-label="Quitar asistencia">−</button>
+                        <span className={c.a ? 'on' : ''}>🅰️{c.a}</span>
+                        <button className="sec" onClick={() => { vibra(8); ajustar(x.jugador_id, 'a', 1) }} aria-label="Sumar asistencia">+</button>
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            ))}
           </div>
-          <div className="row" style={{ justifyContent: 'center', margin: '12px 0' }}>
-            <b>A</b>
-            <input type="number" min={0} style={{ width: 70, textAlign: 'center' }} value={ga}
-              onChange={(e) => { setManual(true); setGa(e.target.value) }} />
-            <b>–</b>
-            <input type="number" min={0} style={{ width: 70, textAlign: 'center' }} value={gb}
-              onChange={(e) => { setManual(true); setGb(e.target.value) }} />
-            <b>B</b>
+          <div className="marcador editable">
+            <div className="marcador-eq"><span className="mut">Equipo</span><b>A</b></div>
+            <div className="marcador-num">
+              <input type="number" inputMode="numeric" min={0} value={ga} onChange={(e) => { setManual(true); setGa(e.target.value) }} aria-label="Goles equipo A" />
+              <i>–</i>
+              <input type="number" inputMode="numeric" min={0} value={gb} onChange={(e) => { setManual(true); setGb(e.target.value) }} aria-label="Goles equipo B" />
+            </div>
+            <div className="marcador-eq"><span className="mut">Equipo</span><b>B</b></div>
           </div>
-          <p className="mut">El marcador se suma solo con los goles. Si hubo un gol en propia puerta, corrígelo a mano.</p>
+          <p className="mut">Si hubo un gol en propia puerta, corrige el marcador a mano.</p>
           <div className="row">
             {editando && <button className="sec" onClick={() => { setEditando(false); cargar() }}>Cancelar</button>}
-            <button disabled={busy} onClick={guardarResultado}>
-              {p.estado === 'jugado' ? 'Guardar cambios' : 'Guardar y cerrar partido'}
+            <button style={{ flex: 1 }} disabled={busy} onClick={guardarResultado}>
+              {p.estado === 'jugado' ? 'Guardar cambios' : '🏁 Guardar y cerrar partido'}
             </button>
           </div>
         </>
       )}
 
       {admin && p.estado === 'jugado' && !editando && part.length > 0 && (
-        <div style={{ marginTop: 12 }}>
-          <button className="sec" onClick={() => setEditando(true)}>Editar resultado y goles</button>
-        </div>
+        <button className="sec" style={{ width: '100%', marginTop: 14 }} onClick={() => setEditando(true)}>✏️ Editar resultado y goles</button>
       )}
 
       {admin && (
-        <div style={{ marginTop: 28 }}>
-          <button className="sec" onClick={borrar}>Borrar partido</button>
-        </div>
+        <button className="sec peligro" style={{ width: '100%', marginTop: 28 }} onClick={borrar}>🗑️ Borrar partido</button>
       )}
     </>
   )

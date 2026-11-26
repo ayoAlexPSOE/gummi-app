@@ -3,14 +3,13 @@ import { supabase } from './supabase'
 import Ficha from './Ficha'
 import Avatar from './Avatar'
 import OnceIdeal from './OnceIdeal'
+import { useAtras } from './movil'
 
 export default function Jugadores({ yo }: { yo: any }) {
   const admin = yo.rol === 'admin'
   const [lista, setLista] = useState<any[]>([])
   const [notas, setNotas] = useState<Record<string, any>>({})
   const [manuales, setManuales] = useState<Record<string, any>>({})
-  const [nombre, setNombre] = useState('')
-  const [pos, setPos] = useState('')
   const [ficha, setFicha] = useState<string | null>(null)
   const [editId, setEditId] = useState<string | null>(null)
   const [eNombre, setENombre] = useState('')
@@ -20,6 +19,7 @@ export default function Jugadores({ yo }: { yo: any }) {
   const [vincId, setVincId] = useState<string | null>(null)
   const [vincCuenta, setVincCuenta] = useState('')
   const [abierto, setAbierto] = useState<string | null>(null)
+  useAtras(ficha !== null, () => setFicha(null))
 
   const cargar = async () => {
     const { data } = await supabase.from('perfiles').select('*').order('nombre')
@@ -40,15 +40,6 @@ export default function Jugadores({ yo }: { yo: any }) {
     }
   }
   useEffect(() => { cargar() }, [])
-
-  const anadir = async (e: any) => {
-    e.preventDefault()
-    if (!nombre.trim()) return
-    const { error } = await supabase.from('perfiles')
-      .insert({ nombre: nombre.trim(), posicion: pos || null, es_externo: true })
-    if (error) alert(error.message)
-    else { setNombre(''); setPos(''); cargar() }
-  }
 
   const guardarManual = async (jid: string, texto: string) => {
     const t = texto.trim().replace(',', '.')
@@ -107,7 +98,8 @@ export default function Jugadores({ yo }: { yo: any }) {
           <div className="jug" key={j.id}>
             <div className="jug-fila">
               <Avatar p={j} size={32} />
-              <span className="jug-nombre" onClick={() => setFicha(j.id)}>{j.apodo || j.nombre}</span>
+              <span className="jug-nombre" onClick={() => setFicha(j.id)}>{j.apodo || j.nombre}{j.id === yo.id && <span className="mut"> (tú)</span>}</span>
+              {j.dorsal != null && <span className="dorsal-mini">{j.dorsal}</span>}
               {j.posicion && <span className={'tag pos-' + j.posicion}>{j.posicion.slice(0, 3)}</span>}
               {j.es_externo && <span className="tag">ext</span>}
               {j.rol === 'admin' && <span className="tag">adm</span>}

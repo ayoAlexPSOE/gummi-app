@@ -3,6 +3,7 @@ import { supabase } from './supabase'
 import Ficha from './Ficha'
 import Logros from './Logros'
 import Avatar from './Avatar'
+import { Cargando, useAtras } from './movil'
 
 type Cat = {
   id: string
@@ -45,7 +46,7 @@ export default function Ranking({ yo, vistaInicial }: { yo: any; vistaInicial?: 
   const [temporadas, setTemporadas] = useState<any[]>([])
   const [sel, setSel] = useState('') // id de temporada o 'todas'
   const [version, setVersion] = useState(0)
-  const admin = yo.rol === 'admin'
+  useAtras(ficha !== null, () => setFicha(null))
 
   useEffect(() => {
     if (ficha !== null) return
@@ -82,21 +83,6 @@ export default function Ranking({ yo, vistaInicial }: { yo: any; vistaInicial?: 
     })()
   }, [ficha, sel, version])
 
-  const activa = temporadas.find((t) => t.activa)
-
-  const nuevaTemporada = async () => {
-    const nombre = prompt('Nombre de la nueva temporada (por ejemplo, 2026/27):')
-    if (!nombre || !nombre.trim()) return
-    const ok = confirm(
-      `Se cerrará${activa ? ` "${activa.nombre}"` : ' la temporada actual'} y empezará "${nombre.trim()}". Los partidos que crees desde ahora irán a la nueva. ¿Seguro?`
-    )
-    if (!ok) return
-    const { data, error } = await supabase.rpc('nueva_temporada', { p_nombre: nombre.trim() })
-    if (error) return alert(error.message)
-    setSel(String(data))
-    setVersion((v) => v + 1)
-  }
-
   if (ficha !== null) return <Ficha id={ficha} yo={yo} onBack={() => setFicha(null)} />
   const selectorVista = (
     <div className="row" style={{ margin: '12px 0 4px' }}>
@@ -121,7 +107,7 @@ export default function Ranking({ yo, vistaInicial }: { yo: any; vistaInicial?: 
       </>
     )
   }
-  if (!filas) return <p className="c">Cargando…</p>
+  if (!filas) return <Cargando />
 
   const actual = CATEGORIAS.find((c) => c.id === cat) as Cat
   const ordenados = filas
@@ -143,8 +129,7 @@ export default function Ranking({ yo, vistaInicial }: { yo: any; vistaInicial?: 
   return (
     <>
       {selectorVista}
-      <h2>Ranking</h2>
-      <select value={sel} onChange={(e) => setSel(e.target.value)} style={{ marginBottom: 10 }}>
+      <select value={sel} onChange={(e) => setSel(e.target.value)} style={{ margin: '8px 0 4px', width: '100%' }} aria-label="Temporada">
         {temporadas.map((t) => (
           <option key={t.id} value={String(t.id)}>
             {t.nombre}{t.activa ? ' (actual)' : ''}
@@ -164,22 +149,40 @@ export default function Ranking({ yo, vistaInicial }: { yo: any; vistaInicial?: 
       {actual.nota && <p className="mut">{actual.nota}</p>}
 
       {ordenados.length === 0 && (
-        <p className="mut">Todavía no hay datos. Aparecerán al jugarse y cerrarse los primeros partidos.</p>
+        <div className="vacio"><span>{actual.icono}</span><b>Todavía no hay datos</b><div className="mut">Aparecerán al jugarse y cerrarse los primeros partidos.</div></div>
       )}
-      {ordenados.map((x, i) => (
-        <div className="card row" key={x.r.id} style={{ cursor: 'pointer' }} onClick={() => setFicha(x.r.id)}>
-          <span style={{ width: 32, textAlign: 'center', fontWeight: 700 }}>
+      {ordenados.length >= 3 && (
+        <div className="podio">
+          {[1, 0, 2].map((i) => {
+            const x = ordenados[i]
+            return (
+              <div key={x.r.id} className={'podio-p p' + (i + 1) + (x.r.id === yo.id ? ' yo' : '')} onClick={() => setFicha(x.r.id)}>
+                <div className="podio-foto">
+                  <span className="podio-medalla">{MEDALLAS[puestos[i] - 1] || puestos[i]}</span>
+                  <Avatar p={x.r} size={i === 0 ? 60 : 48} />
+                </div>
+                <div className="podio-n">{x.r.apodo || x.r.nombre}</div>
+                <div className="podio-v">{x.v}<span> {actual.unidad}</span></div>
+                <div className="podio-base">{puestos[i]}</div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+      {ordenados.map((x, i) => (ordenados.length >= 3 && i < 3) ? null : (
+        <div className={'card row rank-fila' + (x.r.id === yo.id ? ' yo' : '')} key={x.r.id} onClick={() => setFicha(x.r.id)}>
+          <span className="rank-pos">
             {puestos[i] <= 3 ? MEDALLAS[puestos[i] - 1] : puestos[i]}
           </span>
           <Avatar p={x.r} size={36} />
-          <span style={{ flex: 1 }}>
+          <span style={{ flex: 1, minWidth: 0 }}>
             <b>{x.r.apodo || x.r.nombre}</b>
-            {x.r.es_externo && <span className="tag" style={{ marginLeft: 6 }}>externo</span>}
+            {x.r.es_externo && <span className="tag" style={{ marginLeft: 6 }}>ext</span>}
             <div className="mut">{x.r.partidos} PJ · {x.r.victorias}V {x.r.empates}E {x.r.derrotas}D</div>
           </span>
-          <span style={{ fontSize: 22, fontWeight: 700 }}>
+          <span className="rank-val">
             {x.v}
-            <span className="mut" style={{ fontSize: 12, fontWeight: 400 }}> {actual.unidad}</span>
+            <span className="mut"> {actual.unidad}</span>
           </span>
         </div>
       ))}

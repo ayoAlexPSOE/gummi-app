@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { Cargando } from './movil'
 
 const hace = (iso: string) => {
   const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
@@ -23,8 +24,8 @@ export default function Avisos({ onIr, onCambio }: { onIr: (destino: string | nu
 
   const abrir = async (n: any) => {
     if (!n.leida) {
-      await supabase.from('notificaciones').update({ leida: true }).eq('id', n.id)
-      onCambio()
+      // Se marca como leída por detrás para que el salto sea inmediato
+      supabase.from('notificaciones').update({ leida: true }).eq('id', n.id).then(() => onCambio())
     }
     onIr(n.destino, n.ref)
   }
@@ -41,25 +42,28 @@ export default function Avisos({ onIr, onCambio }: { onIr: (destino: string | nu
   }
 
   if (fallo) return <p className="mut">No se pudieron cargar los avisos. Comprueba que se ha ejecutado en Supabase el script 08_avisos.sql.</p>
-  if (!lista) return <p className="c">Cargando…</p>
+  if (!lista) return <Cargando />
 
   return (
     <>
       <h2>Avisos</h2>
-      {lista.length === 0 && <p className="mut">No tienes avisos.</p>}
+      {lista.length === 0 && <div className="vacio"><span>🔔</span><b>Sin avisos</b><div className="mut">Aquí te llegarán las convocatorias, los equipos, las votaciones y tus logros.</div></div>}
       {lista.map((n) => (
         <div key={n.id} className={'card' + (n.leida ? '' : ' unread')} style={{ cursor: 'pointer' }} onClick={() => abrir(n)}>
-          <div className="row">
-            <b style={{ flex: 1 }}>{n.titulo}</b>
-            <span className="mut">{hace(n.created_at)}</span>
+          <div className="row" style={{ flexWrap: 'nowrap', alignItems: 'flex-start' }}>
+            <span className="aviso-ic">{n.destino === 'votar' ? '🗳️' : n.destino === 'logros' ? '🏅' : '⚽'}</span>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <b>{n.titulo}</b>
+              {n.cuerpo && <div className="mut">{n.cuerpo}</div>}
+            </span>
+            <span className="mut" style={{ whiteSpace: 'nowrap', fontSize: 12 }}>{hace(n.created_at)}</span>
           </div>
-          {n.cuerpo && <div className="mut">{n.cuerpo}</div>}
         </div>
       ))}
       {lista.length > 0 && (
         <div className="row" style={{ marginTop: 14 }}>
-          <button className="sec" onClick={todasLeidas}>Marcar todas como leídas</button>
-          <button className="sec" onClick={borrarTodas}>Borrar todas</button>
+          {lista.some((n) => !n.leida) && <button className="sec" style={{ flex: 1 }} onClick={todasLeidas}>✓ Marcar leídas</button>}
+          <button className="sec" style={{ flex: 1 }} onClick={borrarTodas}>🗑️ Borrar todas</button>
         </div>
       )}
     </>

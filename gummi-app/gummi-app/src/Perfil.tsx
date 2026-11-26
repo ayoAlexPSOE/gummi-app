@@ -3,6 +3,7 @@ import { supabase } from './supabase'
 import Numero from './Numero'
 import Avatar from './Avatar'
 import Ficha from './Ficha'
+import { useAtras, vibra } from './movil'
 
 const POS: [string, string, string][] = [
   ['portero', 'Portero', '🧤'],
@@ -41,6 +42,7 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
   const [pass1, setPass1] = useState('')
   const [pass2, setPass2] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
+  useAtras(ficha, () => setFicha(false))
 
   useEffect(() => {
     if (ficha) return
@@ -79,6 +81,7 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
     const { error } = await supabase.from('perfiles').update(cambios).eq('id', yo.id)
     setBusy(false)
     if (error) return avisar('No se pudo guardar: ' + error.message)
+    vibra(20)
     avisar('✅ Perfil guardado')
     onGuardado()
   }
@@ -243,13 +246,13 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
       <details className="card">
         <summary>🔒 Cambiar contraseña</summary>
         <form style={{ marginTop: 10 }} onSubmit={(e) => { e.preventDefault(); cambiarPass() }}>
-          <input type="password" placeholder="Nueva contraseña" value={pass1} onChange={(e) => setPass1(e.target.value)} />
-          <input type="password" placeholder="Repite la contraseña" value={pass2} onChange={(e) => setPass2(e.target.value)} />
+          <input type="password" autoComplete="new-password" placeholder="Nueva contraseña" value={pass1} onChange={(e) => setPass1(e.target.value)} />
+          <input type="password" autoComplete="new-password" placeholder="Repite la contraseña" value={pass2} onChange={(e) => setPass2(e.target.value)} />
           <button type="submit">Cambiar contraseña</button>
         </form>
       </details>
 
-      <button className="sec" style={{ width: '100%', marginTop: 14 }} onClick={() => supabase.auth.signOut()}>Cerrar sesión</button>
+      <button className="sec" style={{ width: '100%', marginTop: 14 }} onClick={() => { if (confirm('¿Cerrar sesión en este móvil?')) supabase.auth.signOut() }}>Cerrar sesión</button>
     </>
   )
 }

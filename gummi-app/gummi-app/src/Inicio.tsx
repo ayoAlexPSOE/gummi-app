@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import { horario } from './util'
 import Numero from './Numero'
+import Avatar from './Avatar'
+import { Cargando, anadirCalendario, vibra } from './movil'
 
 const OPCIONES: [string, string, string][] = [['voy', 'Voy', '✅'], ['duda', 'Duda', '🤔'], ['no_voy', 'No voy', '❌']]
 
@@ -15,10 +17,11 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
   const [, setTick] = useState(0)
 
   const cargar = async () => {
-    const [ps, cf, rk] = await Promise.all([
+    const [ps, cf, rk, pf] = await Promise.all([
       supabase.from('partidos').select('*').order('fecha', { ascending: false }).limit(12),
       supabase.from('configuracion').select('*').single(),
       supabase.rpc('ranking_jugadores'),
+      supabase.from('perfiles').select('*').eq('activo', true),
     ])
     const lista: any[] = ps.data || []
     const ids = lista.map((p) => p.id)
@@ -29,7 +32,7 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
       supabase.from('votos_mvp').select('partido_id').eq('votante_id', yo.id),
     ])
     setD({
-      lista, cfg: cf.data, conv: (cv as any).data || [], part: (pa as any).data || [],
+      lista, cfg: cf.data, perfiles: pf.data || [], conv: (cv as any).data || [], part: (pa as any).data || [],
       misVotos: new Set([...(vo.data || []), ...(mv.data || [])].map((x: any) => x.partido_id)),
       yoStats: (rk.data || []).find((r: any) => r.jugador_id === yo.id) || null,
     })
@@ -40,7 +43,7 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
     return () => clearInterval(t)
   }, [])
 
-  if (!d) return <p className="c">Cargando…</p>
+  if (!d) return <Cargando />
   const ahora = Date.now()
 
   // Próximo partido: el más cercano que aún no ha terminado
@@ -59,6 +62,8 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
   )
 
   const responder = async (partido_id: number, respuesta: string) => {
+    vibra()
+    setD((x: any) => ({ ...x, conv: [...x.conv.filter((c: any) => !(c.partido_id === partido_id && c.jugador_id === yo.id)), { partido_id, jugador_id: yo.id, respuesta }] }))
     const { error } = await supabase.from('convocatorias').upsert(
       { partido_id, jugador_id: yo.id, respuesta, updated_at: new Date().toISOString() },
       { onConflict: 'partido_id,jugador_id' }
@@ -89,7 +94,20 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
               const [dia, h] = horario(prox, true).split(' · ')
               return <>{dia}<br /><span className="hero-h">{h}</span></>
             })()}</div>
-            <div className="mut">{prox.lugar || 'Sin lugar'} · {voy} confirmados</div>
+            <div className="mut">📍 {prox.lugar || 'Sin lugar'}</div>
+            {(() => {
+              const van = d.conv.filter((c: any) => c.partido_id === prox.id && c.respuesta === 'voy')
+                .map((c: any) => d.perfiles.find((j: any) => j.id === c.jugador_id)).filter(Boolean)
+              return (
+                <div className="pila" onClick={() => onPartido(prox.id)}>
+                  <span className="pila-fotos">
+                    {van.slice(0, 7).map((j: any) => <Avatar key={j.id} p={j} size={28} />)}
+                    {van.length > 7 && <span className="avatar mas" style={{ width: 28, height: 28 }}>+{van.length - 7}</span>}
+                  </span>
+                  <span className="mut">{voy === 0 ? 'Nadie apuntado todavía' : `${voy} ${voy === 1 ? 'va' : 'van'}`}</span>
+                </div>
+              )
+            })()}
             {empezado ? (
               <div className="mut" style={{ margin: '10px 0' }}>En juego ahora</div>
             ) : (
@@ -111,13 +129,15 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
                 ))}
               </div>
             )}
-            <button className="sec" style={{ marginTop: 10, width: '100%' }} onClick={() => onPartido(prox.id)}>Ver detalle</button>
+            <div className="row" style={{ marginTop: 10, flexWrap: 'nowrap' }}>
+              <button className="sec" style={{ flex: 1 }} onClick={() => onPartido(prox.id)}>Ver detalle</button>
+              {!empezado && <button className="sec ico" onClick={() => anadirCalendario(prox)} aria-label="Añadir al calendario" title="Añadir al calendario">📅</button>}
+            </div>
           </div>
         )
       })() : (
         <div className="hero">
-          <b>No hay ningún partido convocado</b>
-          <div className="mut">Cuando el admin cree uno, aparecerá aquí.</div>
+          <div className="vacio" style={{ padding: '14px 0' }}><span>📅</span><b>No hay ningún partido convocado</b><div className="mut">Cuando el admin cree uno, aparecerá aquí.</div></div>
         </div>
       )}
 
@@ -134,13 +154,29 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
         </div>
       )}
 
-      {ultimo && (
-        <div className="card" style={{ cursor: 'pointer' }} onClick={() => onPartido(ultimo.id)}>
-          <div className="mut">Último resultado · {fmt(ultimo.fecha)}</div>
-          <div style={{ fontSize: 30, fontWeight: 700, textAlign: 'center', padding: '6px 0' }}>{ultimo.goles_a} - {ultimo.goles_b}</div>
-          <div className="mut" style={{ textAlign: 'center' }}>Ver detalle ›</div>
-        </div>
-      )}
+      {ultimo && (() => {
+        const mi = d.part.find((x: any) => x.partido_id === ultimo.id && x.jugador_id === yo.id)
+        let res = ''
+        if (mi) {
+          const gf = mi.equipo === 'A' ? ultimo.goles_a : ultimo.goles_b
+          const gc = mi.equipo === 'A' ? ultimo.goles_b : ultimo.goles_a
+          res = gf > gc ? 'V' : gf < gc ? 'D' : 'E'
+        }
+        return (
+          <div className="card" style={{ cursor: 'pointer' }} onClick={() => onPartido(ultimo.id)}>
+            <div className="row">
+              <span className="mut" style={{ flex: 1 }}>Último resultado · {fmt(ultimo.fecha)}</span>
+              {res && <span className={'chip ' + res}>{res}</span>}
+            </div>
+            <div className="marcador sin-caja">
+              <div className="marcador-eq"><span className="mut">Equipo</span><b>A</b></div>
+              <div className="marcador-num">{ultimo.goles_a}<i>–</i>{ultimo.goles_b}</div>
+              <div className="marcador-eq"><span className="mut">Equipo</span><b>B</b></div>
+            </div>
+            <div className="mut" style={{ textAlign: 'center' }}>{mi ? `Jugaste en el equipo ${mi.equipo} · ` : ''}Ver detalle ›</div>
+          </div>
+        )
+      })()}
 
       {d.yoStats && d.yoStats.partidos > 0 && (
         <>
