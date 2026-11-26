@@ -29,3 +29,24 @@ export function horario(p: any, largo = false): string {
   const h = (x: Date) => x.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
   return `${dia} · ${h(d)}${p.fecha_fin ? '–' + h(new Date(p.fecha_fin)) : ''}`
 }
+
+// Lista de convocados: los primeros en decir "Voy" juegan (hasta llenar las plazas);
+// el resto queda de reserva por orden de llegada.
+export const PLAZAS_DEFECTO = 14
+const llegada = (c: any) => c.voy_desde || c.updated_at || '9999'
+export function convocados(conv: any[], partidoId: number, plazas: number = PLAZAS_DEFECTO) {
+  const voy = conv
+    .filter((c) => c.partido_id === partidoId && c.respuesta === 'voy')
+    .sort((a, b) => llegada(a).localeCompare(llegada(b)) || String(a.jugador_id).localeCompare(String(b.jugador_id)))
+    .map((c) => c.jugador_id as string)
+  return { titulares: voy.slice(0, plazas), reservas: voy.slice(plazas) }
+}
+
+// Respuesta marcada al momento (antes de que conteste el servidor) sin perder el orden de llegada.
+export function respuestaLocal(conv: any[], partidoId: number, jugadorId: string, respuesta: string) {
+  const previa = conv.find((c) => c.partido_id === partidoId && c.jugador_id === jugadorId)
+  const resto = conv.filter((c) => !(c.partido_id === partidoId && c.jugador_id === jugadorId))
+  if (!respuesta) return resto
+  const voy_desde = respuesta === 'voy' ? (previa?.respuesta === 'voy' ? previa.voy_desde || previa.updated_at : new Date().toISOString()) : null
+  return [...resto, { partido_id: partidoId, jugador_id: jugadorId, respuesta, voy_desde }]
+}

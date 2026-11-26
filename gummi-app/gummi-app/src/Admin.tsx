@@ -64,6 +64,12 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
   }
   useEffect(() => { cargar() }, [])
 
+  const cambiarPlazas = async (n: number) => {
+    setCfg({ ...cfg, plazas: n })
+    const { error } = await supabase.from('configuracion').update({ plazas: n }).eq('id', true)
+    if (error) { alert(error.message); cargar() }
+  }
+
   const ajuste = async (campo: string, v: boolean) => {
     const { error } = await supabase.from('configuracion').update({ [campo]: v }).eq('id', true)
     if (error) alert(error.message)
@@ -160,6 +166,19 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
           <button type="submit">Crear partido</button>
         </form>
       </div>
+      {cfg.plazas !== undefined && (
+        <div className="card fila plazas">
+          <span>
+            <b>Plazas por partido</b>
+            <div className="mut">Los primeros en decir «Voy» juegan; el resto queda de reserva y entra solo si alguien se borra.</div>
+          </span>
+          <span className="contador">
+            <button className="sec" disabled={cfg.plazas <= 4} onClick={() => cambiarPlazas(cfg.plazas - 1)} aria-label="Una plaza menos">−</button>
+            <span className="on">{cfg.plazas}</span>
+            <button className="sec" disabled={cfg.plazas >= 40} onClick={() => cambiarPlazas(cfg.plazas + 1)} aria-label="Una plaza más">+</button>
+          </span>
+        </div>
+      )}
       {partidos.length > 0 && (
         <div className="card">
           <b>Últimos partidos</b>

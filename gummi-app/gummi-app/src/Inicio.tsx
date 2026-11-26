@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import { color, nombreEquipo } from './equipos'
 import { TarjetaAvisos } from './push'
-import { horario } from './util'
+import { horario, convocados, respuestaLocal, PLAZAS_DEFECTO } from './util'
 import Numero from './Numero'
 import Avatar from './Avatar'
 import { Cargando, anadirCalendario, vibra } from './movil'
@@ -67,7 +67,7 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
 
   const responder = async (partido_id: number, respuesta: string) => {
     vibra()
-    setD((x: any) => ({ ...x, conv: [...x.conv.filter((c: any) => !(c.partido_id === partido_id && c.jugador_id === yo.id)), { partido_id, jugador_id: yo.id, respuesta }] }))
+    setD((x: any) => ({ ...x, conv: respuestaLocal(x.conv, partido_id, yo.id, respuesta) }))
     const { error } = await supabase.from('convocatorias').upsert(
       { partido_id, jugador_id: yo.id, respuesta, updated_at: new Date().toISOString() },
       { onConflict: 'partido_id,jugador_id' }
@@ -87,7 +87,9 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
     <>
       {prox ? (() => {
         const mia = d.conv.find((c: any) => c.partido_id === prox.id && c.jugador_id === yo.id)
-        const voy = d.conv.filter((c: any) => c.partido_id === prox.id && c.respuesta === 'voy').length
+        const { titulares, reservas } = convocados(d.conv, prox.id, d.cfg?.plazas ?? PLAZAS_DEFECTO)
+        const voy = titulares.length
+        const miReserva = reservas.indexOf(yo.id)
         const c = cuenta(new Date(prox.fecha).getTime())
         const miEq = d.part.find((x: any) => x.partido_id === prox.id && x.jugador_id === yo.id)
         const empezado = new Date(prox.fecha).getTime() <= ahora
@@ -100,18 +102,20 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
             })()}</div>
             <div className="mut">📍 {prox.lugar || 'Lugar por confirmar'}</div>
             {(() => {
-              const van = d.conv.filter((c: any) => c.partido_id === prox.id && c.respuesta === 'voy')
-                .map((c: any) => d.perfiles.find((j: any) => j.id === c.jugador_id)).filter(Boolean)
+              const van = titulares.map((jid: string) => d.perfiles.find((j: any) => j.id === jid)).filter(Boolean)
               return (
                 <div className="pila" onClick={() => onPartido(prox.id)}>
                   <span className="pila-fotos">
                     {van.slice(0, 7).map((j: any) => <Avatar key={j.id} p={j} size={28} />)}
                     {van.length > 7 && <span className="avatar mas" style={{ width: 28, height: 28 }}>+{van.length - 7}</span>}
                   </span>
-                  <span className="mut">{voy === 0 ? 'Nadie apuntado todavía' : `${voy} ${voy === 1 ? 'va' : 'van'}`}</span>
+                  <span className="mut">{voy === 0 ? 'Nadie apuntado todavía' : `${voy} ${voy === 1 ? 'va' : 'van'}`}{reservas.length > 0 ? ` · ${reservas.length} de reserva` : ''}</span>
                 </div>
               )
             })()}
+            {miReserva >= 0 && (
+              <div className="aviso reserva-aviso">🕓 Estás de <b>reserva nº {miReserva + 1}</b>. Si alguien se borra, entras tú y te avisamos.</div>
+            )}
             {empezado ? (
               <div className="mut" style={{ margin: '10px 0' }}>En juego ahora</div>
             ) : (

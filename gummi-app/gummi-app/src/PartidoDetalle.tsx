@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
-import { horario } from './util'
+import { horario, convocados, respuestaLocal, PLAZAS_DEFECTO } from './util'
 import HorarioPicker, { Horario, aTimestamps, desdePartido } from './HorarioPicker'
 import Avatar from './Avatar'
 import { Cargando, anadirCalendario, compartir, vibra } from './movil'
@@ -95,6 +95,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
   const [colores, setColores] = useState<[string, string] | null>(null) // colores en el borrador
   const [editDatos, setEditDatos] = useState<{ hor: Horario; lugar: string } | null>(null)
   const [mvp, setMvp] = useState<any[]>([])
+  const [plazas, setPlazas] = useState(PLAZAS_DEFECTO)
 
   const cargar = async () => {
     const [pp, pr, cv, pa, ev] = await Promise.all([
@@ -108,6 +109,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
     setPerfiles(pr.data || [])
     setConv(cv.data || [])
     setPart(pa.data || [])
+    supabase.from('configuracion').select('plazas').single().then((cf) => { if (!cf.error && cf.data?.plazas) setPlazas(cf.data.plazas) })
     setEventos(ev.data || [])
 
     const c: Record<string, { g: number; a: number }> = {}
@@ -175,7 +177,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
 
   const setResp = async (jugador_id: string, respuesta: string) => {
     vibra()
-    setConv((cs) => [...cs.filter((x) => x.jugador_id !== jugador_id), ...(respuesta ? [{ partido_id: id, jugador_id, respuesta }] : [])])
+    setConv((cs) => respuestaLocal(cs, id, jugador_id, respuesta))
     if (!respuesta) {
       const { error } = await supabase
         .from('convocatorias').delete().eq('partido_id', id).eq('jugador_id', jugador_id)
@@ -191,7 +193,10 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
   }
 
   // ---------- equipos ----------
-  const confirmados = perfiles.filter((j) => respDe(j.id) === 'voy')
+  // Juegan los primeros en apuntarse hasta llenar las plazas; el resto, de reserva
+  const { titulares, reservas } = convocados(conv, id, plazas)
+  const confirmados = titulares.map((jid) => perfilDe(jid)).filter(Boolean) as any[]
+  const reservaDe = (jid: string) => reservas.indexOf(jid)
 
   const generar = () => {
     if (confirmados.length < 2) return alert('Hacen falta al menos 2 jugadores con "Voy".')
@@ -346,7 +351,8 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
     }
     const van = confirmados.map((j) => j.apodo || j.nombre)
     const dudan = perfiles.filter((j) => respDe(j.id) === 'duda').map((j) => j.apodo || j.nombre)
-    return `${cab}\n✅ Van (${van.length}): ${van.join(', ') || 'nadie todavía'}${dudan.length ? `\n🤔 Dudan: ${dudan.join(', ')}` : ''}\n¿Te apuntas?`
+    const res = reservas.map((jid) => nombre(jid))
+    return `${cab}\n✅ Van (${van.length}/${plazas}): ${van.join(', ') || 'nadie todavía'}${res.length ? `\n🕓 Reservas: ${res.join(', ')}` : ''}${dudan.length ? `\n🤔 Dudan: ${dudan.join(', ')}` : ''}\n¿Te apuntas?`
   }
 
   // ---------- pintado ----------
@@ -413,19 +419,22 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
 
       {/* ---- Mi respuesta (jugadores) ---- */}
       {!admin && p.estado === 'convocatoria' && (
-        <div className="grid3" style={{ marginTop: 14 }}>
+        <>
+        <div className="respuesta" style={{ marginTop: 14 }}>
           {[['voy', 'Voy', '✅'], ['duda', 'Duda', '🤔'], ['no_voy', 'No voy', '❌']].map(([v, t, ic]) => (
-            <button key={v} className={'grande' + (miResp === v ? ' sel' : ' sec')} onClick={() => setResp(yo.id, v)}>
-              <div style={{ fontSize: 20 }}>{ic}</div>{t}
+            <button key={v} className={miResp === v ? 'sel' : 'sec'} onClick={() => setResp(yo.id, v)} aria-pressed={miResp === v}>
+              <span>{ic}</span>{t}
             </button>
           ))}
         </div>
+        {reservaDe(yo.id) >= 0 && <div className="aviso reserva-aviso">🕓 Estás de <b>reserva nº {reservaDe(yo.id) + 1}</b>. Si alguien se borra, entras tú y te avisamos.</div>}
+        </>
       )}
 
       {puedeEditarEquipos && !borrador && (
         <button className="gen-equipos" onClick={generar}>
           ⚡ {part.length > 0 ? 'Rehacer equipos' : 'Generar equipos automáticos'}
-          <span>{confirmados.length} {confirmados.length === 1 ? 'jugador va' : 'jugadores van'}{confirmados.length < 2 ? ' · marca antes quién va, más abajo' : ''}</span>
+          <span>{confirmados.length} {confirmados.length === 1 ? 'jugador va' : 'jugadores van'}{confirmados.length < 2 ? ' · marca antes quién va, más abajo' : ''}{reservas.length ? ` · ${reservas.length} de reserva` : ''}</span>
         </button>
       )}
 
@@ -483,18 +492,18 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
       {/* ---- Convocatoria ---- */}
       {(p.estado === 'convocatoria' || p.estado === 'equipos') && (
         <>
-          <h2>Convocatoria · {confirmados.length} van</h2>
+          <h2>Convocatoria · {confirmados.length}/{plazas}</h2>
           {!admin && (
             <div className="card">
-              {[['voy', '✅ Van'], ['duda', '🤔 Dudan'], ['no_voy', '❌ No van']].map(([r, t]) => {
-                const lista = perfiles.filter((j) => respDe(j.id) === r)
+              {[['voy', '✅ Van'], ['reserva', '🕓 Reservas (por orden)'], ['duda', '🤔 Dudan'], ['no_voy', '❌ No van']].map(([r, t]) => {
+                const lista = r === 'voy' ? confirmados : r === 'reserva' ? (reservas.map((jid) => perfilDe(jid)).filter(Boolean) as any[]) : perfiles.filter((j) => respDe(j.id) === r)
                 if (!lista.length) return null
                 return (
                   <div key={r} className="conv-grupo">
                     <div className="mut">{t} ({lista.length})</div>
                     <div className="conv-lista">
                       {lista.map((j) => (
-                        <span key={j.id} className={'conv-jug' + (j.id === yo.id ? ' yo' : '')}><Avatar p={j} size={22} />{j.apodo || j.nombre}</span>
+                        <span key={j.id} className={'conv-jug' + (j.id === yo.id ? ' yo' : '')}><Avatar p={j} size={22} />{r === 'reserva' ? `${reservaDe(j.id) + 1}. ` : ''}{j.apodo || j.nombre}</span>
                       ))}
                     </div>
                   </div>
@@ -519,6 +528,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
                       <Avatar p={j} size={26} />
                       <span>{j.apodo || j.nombre}</span>
                       {j.es_externo && <span className="tag">ext</span>}
+                      {reservaDe(j.id) >= 0 && <span className="tag tag-reserva" title="Reserva">R{reservaDe(j.id) + 1}</span>}
                     </span>
                     <span className="seg">
                       {[['voy', '✅'], ['duda', '🤔'], ['no_voy', '❌']].map(([v, ic]) => (

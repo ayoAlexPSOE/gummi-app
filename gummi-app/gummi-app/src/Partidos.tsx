@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import { color } from './equipos'
-import { horario } from './util'
+import { horario, convocados, respuestaLocal, PLAZAS_DEFECTO } from './util'
 import PartidoDetalle from './PartidoDetalle'
 import { Cargando, useAtras, vibra } from './movil'
 
@@ -18,6 +18,7 @@ export default function Partidos({ yo, abrirInicial, onUsado }: { yo: any; abrir
   const [part, setPart] = useState<any[]>([])
   const [abierto, setAbiertoEstado] = useState<number | null>(abrirInicial || recordado)
   const [verTodos, setVerTodos] = useState(false)
+  const [plazas, setPlazas] = useState(PLAZAS_DEFECTO)
   const setAbierto = (v: number | null) => { recordado = v; setAbiertoEstado(v) }
 
   useAtras(abierto !== null, () => setAbierto(null))
@@ -33,6 +34,8 @@ export default function Partidos({ yo, abrirInicial, onUsado }: { yo: any; abrir
         ])
       : [{ data: [] }, { data: [] }]
     setPartidos(p.data || [])
+    const cf = await supabase.from('configuracion').select('plazas').single()
+    if (!cf.error && cf.data?.plazas) setPlazas(cf.data.plazas)
     setConv(c.data || [])
     setPart(pa.data || [])
   }
@@ -44,7 +47,7 @@ export default function Partidos({ yo, abrirInicial, onUsado }: { yo: any; abrir
   const responder = async (partido_id: number, respuesta: string) => {
     vibra()
     // Se marca al momento y se guarda por detrás
-    setConv((cs) => [...cs.filter((c) => !(c.partido_id === partido_id && c.jugador_id === yo.id)), { partido_id, jugador_id: yo.id, respuesta }])
+    setConv((cs) => respuestaLocal(cs, partido_id, yo.id, respuesta))
     const { error } = await supabase.from('convocatorias').upsert(
       { partido_id, jugador_id: yo.id, respuesta, updated_at: new Date().toISOString() },
       { onConflict: 'partido_id,jugador_id' }
@@ -67,7 +70,8 @@ export default function Partidos({ yo, abrirInicial, onUsado }: { yo: any; abrir
 
   const tarjeta = (p: any) => {
     const mias = conv.find((c) => c.partido_id === p.id && c.jugador_id === yo.id)
-    const voy = conv.filter((c) => c.partido_id === p.id && c.respuesta === 'voy').length
+    const { titulares, reservas } = convocados(conv, p.id, plazas)
+    const voy = titulares.length
     const miEq = part.find((x) => x.partido_id === p.id)
     const hayRes = p.goles_a != null
     let res = ''
@@ -82,7 +86,7 @@ export default function Partidos({ yo, abrirInicial, onUsado }: { yo: any; abrir
         <div className="row" style={{ flexWrap: 'nowrap' }}>
           <span style={{ flex: 1, minWidth: 0 }}>
             <b className="partido-dia">{horario(p)}</b>
-            <div className="mut">{[p.lugar, !hayRes ? `${voy} ${voy === 1 ? 'va' : 'van'}` : ''].filter(Boolean).join(' · ')}</div>
+            <div className="mut">{[p.lugar, !hayRes ? `${voy} ${voy === 1 ? 'va' : 'van'}${reservas.length ? ` (+${reservas.length} reserva${reservas.length > 1 ? 's' : ''})` : ''}` : ''].filter(Boolean).join(' · ')}</div>
           </span>
           {hayRes ? (
             <span className="marcador-mini">

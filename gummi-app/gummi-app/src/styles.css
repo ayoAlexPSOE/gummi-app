@@ -478,6 +478,12 @@ button.login-entrar { min-height:56px; border-radius:16px; font-size:18px; lette
 .hero-pie button { min-height:40px; font-size:15px; }
 .hero-pie button.ico:not(.mini) { min-height:40px; }
 
+/* Reservas */
+.reserva-aviso { border-color:#ffc83d59; background:linear-gradient(135deg,#ffc83d1f,#ffc83d08); }
+.tag.tag-reserva { background:#ffc83d1f; border-color:#ffc83d59; color:#ffd76a; }
+.card.plazas { padding:12px 14px; gap:12px; }
+.card.plazas .contador { flex:none; }
+
 /* Accesibilidad / ahorro: sin animaciones si el móvil lo pide */
 @media (prefers-reduced-motion:reduce) {
   *, *::before, *::after { animation:none !important; transition:none !important; }
