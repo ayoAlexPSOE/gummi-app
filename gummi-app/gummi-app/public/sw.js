@@ -13,7 +13,7 @@ self.addEventListener('push', (e) => {
   const tareas = [
     self.registration.showNotification(d.titulo || 'Gummi', {
       body: d.cuerpo || '',
-      icon: './icono-192.png',
+      icon: './icono-192.png?v=2',
       badge: './badge.png',
       tag: 'gummi-' + (d.id || Date.now()),
       data: { url: url.href },
