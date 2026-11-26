@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { configuracion } from './datos'
 import { color } from './equipos'
 import { horario, convocados, respuestaLocal, PLAZAS_DEFECTO } from './util'
 import PartidoDetalle from './PartidoDetalle'
@@ -34,7 +35,7 @@ export default function Partidos({ yo, abrirInicial, onUsado }: { yo: any; abrir
         ])
       : [{ data: [] }, { data: [] }]
     setPartidos(p.data || [])
-    const cf = await supabase.from('configuracion').select('plazas').single()
+    const cf = await configuracion()
     if (!cf.error && cf.data?.plazas) setPlazas(cf.data.plazas)
     setConv(c.data || [])
     setPart(pa.data || [])

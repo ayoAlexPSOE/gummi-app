@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { perfilesActivos, ranking } from './datos'
 import Ficha from './Ficha'
 import Logros from './Logros'
 import Avatar from './Avatar'
@@ -67,7 +68,6 @@ export default function Ranking({ yo, vistaInicial }: { yo: any; vistaInicial?: 
   const [fallo, setFallo] = useState(false)
   const [temporadas, setTemporadas] = useState<any[]>([])
   const [sel, setSel] = useState('') // id de temporada o 'todas'
-  const [version, setVersion] = useState(0)
   useAtras(ficha !== null, () => setFicha(null))
 
   useEffect(() => {
@@ -78,16 +78,14 @@ export default function Ranking({ yo, vistaInicial }: { yo: any; vistaInicial?: 
       setTemporadas(lista)
       setSel((s) => s || String((lista.find((x: any) => x.activa) || lista[0])?.id ?? 'todas'))
     })()
-  }, [ficha, version])
+  }, [ficha])
 
   useEffect(() => {
     if (ficha !== null || sel === '') return
     ;(async () => {
       const [pr, rk] = await Promise.all([
-        supabase.from('perfiles').select('*').eq('activo', true),
-        sel === 'todas'
-          ? supabase.rpc('ranking_jugadores')
-          : supabase.rpc('ranking_jugadores', { p_temporada: Number(sel) }),
+        perfilesActivos(),
+        ranking(sel === 'todas' ? null : Number(sel)),
       ])
       if (rk.error) {
         setFallo(true)
@@ -103,7 +101,7 @@ export default function Ranking({ yo, vistaInicial }: { yo: any; vistaInicial?: 
         }))
       )
     })()
-  }, [ficha, sel, version])
+  }, [ficha, sel])
 
   if (ficha !== null) return <Ficha id={ficha} yo={yo} onBack={() => setFicha(null)} />
   const selectorVista = (

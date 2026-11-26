@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { configuracion, invalidar, perfilesActivos } from './datos'
 import { horario, convocados, respuestaLocal, PLAZAS_DEFECTO } from './util'
 import HorarioPicker, { Horario, aTimestamps, desdePartido } from './HorarioPicker'
 import Avatar from './Avatar'
@@ -102,7 +103,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
   const cargar = async () => {
     const [pp, pr, cv, pa, ev] = await Promise.all([
       supabase.from('partidos').select('*').eq('id', id).single(),
-      supabase.from('perfiles').select('*').eq('activo', true).order('nombre'),
+      perfilesActivos(),
       supabase.from('convocatorias').select('*').eq('partido_id', id),
       supabase.from('participaciones').select('*').eq('partido_id', id),
       supabase.from('eventos').select('*').eq('partido_id', id),
@@ -111,7 +112,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
     setPerfiles(pr.data || [])
     setConv(cv.data || [])
     setPart(pa.data || [])
-    supabase.from('configuracion').select('plazas').single().then((cf) => { if (!cf.error && cf.data?.plazas) setPlazas(cf.data.plazas) })
+    configuracion().then((cf) => { if (!cf.error && cf.data?.plazas) setPlazas(cf.data.plazas) })
     setEventos(ev.data || [])
 
     const c: Record<string, { g: number; a: number }> = {}
@@ -310,6 +311,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
       .eq('id', id)
     if (upd.error) { setBusy(false); return alert(upd.error.message) }
     setEditando(false)
+    invalidar('ranking')
     try { await supabase.rpc('mantenimiento', { p_forzar: true }) } catch { /* sin SQL de avisos todavía */ }
     await cargar()
     setBusy(false)
@@ -333,6 +335,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
     if (!confirm('¿Borrar este partido y todo lo asociado? No se puede deshacer.')) return
     const { error } = await supabase.from('partidos').delete().eq('id', id)
     if (error) return alert(error.message)
+    invalidar('ranking')
     onBack()
   }
 

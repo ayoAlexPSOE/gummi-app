@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from './supabase'
+import { invalidar } from './datos'
 import Jugadores from './Jugadores'
 import Partidos, { olvidarPartido } from './Partidos'
 import Votar from './Votar'
@@ -64,6 +65,7 @@ export default function App() {
   const [irPartido, setIrPartido] = useState<number | null>(null)
   const [vistaRanking, setVistaRanking] = useState('tabla')
   const [vuelta, setVuelta] = useState(0) // al cambiar, la pantalla actual se recarga
+  const refrescar = () => { invalidar(); setVuelta((v) => v + 1) }
   const [tirando, setTirando] = useState(0) // 0-1: cuánto se ha tirado hacia abajo para refrescar
   const oculto = useRef(0)
 
@@ -74,7 +76,7 @@ export default function App() {
   const irTab = (t: string) => {
     if (t === tab) {
       if (window.scrollY > 40) window.scrollTo({ top: 0, behavior: 'smooth' })
-      else { olvidarPartido(); setVuelta((v) => v + 1) }
+      else { olvidarPartido(); refrescar() }
       return
     }
     olvidarPartido()
@@ -148,7 +150,7 @@ export default function App() {
     // Al volver a la app tras un rato fuera, se ponen los datos al día.
     const cambio = () => {
       if (document.hidden) { oculto.current = Date.now(); return }
-      if (oculto.current && Date.now() - oculto.current > 60000) { setVuelta((v) => v + 1); ciclo() }
+      if (oculto.current && Date.now() - oculto.current > 60000) { refrescar(); ciclo() }
       oculto.current = 0
     }
     document.addEventListener('visibilitychange', cambio)
@@ -169,7 +171,7 @@ export default function App() {
       if (Math.abs(nk - k) > 0.04 || nk === 1) { k = nk; setTirando(nk) }
     }
     const fin = () => {
-      if (y0 >= 0 && k >= 1) { setVuelta((v) => v + 1); contarAvisos(); try { navigator.vibrate?.(10) } catch { /* */ } }
+      if (y0 >= 0 && k >= 1) { refrescar(); contarAvisos(); try { navigator.vibrate?.(10) } catch { /* */ } }
       y0 = -1; k = 0; setTirando(0)
     }
     window.addEventListener('touchstart', ini, { passive: true })

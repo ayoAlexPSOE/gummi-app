@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { perfilesActivos, ranking } from './datos'
 import { nombreEquipo } from './equipos'
 import Numero from './Numero'
 import { traerTodo } from './util'
@@ -14,13 +15,17 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
 
   useEffect(() => {
     ;(async () => {
+      // Solo los partidos de este jugador (y quién jugó en ellos), no todo el historial de la peña
+      const mios = await traerTodo('participaciones', ['partido_id'], (q) => q.eq('jugador_id', id))
+      const idsPartidos = [...new Set(mios.map((x: any) => x.partido_id))]
+      const trozos = (ids: number[]) => Array.from({ length: Math.ceil(ids.length / 150) }, (_, i) => ids.slice(i * 150, i * 150 + 150))
+      const enTrozos = async (tabla: string, orden: string[], extra: (q: any) => any = (q) => q) =>
+        (await Promise.all(trozos(idsPartidos).map((t) => traerTodo(tabla, orden, (q) => extra(q.in(tabla === 'partidos' ? 'id' : 'partido_id', t)))))).flat()
       const [pr, rk, ps, pa, ev, nt, lg, lj] = await Promise.all([
-        supabase.from('perfiles').select('*').eq('activo', true),
-        supabase.rpc('ranking_jugadores'),
-        traerTodo('partidos', ['fecha', 'id'], (q) =>
-          q.in('estado', ['jugado', 'cerrado']).not('goles_a', 'is', null).not('goles_b', 'is', null)
-        ),
-        traerTodo('participaciones', ['partido_id', 'jugador_id']),
+        perfilesActivos(),
+        ranking(),
+        enTrozos('partidos', ['fecha', 'id'], (q) => q.in('estado', ['jugado', 'cerrado']).not('goles_a', 'is', null).not('goles_b', 'is', null)),
+        enTrozos('participaciones', ['partido_id', 'jugador_id']),
         traerTodo('eventos', ['id'], (q) => q.eq('jugador_id', id)),
         supabase.rpc('notas_jugadores'), // solo funciona para el admin
         supabase.from('logros').select('*').order('orden'),

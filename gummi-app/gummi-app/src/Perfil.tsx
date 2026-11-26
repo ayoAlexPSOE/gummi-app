@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from './supabase'
+import { invalidar, ranking } from './datos'
 import Numero from './Numero'
 import Avatar from './Avatar'
 import Ficha from './Ficha'
@@ -44,7 +45,7 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
   useEffect(() => {
     if (ficha) return
     ;(async () => {
-      const rk = await supabase.rpc('ranking_jugadores')
+      const rk = await ranking()
       setStats((rk.data || []).find((r: any) => r.jugador_id === yo.id) || { partidos: 0, victorias: 0, empates: 0, derrotas: 0, goles: 0, asistencias: 0, mvps: 0 })
       const [lg, lj] = await Promise.all([
         supabase.from('logros').select('*').order('orden'),
@@ -80,7 +81,7 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
     if (error) return avisar('No se pudo guardar: ' + error.message)
     vibra(20)
     avisar('✅ Perfil guardado')
-    onGuardado()
+    invalidar('perfiles'); onGuardado()
   }
 
   const subirFoto = async (e: any) => {
@@ -97,7 +98,7 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
       const { error } = await supabase.from('perfiles').update({ foto_url: url }).eq('id', yo.id)
       if (error) throw error
       avisar('✅ Foto actualizada')
-      onGuardado()
+      invalidar('perfiles'); onGuardado()
     } catch (err: any) {
       avisar('No se pudo subir la foto: ' + (err?.message || 'error'))
     }
@@ -111,7 +112,7 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
     const { error } = await supabase.from('perfiles').update({ foto_url: null }).eq('id', yo.id)
     setBusy(false)
     if (error) return avisar(error.message)
-    onGuardado()
+    invalidar('perfiles'); onGuardado()
   }
 
   const cambiarPass = async () => {

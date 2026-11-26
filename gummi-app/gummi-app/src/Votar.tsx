@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { configuracion, perfilesActivos } from './datos'
 import Avatar from './Avatar'
 import { Cargando, vibra } from './movil'
 
@@ -42,8 +43,8 @@ export default function Votar({ yo }: { yo: any }) {
 
   const cargar = async () => {
     const [cf, pr, vo, mv, pt] = await Promise.all([
-      supabase.from('configuracion').select('*').single(),
-      supabase.from('perfiles').select('*').eq('activo', true).order('nombre'),
+      configuracion(),
+      perfilesActivos(),
       supabase.from('votos').select('*').eq('votante_id', yo.id),
       supabase.from('votos_mvp').select('*').eq('votante_id', yo.id),
       supabase.from('partidos').select('*').eq('estado', 'jugado').order('fecha', { ascending: false }).limit(10),
@@ -64,11 +65,6 @@ export default function Votar({ yo }: { yo: any }) {
   useEffect(() => { cargar() }, [])
 
   if (!cfg) return <Cargando />
-
-  const nombre = (jid: string) => {
-    const j = perfiles.find((x) => x.id === jid)
-    return j ? j.apodo || j.nombre : '?'
-  }
 
   const clave = (pid: number | null, jid: string) => `${pid ?? 'ini'}:${jid}`
   const buscar = (pid: number | null, jid: string) =>

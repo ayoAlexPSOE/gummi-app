@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { invalidar, perfilesActivos } from './datos'
 import { Cargando } from './movil'
 import { POSICIONES } from './equipos'
 import { horario } from './util'
 import HorarioPicker, { Horario, horarioVacio, aTimestamps } from './HorarioPicker'
-
-const fmt = (iso: string) =>
-  new Date(iso).toLocaleString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 
 const ESTADO: Record<string, string> = { convocatoria: 'Convocatoria', equipos: 'Equipos', jugado: 'Jugado', cerrado: 'Cerrado' }
 
@@ -39,7 +37,7 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
   const cargar = async () => {
     const [cf, pr, pt, tp, cu] = await Promise.all([
       supabase.from('configuracion').select('*').single(),
-      supabase.from('perfiles').select('*').eq('activo', true).order('nombre'),
+      perfilesActivos(),
       supabase.from('partidos').select('*').order('fecha', { ascending: false }).limit(6),
       supabase.from('temporadas').select('*').eq('activa', true).maybeSingle(),
       supabase.rpc('cuentas_disponibles'),
@@ -65,6 +63,7 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
   useEffect(() => { cargar() }, [])
 
   const cambiarPlazas = async (n: number) => {
+    invalidar('config')
     setCfg({ ...cfg, plazas: n })
     const { error } = await supabase.from('configuracion').update({ plazas: n }).eq('id', true)
     if (error) { alert(error.message); cargar() }
@@ -73,7 +72,7 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
   const ajuste = async (campo: string, v: boolean) => {
     const { error } = await supabase.from('configuracion').update({ [campo]: v }).eq('id', true)
     if (error) alert(error.message)
-    else cargar()
+    else { invalidar('config'); cargar() }
   }
 
   const crearPartido = async (e: any) => {
@@ -99,6 +98,7 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
     const { error } = await supabase.from('perfiles').insert({ nombre: nombre.trim(), posicion: pos || null, es_externo: true })
     if (error) return alert(error.message)
     setNombre(''); setPos('')
+    invalidar('perfiles')
     aviso('✅ Externo añadido')
   }
 
@@ -108,6 +108,7 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
     if (!confirm(`Se cerrará${temporada ? ` "${temporada.nombre}"` : ' la temporada actual'} y empezará "${n.trim()}". Los partidos nuevos irán a la nueva. ¿Seguro?`)) return
     const { error } = await supabase.rpc('nueva_temporada', { p_nombre: n.trim() })
     if (error) return alert(error.message)
+    invalidar('ranking')
     aviso('✅ Temporada nueva creada')
     cargar()
   }

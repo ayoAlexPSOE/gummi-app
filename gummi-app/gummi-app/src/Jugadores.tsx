@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { invalidar, perfilesActivos } from './datos'
 import Ficha from './Ficha'
 import Avatar from './Avatar'
 import OnceIdeal from './OnceIdeal'
@@ -23,7 +24,7 @@ export default function Jugadores({ yo }: { yo: any }) {
   useAtras(ficha !== null, () => setFicha(null))
 
   const cargar = async () => {
-    const { data } = await supabase.from('perfiles').select('*').eq('activo', true).order('nombre')
+    const { data } = await perfilesActivos()
     setLista(data || [])
     if (admin) {
       const n = await supabase.rpc('notas_jugadores')
@@ -72,6 +73,7 @@ export default function Jugadores({ yo }: { yo: any }) {
       .eq('id', editId)
     if (error) return alert(error.message)
     setEditId(null)
+    invalidar('perfiles')
     cargar()
   }
   const vincular = async (externo: string) => {
@@ -81,6 +83,7 @@ export default function Jugadores({ yo }: { yo: any }) {
     const { error } = await supabase.rpc('vincular_externo', { p_externo: externo, p_user_id: c.user_id })
     if (error) return alert(error.message)
     setVincId(null); setVincCuenta('')
+    invalidar('perfiles')
     cargar()
   }
 

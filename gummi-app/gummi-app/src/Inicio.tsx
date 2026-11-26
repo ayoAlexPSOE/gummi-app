@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { configuracion, perfilesActivos, ranking } from './datos'
 import { color, nombreEquipo } from './equipos'
 import { TarjetaAvisos } from './push'
 import { horario, convocados, respuestaLocal, PLAZAS_DEFECTO } from './util'
@@ -23,9 +24,9 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
   const cargar = async () => {
     const [ps, cf, rk, pf] = await Promise.all([
       supabase.from('partidos').select('*').order('fecha', { ascending: false }).limit(12),
-      supabase.from('configuracion').select('*').single(),
-      supabase.rpc('ranking_jugadores'),
-      supabase.from('perfiles').select('*').eq('activo', true),
+      configuracion(),
+      ranking(),
+      perfilesActivos(),
     ])
     const lista: any[] = ps.data || []
     const ids = lista.map((p) => p.id)

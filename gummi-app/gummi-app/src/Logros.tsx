@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { perfilesActivos } from './datos'
 import { Cargando } from './movil'
 import { traerTodo } from './util'
 
 export default function Logros({ yo, onFicha }: { yo: any; onFicha: (id: string) => void }) {
-  const admin = yo.rol === 'admin'
   const [cat, setCat] = useState<any[] | null>(null)
   const [tienen, setTienen] = useState<any[]>([])
   const [perfiles, setPerfiles] = useState<any[]>([])
   const [fallo, setFallo] = useState(false)
-  const [busy, setBusy] = useState(false)
 
   const cargar = async () => {
     const c = await supabase.from('logros').select('*').order('orden')
@@ -19,22 +18,13 @@ export default function Logros({ yo, onFicha }: { yo: any; onFicha: (id: string)
     }
     const [lj, pr] = await Promise.all([
       traerTodo('logros_jugador', ['id']),
-      supabase.from('perfiles').select('*').eq('activo', true),
+      perfilesActivos(),
     ])
     setCat(c.data || [])
     setTienen(lj || [])
     setPerfiles(pr.data || [])
   }
   useEffect(() => { cargar() }, [])
-
-  const recalcular = async () => {
-    if (!confirm('Se borrarán todos los logros y se volverán a calcular con los partidos actuales. ¿Seguro?')) return
-    setBusy(true)
-    const { error } = await supabase.rpc('reiniciar_logros')
-    setBusy(false)
-    if (error) alert(error.message)
-    else cargar()
-  }
 
   if (fallo) {
     return <p className="mut">No se pudieron cargar los logros. Comprueba que se ha ejecutado en Supabase el script 06_logros.sql.</p>
