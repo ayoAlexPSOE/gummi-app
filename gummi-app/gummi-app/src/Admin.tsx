@@ -29,6 +29,7 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
   const [pos, setPos] = useState('')
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
+  const [push, setPush] = useState<any>(null)
 
   const aviso = (t: string) => {
     setMsg(t)
@@ -48,6 +49,8 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
     setPartidos(pt.data || [])
     setTemporada(tp.data || null)
     setCuentas(cu.error ? 0 : (cu.data || []).length)
+    const rp = await supabase.rpc('resumen_push')
+    setPush(rp.error ? { falta: true } : (rp.data || [])[0] || null)
     if (cf.data?.admin_ve_votos) {
       const [a, b] = await Promise.all([
         supabase.from('votos').select('*').order('created_at', { ascending: false }).limit(1000),
@@ -110,6 +113,18 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
     setBusy(false)
     if (error) return alert(error.message)
     aviso(`✅ Logros recalculados (${data} concedidos)`)
+  }
+
+  // Guarda en la base de datos la dirección de la función que envía los avisos
+  const conectarPush = async () => {
+    setBusy(true)
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/enviar-push`
+    const { error } = await supabase.rpc('configurar_push', { p_url: url })
+    if (!error) await supabase.rpc('probar_push')
+    setBusy(false)
+    if (error) return alert(error.message)
+    aviso('✅ Avisos conectados. Te he mandado uno de prueba.')
+    cargar()
   }
 
   const mantenimiento = async () => {
@@ -237,6 +252,20 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
       </div>
 
       <h2>🔧 Sistema</h2>
+      <div className="card">
+        <b>📲 Avisos al móvil</b>
+        <div className="mut" style={{ margin: '4px 0 8px' }}>
+          {push?.falta ? 'Falta ejecutar en Supabase el script 15_avisos_push.sql.'
+            : !push ? '…'
+            : push.configurado ? `Conectados ✓ · ${push.jugadores} ${push.jugadores === 1 ? 'jugador los tiene' : 'jugadores los tienen'} activados (${push.moviles} ${push.moviles === 1 ? 'móvil' : 'móviles'}).`
+            : 'Sin conectar todavía. Cuando hayas desplegado la función enviar-push, pulsa el botón.'}
+        </div>
+        {!push?.falta && (
+          <button className="sec" style={{ width: '100%' }} disabled={busy} onClick={conectarPush}>
+            {push?.configurado ? 'Volver a conectar y enviarme una prueba' : 'Conectar avisos y enviarme una prueba'}
+          </button>
+        )}
+      </div>
       <div className="card">
         <button className="sec" style={{ width: '100%' }} disabled={busy} onClick={mantenimiento}>Ejecutar mantenimiento ahora</button>
         <p className="mut" style={{ marginBottom: 0 }}>Concede logros pendientes y lanza los avisos por tiempo. La app ya lo hace sola cada pocos minutos.</p>

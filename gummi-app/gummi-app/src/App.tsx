@@ -10,6 +10,7 @@ import Perfil from './Perfil'
 import Admin from './Admin'
 import Avatar from './Avatar'
 import { Cargando, useAtras } from './movil'
+import { refrescarSuscripcion } from './push'
 
 function Login() {
   const [email, setEmail] = useState('')
@@ -85,6 +86,35 @@ export default function App() {
     if (!session) { setYo(null); return }
     cargarYo()
   }, [session])
+
+  // Al entrar: el móvil queda apuntado a esta cuenta para los avisos
+  useEffect(() => { if (yo?.id) refrescarSuscripcion() }, [yo?.id])
+
+  // Globito con el número de avisos en el icono de la app (donde el móvil lo permite)
+  useEffect(() => {
+    const n: any = navigator
+    try { if (sinLeer > 0) n.setAppBadge?.(sinLeer); else n.clearAppBadge?.() } catch { /* sin soporte */ }
+  }, [sinLeer])
+
+  // Al tocar un aviso del móvil se abre la app en la pantalla del aviso
+  const abrirDesdeAviso = (url: string) => {
+    const q = new URL(url, location.href).searchParams
+    const ir = q.get('ir'), ref = q.get('ref'), aviso = q.get('aviso')
+    if (!ir && !aviso) return
+    if (aviso) supabase.from('notificaciones').update({ leida: true }).eq('id', Number(aviso)).then(() => contarAvisos())
+    if (ir) irA(ir, ref ? Number(ref) : null)
+    else { window.scrollTo(0, 0); setTab('avisos') }
+  }
+  useEffect(() => {
+    if (!yo) return
+    if (location.search.includes('ir=') || location.search.includes('aviso=')) {
+      abrirDesdeAviso(location.href)
+      history.replaceState(history.state, '', location.pathname)
+    }
+    const msg = (e: MessageEvent) => { if (e.data?.tipo === 'abrir') abrirDesdeAviso(e.data.url) }
+    navigator.serviceWorker?.addEventListener('message', msg)
+    return () => navigator.serviceWorker?.removeEventListener('message', msg)
+  }, [yo?.id])
 
   const contarAvisos = async () => {
     const { count, error } = await supabase

@@ -431,6 +431,12 @@ button.guardar-fijo { width:100%; margin-top:12px; position:sticky; bottom:calc(
 .muestra.choca { opacity:.35; }
 .muestra.choca::after { content:''; position:absolute; left:50%; top:4px; bottom:4px; width:2px; margin-left:-1px; background:#ff4d6a; transform:rotate(45deg); }
 
+/* Avisos al móvil */
+.card.avisos-movil { border-color:#3ddcff59; background:linear-gradient(150deg,#3ddcff26,#0b145099 55%); }
+.card.avisos-movil.compacta { padding:12px 14px; }
+.avisos-ic { font-size:26px; line-height:1.1; animation:flota2 3s ease-in-out infinite; }
+.ios-ic { display:inline-block; border:1px solid currentColor; border-radius:4px; padding:0 3px; font-size:11px; line-height:1.3; }
+
 /* Accesibilidad / ahorro: sin animaciones si el móvil lo pide */
 @media (prefers-reduced-motion:reduce) {
   *, *::before, *::after { animation:none !important; transition:none !important; }

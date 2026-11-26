@@ -5,6 +5,7 @@ import Avatar from './Avatar'
 import Ficha from './Ficha'
 import { useAtras, vibra } from './movil'
 import { POSICIONES, nombrePos } from './equipos'
+import { TarjetaAvisos } from './push'
 
 const POS = POSICIONES
 const PIERNAS: [string, string][] = [['derecha', 'Derecha'], ['izquierda', 'Izquierda'], ['ambas', 'Ambas']]
@@ -196,6 +197,9 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
         </div>
       )}
       <button className="sec" style={{ width: '100%', marginTop: 6 }} onClick={() => setFicha(true)}>Ver mi ficha completa ›</button>
+
+      <h2>Avisos</h2>
+      <TarjetaAvisos />
 
       <h2>Mis datos</h2>
       <div className="card">

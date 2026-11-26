@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import { color, nombreEquipo } from './equipos'
+import { TarjetaAvisos } from './push'
 import { horario } from './util'
 import Numero from './Numero'
 import Avatar from './Avatar'
@@ -16,6 +17,8 @@ function cuenta(hasta: number) {
 export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido: (id: number) => void; onVotar: () => void }) {
   const [d, setD] = useState<any>(null)
   const [, setTick] = useState(0)
+  const [bannerAvisos, setBannerAvisos] = useState(() => { try { return localStorage.getItem('gummi-banner-avisos') !== 'no' } catch { return true } })
+  const cerrarBanner = () => { setBannerAvisos(false); try { localStorage.setItem('gummi-banner-avisos', 'no') } catch { /* */ } }
 
   const cargar = async () => {
     const [ps, cf, rk, pf] = await Promise.all([
@@ -148,6 +151,8 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
           <div className="vacio" style={{ padding: '14px 0' }}><span>📅</span><b>No hay ningún partido convocado</b><div className="mut">Cuando el admin cree uno, aparecerá aquí.</div></div>
         </div>
       )}
+
+      {bannerAvisos && <TarjetaAvisos compacta onCerrar={cerrarBanner} />}
 
       {pendientes.length > 0 && (
         <div className="card alerta" onClick={onVotar}>
