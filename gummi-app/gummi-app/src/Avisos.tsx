@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { confirmar } from './dialogos'
 import { Cargando } from './movil'
 
 const hace = (iso: string) => {
@@ -35,7 +36,7 @@ export default function Avisos({ onIr, onCambio }: { onIr: (destino: string | nu
     onCambio()
   }
   const borrarTodas = async () => {
-    if (!confirm('¿Borrar todos los avisos?')) return
+    if (!(await confirmar('¿Borrar todos los avisos?', { si: 'Borrar', peligro: true }))) return
     await supabase.from('notificaciones').delete().gte('id', 0)
     await cargar()
     onCambio()

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { aviso, confirmar, pedirTexto } from './dialogos'
 import { invalidar, perfilesActivos } from './datos'
 import { Cargando } from './movil'
 import { POSICIONES } from './equipos'
@@ -23,14 +24,8 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
   const [lugar, setLugar] = useState('')
   const [nombre, setNombre] = useState('')
   const [pos, setPos] = useState('')
-  const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
   const [push, setPush] = useState<any>(null)
-
-  const aviso = (t: string) => {
-    setMsg(t)
-    setTimeout(() => setMsg(''), 3500)
-  }
 
   const cargar = async () => {
     const [cf, pr, pt, tp, cu] = await Promise.all([
@@ -64,12 +59,12 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
     invalidar('config')
     setCfg({ ...cfg, plazas: n })
     const { error } = await supabase.from('configuracion').update({ plazas: n }).eq('id', true)
-    if (error) { alert(error.message); cargar() }
+    if (error) { aviso(error.message, 'error'); cargar() }
   }
 
   const ajuste = async (campo: string, v: boolean) => {
     const { error } = await supabase.from('configuracion').update({ [campo]: v }).eq('id', true)
-    if (error) alert(error.message)
+    if (error) aviso(error.message, 'error')
     else { invalidar('config'); cargar() }
   }
 
@@ -84,9 +79,9 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
       sinFin = true // aún no se ha ejecutado 13_horario.sql: se crea solo con la hora de inicio
       r = await supabase.from('partidos').insert(base)
     }
-    if (r.error) return alert(r.error.message)
+    if (r.error) return aviso(r.error.message, 'error')
     setHor({ ...horarioVacio() }); setLugar('')
-    aviso(sinFin ? '✅ Partido creado (sin hora de fin: falta ejecutar 13_horario.sql)' : '✅ Partido creado y avisado a todos')
+    aviso(sinFin ? '✅ Partido creado (sin hora de fin: falta ejecutar 13_horario.sql)' : '✅ Partido creado y avisado a todos', 'ok')
     cargar()
   }
 
@@ -94,30 +89,30 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
     e.preventDefault()
     if (!nombre.trim()) return
     const { error } = await supabase.from('perfiles').insert({ nombre: nombre.trim(), posicion: pos || null, es_externo: true })
-    if (error) return alert(error.message)
+    if (error) return aviso(error.message, 'error')
     setNombre(''); setPos('')
     invalidar('perfiles')
-    aviso('✅ Externo añadido')
+    aviso('✅ Externo añadido', 'ok')
   }
 
   const nuevaTemporada = async () => {
-    const n = prompt('Nombre de la nueva temporada (por ejemplo, 2026/27):')
+    const n = await pedirTexto('Nombre de la nueva temporada', { placeholder: 'Por ejemplo, 2026/27', si: 'Continuar' })
     if (!n || !n.trim()) return
-    if (!confirm(`Se cerrará${temporada ? ` "${temporada.nombre}"` : ' la temporada actual'} y empezará "${n.trim()}". Los partidos nuevos irán a la nueva. ¿Seguro?`)) return
+    if (!(await confirmar(`Se cerrará${temporada ? ` "${temporada.nombre}"` : ' la temporada actual'} y empezará "${n.trim()}". Los partidos nuevos irán a la nueva. ¿Seguro?`))) return
     const { error } = await supabase.rpc('nueva_temporada', { p_nombre: n.trim() })
-    if (error) return alert(error.message)
+    if (error) return aviso(error.message, 'error')
     invalidar('ranking')
-    aviso('✅ Temporada nueva creada')
+    aviso('✅ Temporada nueva creada', 'ok')
     cargar()
   }
 
   const recalcularLogros = async () => {
-    if (!confirm('Se borrarán todos los logros y se volverán a calcular con los partidos actuales. ¿Seguro?')) return
+    if (!(await confirmar('Se borrarán todos los logros y se volverán a calcular con los partidos actuales. ¿Seguro?', { si: 'Recalcular' }))) return
     setBusy(true)
     const { data, error } = await supabase.rpc('reiniciar_logros')
     setBusy(false)
-    if (error) return alert(error.message)
-    aviso(`✅ Logros recalculados (${data} concedidos)`)
+    if (error) return aviso(error.message, 'error')
+    aviso(`✅ Logros recalculados (${data} concedidos)`, 'ok')
   }
 
   // Guarda en la base de datos la dirección de la función que envía los avisos
@@ -127,8 +122,8 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
     const { error } = await supabase.rpc('configurar_push', { p_url: url })
     if (!error) await supabase.rpc('probar_push')
     setBusy(false)
-    if (error) return alert(error.message)
-    aviso('✅ Avisos conectados. Te he mandado uno de prueba.')
+    if (error) return aviso(error.message, 'error')
+    aviso('✅ Avisos conectados. Te he mandado uno de prueba.', 'ok')
     cargar()
   }
 
@@ -136,8 +131,8 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
     setBusy(true)
     const { error } = await supabase.rpc('mantenimiento', { p_forzar: true })
     setBusy(false)
-    if (error) return alert(error.message)
-    aviso('✅ Mantenimiento hecho: logros y avisos al día')
+    if (error) return aviso(error.message, 'error')
+    aviso('✅ Mantenimiento hecho: logros y avisos al día', 'ok')
   }
 
   if (!cfg) return <Cargando />
@@ -149,7 +144,6 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
 
   return (
     <>
-      {msg && <div className="toast">{msg}</div>}
       <div className="row" style={{ margin: '12px 0' }}>
         <button className="sec mini" onClick={onBack}>← Perfil</button>
       </div>

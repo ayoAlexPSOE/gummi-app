@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { aviso } from './dialogos'
 import { configuracion, perfilesActivos, ranking } from './datos'
 import { color, nombreEquipo } from './equipos'
 import { TarjetaAvisos } from './push'
@@ -73,7 +74,7 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
       { partido_id, jugador_id: yo.id, respuesta, updated_at: new Date().toISOString() },
       { onConflict: 'partido_id,jugador_id' }
     )
-    if (error) alert(error.message)
+    if (error) aviso(error.message, 'error')
     else cargar()
   }
 

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from './supabase'
+import { aviso, confirmar } from './dialogos'
 import { invalidar, ranking } from './datos'
 import Numero from './Numero'
 import Avatar from './Avatar'
@@ -32,7 +33,6 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
   const [sec, setSec] = useState<string[]>(yo.posiciones_secundarias || [])
   const [dorsal, setDorsal] = useState(yo.dorsal != null ? String(yo.dorsal) : '')
   const [pierna, setPierna] = useState<string>(yo.pierna || '')
-  const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
   const [stats, setStats] = useState<any>(null)
   const [logros, setLogros] = useState<any[]>([])
@@ -60,10 +60,7 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
     })()
   }, [ficha])
 
-  const avisar = (t: string) => {
-    setMsg(t)
-    setTimeout(() => setMsg(''), 3000)
-  }
+  const avisar = (t: string) => aviso(t, t.startsWith('✅') ? 'ok' : 'error')
 
   const guardar = async () => {
     if (!nombre.trim()) return avisar('El nombre no puede estar vacío')
@@ -106,7 +103,7 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
   }
 
   const quitarFoto = async () => {
-    if (!confirm('¿Quitar tu foto?')) return
+    if (!(await confirmar('¿Quitar tu foto?', { si: 'Quitar', peligro: true }))) return
     setBusy(true)
     await supabase.storage.from('avatares').remove([`${yo.id}/avatar.jpg`])
     const { error } = await supabase.from('perfiles').update({ foto_url: null }).eq('id', yo.id)
@@ -133,7 +130,6 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
 
   return (
     <>
-      {msg && <div className="toast">{msg}</div>}
 
       <div className="perfil-cab">
         <Avatar p={yo} size={96} />
@@ -253,7 +249,7 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
         </form>
       </details>
 
-      <button className="sec" style={{ width: '100%', marginTop: 14 }} onClick={() => { if (confirm('¿Cerrar sesión en este móvil?')) supabase.auth.signOut() }}>Cerrar sesión</button>
+      <button className="sec" style={{ width: '100%', marginTop: 14 }} onClick={async () => { if (await confirmar('¿Cerrar sesión en este móvil?', { si: 'Cerrar sesión' })) supabase.auth.signOut() }}>Cerrar sesión</button>
     </>
   )
 }

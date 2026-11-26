@@ -501,6 +501,21 @@ button.login-entrar { min-height:56px; border-radius:16px; font-size:18px; lette
 .premio-v b { font-family:var(--titulo); font-size:24px; font-weight:800; line-height:1; }
 .premio-v .mut { font-size:11px; }
 
+/* Avisos y preguntas de la app */
+.toasts { position:fixed; top:calc(70px + env(safe-area-inset-top)); left:12px; right:12px; z-index:30; display:flex; flex-direction:column; align-items:center; gap:8px; pointer-events:none; }
+.toast-item { max-width:520px; padding:11px 18px; border-radius:16px; font-weight:700; font-size:15px; text-align:center; white-space:pre-line;
+  background:#0e1a5cf2; color:var(--txt); border:1px solid var(--line2); box-shadow:0 10px 30px -6px #000c; animation:toast2 .4s var(--muelle) both; }
+.toast-item.ok { background:var(--grad); color:var(--acc-t); border-color:transparent; }
+.toast-item.error { background:#4a1020f2; border-color:#ff4d6a80; color:#ffd5dc; }
+@keyframes toast2 { from { opacity:0; transform:translateY(-14px) scale(.9); } to { opacity:1; transform:none; } }
+.modal-fondo { position:fixed; inset:0; z-index:40; background:#02041599; backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); display:flex; align-items:flex-end; justify-content:center; padding:16px 16px calc(16px + env(safe-area-inset-bottom)); animation:aparece .2s both; }
+.modal { width:100%; max-width:440px; background:linear-gradient(165deg,#16246ef7,#0a1250f7); border:1px solid var(--line2); border-radius:24px; padding:20px; box-shadow:0 20px 60px -10px #000e; animation:sube .35s var(--suave) both; display:flex; flex-direction:column; gap:14px; }
+.modal-texto { margin:0; font-size:17px; font-weight:600; line-height:1.4; }
+.modal-botones { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.modal-botones button { min-height:50px; }
+button.peligro-lleno { background:linear-gradient(135deg,#ff6a82,#d8304c); color:#fff; box-shadow:0 6px 18px -6px #ff4d6aaa; }
+@media (min-width:700px) { .modal-fondo { align-items:center; } }
+
 /* Accesibilidad / ahorro: sin animaciones si el móvil lo pide */
 @media (prefers-reduced-motion:reduce) {
   *, *::before, *::after { animation:none !important; transition:none !important; }

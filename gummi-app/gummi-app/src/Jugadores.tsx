@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { aviso, confirmar } from './dialogos'
 import { invalidar, perfilesActivos } from './datos'
 import Ficha from './Ficha'
 import Avatar from './Avatar'
@@ -53,13 +54,13 @@ export default function Jugadores({ yo }: { yo: any }) {
       return
     }
     const n = Number(t)
-    if (!(n >= 0 && n <= 99)) return alert('La media debe estar entre 0 y 99')
+    if (!(n >= 0 && n <= 99)) return aviso('La media debe estar entre 0 y 99')
     if (manuales[jid] && Number(manuales[jid].nota) === n) return
     const { error } = await supabase.from('notas_manuales').upsert(
       { jugador_id: jid, nota: n, updated_at: new Date().toISOString() },
       { onConflict: 'jugador_id' }
     )
-    if (error) alert(error.message)
+    if (error) aviso(error.message, 'error')
     else cargar()
   }
 
@@ -67,11 +68,11 @@ export default function Jugadores({ yo }: { yo: any }) {
     setEditId(j.id); setENombre(j.nombre); setEApodo(j.apodo || ''); setEPos(j.posicion || '')
   }
   const guardarEdicion = async () => {
-    if (!eNombre.trim()) return alert('El nombre no puede estar vacío')
+    if (!eNombre.trim()) return aviso('El nombre no puede estar vacío')
     const { error } = await supabase.from('perfiles')
       .update({ nombre: eNombre.trim(), apodo: eApodo.trim() || null, posicion: ePos || null })
       .eq('id', editId)
-    if (error) return alert(error.message)
+    if (error) return aviso(error.message, 'error')
     setEditId(null)
     invalidar('perfiles')
     cargar()
@@ -79,9 +80,9 @@ export default function Jugadores({ yo }: { yo: any }) {
   const vincular = async (externo: string) => {
     const c = cuentas.find((x) => x.user_id === vincCuenta)
     if (!c) return
-    if (!confirm(`Vincular este externo con la cuenta "${c.nombre}"? Conservará todo su histórico.`)) return
+    if (!(await confirmar(`Vincular este externo con la cuenta "${c.nombre}"? Conservará todo su histórico.`))) return
     const { error } = await supabase.rpc('vincular_externo', { p_externo: externo, p_user_id: c.user_id })
-    if (error) return alert(error.message)
+    if (error) return aviso(error.message, 'error')
     setVincId(null); setVincCuenta('')
     invalidar('perfiles')
     cargar()

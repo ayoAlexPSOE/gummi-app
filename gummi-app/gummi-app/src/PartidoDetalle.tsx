@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { aviso, confirmar } from './dialogos'
 import { configuracion, invalidar, perfilesActivos } from './datos'
 import { ESTADOS, horario, convocados, respuestaLocal, PLAZAS_DEFECTO } from './util'
 import HorarioPicker, { Horario, aTimestamps, desdePartido } from './HorarioPicker'
@@ -178,13 +179,13 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
     if (!respuesta) {
       const { error } = await supabase
         .from('convocatorias').delete().eq('partido_id', id).eq('jugador_id', jugador_id)
-      if (error) return alert(error.message)
+      if (error) return aviso(error.message, 'error')
     } else {
       const { error } = await supabase.from('convocatorias').upsert(
         { partido_id: id, jugador_id, respuesta, updated_at: new Date().toISOString() },
         { onConflict: 'partido_id,jugador_id' }
       )
-      if (error) return alert(error.message)
+      if (error) return aviso(error.message, 'error')
     }
     recargarConv()
   }
@@ -196,8 +197,8 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
   const reservaDe = (jid: string) => reservas.indexOf(jid)
 
   const generar = () => {
-    if (confirmados.length < 2) return alert('Hacen falta al menos 2 jugadores con "Voy".')
-    if (confirmados.length > 20) return alert('Demasiados jugadores para repartir (máximo 20).')
+    if (confirmados.length < 2) return aviso('Hacen falta al menos 2 jugadores con "Voy".')
+    if (confirmados.length > 20) return aviso('Demasiados jugadores para repartir (máximo 20).')
     vibra(20)
     // Si el partido ya tiene colores se mantienen; si no, se eligen solos.
     if (!colores) setColores(p.color_a && p.color_b ? [p.color_a, p.color_b] : elegirColores())
@@ -221,9 +222,9 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
       posicion: perfiles.find((x) => x.id === jid)?.posicion ?? null,
     }))
     const del = await supabase.from('participaciones').delete().eq('partido_id', id)
-    if (del.error) { setBusy(false); return alert(del.error.message) }
+    if (del.error) { setBusy(false); return aviso(del.error.message, 'error') }
     const ins = await supabase.from('participaciones').insert(filas)
-    if (ins.error) { setBusy(false); return alert(ins.error.message) }
+    if (ins.error) { setBusy(false); return aviso(ins.error.message, 'error') }
     const cambios: any = p.estado === 'convocatoria' ? { estado: 'equipos' } : {}
     if (colores) { cambios.color_a = colores[0]; cambios.color_b = colores[1] }
     if (Object.keys(cambios).length) {
@@ -252,7 +253,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
     }
     if (borrador) { setColores([a, b]); return }
     const u = await supabase.from('partidos').update({ color_a: a || null, color_b: b || null }).eq('id', id)
-    if (u.error) return alert(/color_/.test(u.error.message) ? 'Falta ejecutar en Supabase el script 14_banda_colores.sql.' : u.error.message)
+    if (u.error) return aviso(/color_/.test(u.error.message) ? 'Falta ejecutar en Supabase el script 14_banda_colores.sql.' : u.error.message, 'error')
     setP({ ...p, color_a: a || null, color_b: b || null })
   }
   const selectorColores = () => (
@@ -285,7 +286,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
 
   const guardarResultado = async () => {
     if (p.estado !== 'jugado' &&
-        !confirm('¿Cerrar el partido? Se abrirá la votación durante 48 horas.')) return
+        !(await confirmar('¿Cerrar el partido? Se abrirá la votación durante 48 horas.', { si: 'Cerrar partido' }))) return
     setBusy(true)
     const filas: any[] = []
     for (const x of part) {
@@ -295,15 +296,15 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
       for (let i = 0; i < c.a; i++) filas.push({ partido_id: id, jugador_id: x.jugador_id, tipo: 'asistencia' })
     }
     const del = await supabase.from('eventos').delete().eq('partido_id', id)
-    if (del.error) { setBusy(false); return alert(del.error.message) }
+    if (del.error) { setBusy(false); return aviso(del.error.message, 'error') }
     if (filas.length) {
       const ins = await supabase.from('eventos').insert(filas)
-      if (ins.error) { setBusy(false); return alert(ins.error.message) }
+      if (ins.error) { setBusy(false); return aviso(ins.error.message, 'error') }
     }
     const upd = await supabase.from('partidos')
       .update({ goles_a: Number(ga) || 0, goles_b: Number(gb) || 0, estado: 'jugado' })
       .eq('id', id)
-    if (upd.error) { setBusy(false); return alert(upd.error.message) }
+    if (upd.error) { setBusy(false); return aviso(upd.error.message, 'error') }
     setEditando(false)
     invalidar('ranking')
     try { await supabase.rpc('mantenimiento', { p_forzar: true }) } catch { /* sin SQL de avisos todavía */ }
@@ -320,15 +321,15 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
     if (r.error && /fecha_fin/.test(r.error.message)) {
       r = await supabase.from('partidos').update({ fecha: t.fecha, lugar: editDatos.lugar.trim() || null }).eq('id', id)
     }
-    if (r.error) return alert(r.error.message)
+    if (r.error) return aviso(r.error.message, 'error')
     setEditDatos(null)
     cargar()
   }
 
   const borrar = async () => {
-    if (!confirm('¿Borrar este partido y todo lo asociado? No se puede deshacer.')) return
+    if (!(await confirmar('¿Borrar este partido y todo lo asociado? No se puede deshacer.', { si: 'Borrar', peligro: true }))) return
     const { error } = await supabase.from('partidos').delete().eq('id', id)
-    if (error) return alert(error.message)
+    if (error) return aviso(error.message, 'error')
     invalidar('ranking')
     onBack()
   }
@@ -350,7 +351,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
         golesA: p.goles_a, golesB: p.goles_b,
         mvp: mvp.length ? mvp.filter((m) => m.num_votos === mvp[0].num_votos).map((m) => nombre(m.jugador_id)).join(' y ') : null,
       }, `gummi-${p.id}.png`)
-    } catch (e: any) { alert(e?.message || 'No se pudo crear la imagen') }
+    } catch (e: any) { aviso(e?.message || 'No se pudo crear la imagen', 'error') }
     setHaciendoImg(false)
   }
 

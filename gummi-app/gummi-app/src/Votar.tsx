@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { aviso } from './dialogos'
 import { configuracion, perfilesActivos } from './datos'
 import Avatar from './Avatar'
 import { fecha } from './util'
@@ -39,7 +40,6 @@ export default function Votar({ yo }: { yo: any }) {
   const [mvpEd, setMvpEd] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState(false)
   const [editando, setEditando] = useState<Record<string, boolean>>({})
-  const [aviso, setAviso] = useState('')
 
   const cargar = async () => {
     const [cf, pr, vo, mv, pt] = await Promise.all([
@@ -114,13 +114,12 @@ export default function Votar({ yo }: { yo: any }) {
       if (r?.error) fallo = r.error.message
     }
     setBusy(false)
-    if (fallo) alert('No se pudo guardar todo. Puede que la votación haya terminado.\n\n' + fallo)
+    if (fallo) aviso('No se pudo guardar todo. Puede que la votación haya terminado.\n\n' + fallo, 'error')
     await cargar()
     if (!fallo) {
       vibra(25)
       setEditando((x) => ({ ...x, [pid === null ? 'ini' : String(pid)]: false }))
-      setAviso('✅ Voto guardado')
-      setTimeout(() => setAviso(''), 3000)
+      aviso('✅ Voto guardado', 'ok')
     }
   }
 
@@ -151,7 +150,6 @@ export default function Votar({ yo }: { yo: any }) {
         <div className="vacio"><span>🗳️</span><b>Nada que votar ahora</b><div className="mut">Después de cada partido tendrás 48 h para puntuar a tus compañeros y elegir al MVP.</div></div>
       )}
 
-      {aviso && <div className="toast">{aviso}</div>}
 
       {abiertos.map((p) => {
         const cands = candidatosPartido(p.id)

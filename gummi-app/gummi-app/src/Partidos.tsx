@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { aviso } from './dialogos'
 import { configuracion } from './datos'
 import { color } from './equipos'
 import { ESTADOS, horario, convocados, respuestaLocal, PLAZAS_DEFECTO } from './util'
@@ -52,7 +53,7 @@ export default function Partidos({ yo, abrirInicial, onUsado }: { yo: any; abrir
       { partido_id, jugador_id: yo.id, respuesta, updated_at: new Date().toISOString() },
       { onConflict: 'partido_id,jugador_id' }
     )
-    if (error) alert(error.message)
+    if (error) aviso(error.message, 'error')
     cargar()
   }
 

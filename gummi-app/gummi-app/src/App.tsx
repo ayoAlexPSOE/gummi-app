@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from './supabase'
 import { invalidar } from './datos'
+import { Dialogos } from './dialogos'
 import Jugadores from './Jugadores'
 import Partidos, { olvidarPartido } from './Partidos'
 import Votar from './Votar'
@@ -53,6 +54,7 @@ function Login() {
         <button type="submit" className="login-entrar" disabled={busy}>{busy ? <span className="login-cargando">⚽</span> : 'Entrar'}</button>
       </form>
       <p className="login-pie">¿No tienes cuenta? Pídesela al admin de la peña.</p>
+      <Dialogos />
     </div>
   )
 }
@@ -223,6 +225,7 @@ export default function App() {
           : tab === 'ranking' ? <Ranking key={vistaRanking} yo={yo} vistaInicial={vistaRanking} />
           : <Jugadores yo={yo} />}
       </main>
+      <Dialogos />
       <nav>
         {([['inicio', '🏠', 'Inicio'], ['partidos', '⚽', 'Partidos'], ['votar', '🗳️', 'Votar'], ['ranking', '🏆', 'Ranking'], ['jugadores', '👥', 'Plantilla']] as const).map(([id, ic, tx]) => (
           <button key={id} className={tab === id ? 'on' : ''} aria-current={tab === id ? 'page' : undefined} onClick={() => { if (id === 'ranking' && tab !== 'ranking') setVistaRanking('tabla'); irTab(id) }}>
