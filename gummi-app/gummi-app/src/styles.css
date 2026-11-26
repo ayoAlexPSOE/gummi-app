@@ -190,8 +190,19 @@ button.admin-tag { background:#3ddcff22; color:var(--acc); border:1px solid #3dd
 .hero-h { color:var(--acc); white-space:nowrap; }
 
 /* Fondo de estadio: arcos de luz detrás de todo, tenues para que las letras se lean */
-body::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.8;
-  background:url('./fondo.svg') right top / min(1100px,140vw) auto no-repeat; }
+/* Móvil: el estadio ocupa la parte de arriba (centrado en el campo) y se funde con el fondo */
+body::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:
+    linear-gradient(180deg, #04082680 0%, #04082640 30%, #040826b3 65%, #040826 98%) center top / 210vw 118.5vw no-repeat,
+    url('./estadio.jpg') center top / 210vw auto no-repeat,
+    var(--bg); }
+/* Pantallas anchas: la imagen a lo ancho */
+@media (min-width:700px) {
+  body::before { background:
+    linear-gradient(180deg, #04082699 0%, #04082666 30%, #040826d9 70%, #040826 100%),
+    url('./estadio.jpg') center top / cover no-repeat,
+    var(--bg); }
+}
 .card, .tile, .jug, .once, .hero, .perfil-cab { backdrop-filter:blur(6px); }
 
 button.gen-equipos { width:100%; margin:12px 0 4px; padding:14px; display:flex; flex-direction:column; align-items:center; gap:2px; font-size:18px; font-family:var(--titulo); font-weight:800; letter-spacing:.8px; text-transform:uppercase; box-shadow:0 0 22px #3ddcff44; }
