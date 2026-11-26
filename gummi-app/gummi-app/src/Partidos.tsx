@@ -85,7 +85,7 @@ export default function Partidos({ yo, abrirInicial, onUsado }: { yo: any; abrir
     return (
       <div className="card partido" key={p.id} onClick={() => setAbierto(p.id)}>
         <div className="row" style={{ flexWrap: 'nowrap' }}>
-          <span style={{ flex: 1, minWidth: 0 }}>
+          <span className="f1 min0">
             <b className="partido-dia">{horario(p)}</b>
             <div className="mut">{[p.lugar, !hayRes ? `${voy} ${voy === 1 ? 'va' : 'van'}${reservas.length ? ` (+${reservas.length} reserva${reservas.length > 1 ? 's' : ''})` : ''}` : ''].filter(Boolean).join(' · ')}</div>
           </span>
@@ -98,9 +98,9 @@ export default function Partidos({ yo, abrirInicial, onUsado }: { yo: any; abrir
             <span className={'tag estado-' + p.estado}>{ESTADOS[p.estado] || p.estado}</span>
           )}
         </div>
-        {votando && <div className="mut" style={{ marginTop: 4 }}>🗳️ Votación abierta</div>}
+        {votando && <div className="mut mt4">🗳️ Votación abierta</div>}
         {p.estado === 'convocatoria' && (
-          <div className="grid3" style={{ marginTop: 10 }} onClick={(e) => e.stopPropagation()}>
+          <div className="grid3 mt10" onClick={(e) => e.stopPropagation()}>
             {OPCIONES.map(([v, t, ic]) => (
               <button key={v} className={'sec mini' + (mias?.respuesta === v ? ' on2' : '')} onClick={() => responder(p.id, v)}>{ic} {t}</button>
             ))}
@@ -109,7 +109,7 @@ export default function Partidos({ yo, abrirInicial, onUsado }: { yo: any; abrir
         {p.estado === 'equipos' && miEq && (() => {
           const c = color(miEq.equipo === 'A' ? p.color_a : p.color_b)
           return (
-            <div className="aviso equipo-aviso" style={{ margin: '8px 0 0' }}>
+            <div className="aviso equipo-aviso mt8 mb0">
               {c ? <><span className="camiseta" style={{ ['--m' as any]: c.hex }} /><span>Juegas con los <b>{c.plural.toLowerCase()}</b></span></> : <span>Juegas en el <b>equipo {miEq.equipo}</b></span>}
             </div>
           )
@@ -128,7 +128,7 @@ export default function Partidos({ yo, abrirInicial, onUsado }: { yo: any; abrir
       {jugados.length > 0 && <h2>Jugados</h2>}
       {visibles.map(tarjeta)}
       {jugados.length > visibles.length && (
-        <button className="sec" style={{ width: '100%', marginTop: 6 }} onClick={() => setVerTodos(true)}>Ver los {jugados.length - visibles.length} anteriores</button>
+        <button className="sec w100 mt6" onClick={() => setVerTodos(true)}>Ver los {jugados.length - visibles.length} anteriores</button>
       )}
     </>
   )

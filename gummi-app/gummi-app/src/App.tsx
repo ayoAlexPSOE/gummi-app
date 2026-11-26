@@ -203,7 +203,7 @@ export default function App() {
     <div className="app">
       <header>
         <b className="brand" onClick={() => irTab('inicio')}><img className="brand-logo" src={logoCab} alt="Gummi" /></b>
-        <span className="quien" style={{ cursor: 'pointer' }} onClick={() => irTab('perfil')}>
+        <span className="quien clic" onClick={() => irTab('perfil')}>
           <b>{yo?.apodo || yo?.nombre}{yo?.rol === 'admin' ? ' · admin' : ''}</b>
           <Avatar p={yo} size={32} />
         </span>

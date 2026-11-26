@@ -85,9 +85,9 @@ export default function OnceIdeal({ perfiles, onFicha }: { perfiles: any[]; onFi
         </span>
         <button className="sec mini" disabled={idx === 0} onClick={() => setIdx(idx - 1)} aria-label="Partido siguiente">›</button>
       </div>
-      {!filas && <p className="mut c" style={{ padding: 12 }}>Cargando…</p>}
+      {!filas && <p className="mut c p12">Cargando…</p>}
       {filas && !hay && (
-        <p className="mut c" style={{ padding: 12 }}>
+        <p className="mut c p12">
           {sinSql ? 'Falta ejecutar en Supabase el script 12_once_ideal.sql.' : 'Sin votos suficientes en este partido.'}
         </p>
       )}

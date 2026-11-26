@@ -144,16 +144,16 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
 
   return (
     <>
-      <div className="row" style={{ margin: '12px 0' }}>
+      <div className="row my12">
         <button className="sec mini" onClick={onBack}>← Perfil</button>
       </div>
-      <h2 style={{ marginTop: 0 }}>Panel de admin</h2>
+      <h2 className="mt0">Panel de admin</h2>
       <p className="mut">Todas tus herramientas en un sitio.</p>
 
       <h2>⚽ Partidos</h2>
       <div className="card">
         <b>Crear convocatoria</b>
-        <form onSubmit={crearPartido} style={{ marginTop: 8 }}>
+        <form onSubmit={crearPartido} className="mt8">
           <HorarioPicker valor={hor} onChange={setHor} />
           <input placeholder="Lugar (opcional)" value={lugar} onChange={(e) => setLugar(e.target.value)} />
           <button type="submit">Crear partido</button>
@@ -177,7 +177,7 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
           <b>Últimos partidos</b>
           <div className="mut" style={{ marginBottom: 4 }}>Entra para gestionar convocatoria, equipos, resultado, cierre y fecha o lugar.</div>
           {partidos.map((p) => (
-            <div className="fila" key={p.id} style={{ cursor: 'pointer' }} onClick={() => onPartido(p.id)}>
+            <div className="fila clic" key={p.id} onClick={() => onPartido(p.id)}>
               <span>
                 {horario(p)}
                 {p.goles_a != null && <b> · {p.goles_a}-{p.goles_b}</b>}
@@ -207,7 +207,7 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
         <details className="card">
           <summary>Ver votos de todos (solo tú)</summary>
           {perfiles.filter((j) => votos.some((v) => v.votado_id === j.id)).map((j) => (
-            <div key={j.id} style={{ margin: '10px 0' }}>
+            <div key={j.id} className="my10">
               <b>{j.apodo || j.nombre}</b>
               <div className="mut">
                 {votos
@@ -222,7 +222,7 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
             </div>
           ))}
           {mvps.length > 0 && (
-            <div style={{ marginTop: 14 }}>
+            <div className="mt14">
               <b>🏆 Votos de MVP</b>
               <div className="mut">{mvps.map((m) => `${nom(m.votante_id)} → ${nom(m.votado_id)}`).join(' · ')}</div>
             </div>
@@ -233,18 +233,18 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
 
       <h2>👥 Jugadores</h2>
       <div className="card">
-        <button className="sec" style={{ width: '100%' }} onClick={() => onTab('jugadores')}>
+        <button className="sec w100" onClick={() => onTab('jugadores')}>
           Plantilla: medias, editar y vincular ›
         </button>
         {cuentas > 0 && (
-          <p className="mut" style={{ margin: '8px 0 0' }}>
+          <p className="mut mt8 mb0">
             Hay {cuentas} {cuentas === 1 ? 'cuenta nueva' : 'cuentas nuevas'} sin partidos ni votos que se podrían vincular con un externo.
           </p>
         )}
       </div>
       <div className="card">
         <b>Añadir externo</b>
-        <form onSubmit={anadirExterno} style={{ marginTop: 8 }}>
+        <form onSubmit={anadirExterno} className="mt8">
           <input placeholder="Nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} />
           <select value={pos} onChange={(e) => setPos(e.target.value)}>
             <option value="">Posición (opcional)</option>
@@ -257,10 +257,10 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
       <h2>🏆 Temporada y logros</h2>
       <div className="card">
         <div className="mut" style={{ marginBottom: 8 }}>Temporada actual: <b style={{ color: 'var(--txt)' }}>{temporada?.nombre || '—'}</b></div>
-        <button className="sec" style={{ width: '100%' }} onClick={nuevaTemporada}>Empezar nueva temporada</button>
+        <button className="sec w100" onClick={nuevaTemporada}>Empezar nueva temporada</button>
         <p className="mut">Cierra la actual y abre otra. Las medias no se reinician; solo cambia el ranking.</p>
-        <button className="sec" style={{ width: '100%' }} disabled={busy} onClick={recalcularLogros}>Recalcular todos los logros</button>
-        <p className="mut" style={{ marginBottom: 0 }}>Útil si has corregido un resultado antiguo. No avisa a nadie.</p>
+        <button className="sec w100" disabled={busy} onClick={recalcularLogros}>Recalcular todos los logros</button>
+        <p className="mut mb0">Útil si has corregido un resultado antiguo. No avisa a nadie.</p>
       </div>
 
       <h2>🔧 Sistema</h2>
@@ -273,14 +273,14 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
             : 'Sin conectar todavía. Cuando hayas desplegado la función enviar-push, pulsa el botón.'}
         </div>
         {!push?.falta && (
-          <button className="sec" style={{ width: '100%' }} disabled={busy} onClick={conectarPush}>
+          <button className="sec w100" disabled={busy} onClick={conectarPush}>
             {push?.configurado ? 'Volver a conectar y enviarme una prueba' : 'Conectar avisos y enviarme una prueba'}
           </button>
         )}
       </div>
       <div className="card">
-        <button className="sec" style={{ width: '100%' }} disabled={busy} onClick={mantenimiento}>Ejecutar mantenimiento ahora</button>
-        <p className="mut" style={{ marginBottom: 0 }}>Concede logros pendientes y lanza los avisos por tiempo. La app ya lo hace sola cada pocos minutos.</p>
+        <button className="sec w100" disabled={busy} onClick={mantenimiento}>Ejecutar mantenimiento ahora</button>
+        <p className="mut mb0">Concede logros pendientes y lanza los avisos por tiempo. La app ya lo hace sola cada pocos minutos.</p>
       </div>
     </>
   )

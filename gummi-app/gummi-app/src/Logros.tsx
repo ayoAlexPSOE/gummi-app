@@ -52,22 +52,22 @@ export default function Logros({ yo, onFicha }: { yo: any; onFicha: (id: string)
           <div className="card" key={l.id} style={mio ? { outline: '2px solid var(--acc)' } : undefined}>
             <div className="row">
               <span style={{ fontSize: 28 }}>{l.icono}</span>
-              <span style={{ flex: 1 }}>
+              <span className="f1">
                 <b>{l.nombre}</b>
                 <div className="mut">{l.descripcion}</div>
               </span>
               <span className="mut">{lista.length}</span>
             </div>
             {lista.length > 0 ? (
-              <div className="row" style={{ marginTop: 8 }}>
+              <div className="row mt8">
                 {lista.map(([jid, n]) => (
-                  <span key={jid} className="tag" style={{ cursor: 'pointer' }} onClick={() => onFicha(jid)}>
+                  <span key={jid} className="tag clic" onClick={() => onFicha(jid)}>
                     {nombre(jid)}{n > 1 ? ` ×${n}` : ''}
                   </span>
                 ))}
               </div>
             ) : (
-              <div className="mut" style={{ marginTop: 6 }}>Nadie todavía</div>
+              <div className="mut mt6">Nadie todavía</div>
             )}
           </div>
         )

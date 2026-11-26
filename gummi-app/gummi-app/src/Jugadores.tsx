@@ -121,7 +121,7 @@ export default function Jugadores({ yo }: { yo: any }) {
                   {n?.ajuste != null && Number(n.ajuste) !== 0 &&
                     ` · salió de ${Math.round(Number(n.nota_votos))} ${Number(n.ajuste) > 0 ? '+' : ''}${Number(n.ajuste).toFixed(1)}`}
                 </div>
-                <div className="row" style={{ marginTop: 6 }}>
+                <div className="row mt6">
                   {(j.es_externo || n?.fuente !== 'votos') && (
                     <input
                       key={j.id + ':' + (manual?.nota ?? '')}
@@ -140,7 +140,7 @@ export default function Jugadores({ yo }: { yo: any }) {
                   )}
                 </div>
                 {editId === j.id && (
-                  <form style={{ marginTop: 8 }} onSubmit={(e) => { e.preventDefault(); guardarEdicion() }}>
+                  <form className="mt8" onSubmit={(e) => { e.preventDefault(); guardarEdicion() }}>
                     <input placeholder="Nombre" value={eNombre} onChange={(e) => setENombre(e.target.value)} />
                     <input placeholder="Apodo (opcional)" value={eApodo} onChange={(e) => setEApodo(e.target.value)} />
                     <select value={ePos} onChange={(e) => setEPos(e.target.value)}>
@@ -154,7 +154,7 @@ export default function Jugadores({ yo }: { yo: any }) {
                   </form>
                 )}
                 {vincId === j.id && (
-                  <div style={{ marginTop: 8 }}>
+                  <div className="mt8">
                     <p className="mut">Elige la cuenta recién creada de este jugador (debe estar sin partidos ni votos).</p>
                     <select value={vincCuenta} onChange={(e) => setVincCuenta(e.target.value)}>
                       <option value="">Cuenta…</option>

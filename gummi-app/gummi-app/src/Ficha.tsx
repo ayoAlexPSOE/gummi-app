@@ -153,12 +153,12 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
 
   return (
     <>
-      <div className="row" style={{ margin: '12px 0' }}>
+      <div className="row my12">
         <button className="sec mini" onClick={onBack}>← Volver</button>
       </div>
       <div className="perfil-cab">
         <Avatar p={perfil} size={72} />
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="f1 min0">
           <div className="perfil-nombre">{perfil.apodo || perfil.nombre}</div>
           {perfil.apodo && <div className="mut">{perfil.nombre}</div>}
         </div>
@@ -167,7 +167,7 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
       <div className="row" style={{ marginBottom: 10 }}>
         {perfil.posicion && <span className={'tag pos-' + perfil.posicion}>{nombrePos(perfil.posicion)}</span>}
         {(perfil.posiciones_secundarias || []).map((s: string) => (
-          <span key={s} className={'tag pos-' + s} style={{ opacity: 0.7 }}>{nombrePos(s)}</span>
+          <span key={s} className={'tag o70 pos-' + s}>{nombrePos(s)}</span>
         ))}
         {perfil.pierna && <span className="tag">🦶 {perfil.pierna}</span>}
         {perfil.es_externo && <span className="tag">externo</span>}
@@ -191,7 +191,7 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
       {logros.length > 0 && (
         <div className="card">
           <b>🏅 Logros ({logros.length})</b>
-          <div className="row" style={{ marginTop: 8 }}>
+          <div className="row mt8">
             {logros.map((l: any) => (
               <span key={l.id} className="tag" title={l.descripcion}>
                 {l.icono} {l.nombre}{l.n > 1 ? ` ×${l.n}` : ''}
@@ -216,7 +216,7 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
       {(mejorComp || peorRival) && (
         <div className="card">
           {mejorComp && (
-            <div style={{ margin: '4px 0' }}>
+            <div className="my4">
               🤝 <b>Mejor pareja:</b> {mejorComp.nombre}{' '}
               <span className="mut">
                 (ganáis el {Math.round((100 * mejorComp.v) / mejorComp.n)}% de {mejorComp.n} partidos juntos)
@@ -224,7 +224,7 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
             </div>
           )}
           {peorRival && (
-            <div style={{ margin: '4px 0' }}>
+            <div className="my4">
               😈 <b>Bestia negra:</b> {peorRival.nombre}{' '}
               <span className="mut">
                 (solo gana el {Math.round((100 * peorRival.v) / peorRival.n)}% de {peorRival.n} partidos en contra)
@@ -243,7 +243,7 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
           {historial.slice(0, 10).map((h: any) => (
             <div className="card row" key={h.p.id}>
               <span className={'chip ' + h.res}>{h.res}</span>
-              <span style={{ flex: 1 }}>
+              <span className="f1">
                 {fmt(h.p.fecha)} · {h.gf}-{h.gc}
                 <div className="mut">{nombreEquipo(h.equipo, h.equipo === 'A' ? h.p.color_a : h.p.color_b)}</div>
               </span>

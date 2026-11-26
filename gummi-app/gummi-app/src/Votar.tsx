@@ -159,8 +159,8 @@ export default function Votar({ yo }: { yo: any }) {
           return (
             <div className="card hecho" key={p.id}>
               <div className="row">
-                <span style={{ fontSize: 26 }}>✅</span>
-                <span style={{ flex: 1 }}>
+                <span className="fs26">✅</span>
+                <span className="f1">
                   <b>Voto guardado</b>
                   <div className="mut">
                     Partido del {fmt(p.fecha)} · has puntuado a {nVotados}. Puedes cambiarlo hasta el {fmt(p.votacion_hasta)}.
@@ -202,8 +202,8 @@ export default function Votar({ yo }: { yo: any }) {
       {cfg.votacion_inicial_abierta && votadosIni > 0 && !editando['ini'] && (
         <div className="card hecho">
           <div className="row">
-            <span style={{ fontSize: 26 }}>{votadosIni >= candidatosIni.length ? '✅' : '📝'}</span>
-            <span style={{ flex: 1 }}>
+            <span className="fs26">{votadosIni >= candidatosIni.length ? '✅' : '📝'}</span>
+            <span className="f1">
               <b>{votadosIni >= candidatosIni.length ? 'Votación inicial guardada' : 'Votación inicial a medias'}</b>
               <div className="mut">Has puntuado a {votadosIni} de {candidatosIni.length}.</div>
             </span>

@@ -274,7 +274,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
           </div>
         )
       })}
-      <div className="mut" style={{ fontSize: 12 }}>Tachado: se confunde con el color del otro equipo.</div>
+      <div className="mut fs12">Tachado: se confunde con el color del otro equipo.</div>
     </div>
   )
 
@@ -418,7 +418,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
       <div className="row barra-detalle">
         <button className="sec mini" onClick={onBack}>← Volver</button>
         <span className={'tag estado-' + p.estado}>{ESTADOS[p.estado]}</span>
-        <span style={{ flex: 1 }} />
+        <span className="f1" />
         {proximo && <button className="sec mini ico" onClick={() => anadirCalendario(p)} aria-label="Añadir al calendario" title="Añadir al calendario">🗓️</button>}
         {part.length > 0 && <button className="sec mini ico" disabled={haciendoImg} onClick={imagen} aria-label="Compartir imagen" title="Compartir imagen">🖼️</button>}
         <button className="sec mini ico" onClick={() => compartir(textoCompartir())} aria-label="Compartir texto" title="Compartir por WhatsApp">📤</button>
@@ -431,8 +431,8 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
       {admin && editDatos && (
         <div className="card">
           <HorarioPicker valor={editDatos.hor} onChange={(hor) => setEditDatos({ ...editDatos, hor })} />
-          <input style={{ marginTop: 8 }} placeholder="Lugar" value={editDatos.lugar} onChange={(e) => setEditDatos({ ...editDatos, lugar: e.target.value })} />
-          <div className="row" style={{ marginTop: 8 }}>
+          <input className="mt8" placeholder="Lugar" value={editDatos.lugar} onChange={(e) => setEditDatos({ ...editDatos, lugar: e.target.value })} />
+          <div className="row mt8">
             <button onClick={guardarDatos}>Guardar</button>
             <button className="sec" onClick={() => setEditDatos(null)}>Cancelar</button>
           </div>
@@ -442,7 +442,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
       {/* ---- Mi respuesta (jugadores) ---- */}
       {!admin && p.estado === 'convocatoria' && (
         <>
-        <div className="respuesta" style={{ marginTop: 14 }}>
+        <div className="respuesta mt14">
           {[['voy', 'Voy', '✅'], ['duda', 'Duda', '🤔'], ['no_voy', 'No voy', '❌']].map(([v, t, ic]) => (
             <button key={v} className={miResp === v ? 'sel' : 'sec'} onClick={() => setResp(yo.id, v)} aria-pressed={miResp === v}>
               <span>{ic}</span>{t}
@@ -471,7 +471,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
       {jugado && mvp.length > 0 && (
         <div className="card mvp">
           <span className="mvp-corona">👑</span>
-          <span style={{ flex: 1 }}>
+          <span className="f1">
             <div className="mut">MVP del partido</div>
             <b>{mvp.filter((m) => m.num_votos === mvp[0].num_votos).map((m) => nombre(m.jugador_id)).join(' y ')}</b>
           </span>
@@ -508,7 +508,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
           {admin && p.estado !== 'cerrado' && selectorColores()}
         </>
       ) : (
-        !puedeEditarEquipos && (p.estado === 'convocatoria') && <p className="mut" style={{ marginTop: 14 }}>Los equipos se harán cuando se cierre la convocatoria.</p>
+        !puedeEditarEquipos && (p.estado === 'convocatoria') && <p className="mut mt14">Los equipos se harán cuando se cierre la convocatoria.</p>
       )}
 
       {/* ---- Convocatoria ---- */}
@@ -534,14 +534,14 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
               {sinResponder.length > 0 && (
                 <div className="conv-grupo">
                   <div className="mut">⏳ Sin responder ({sinResponder.length})</div>
-                  <div className="mut" style={{ fontSize: 12 }}>{sinResponder.map((j) => j.apodo || j.nombre).join(', ')}</div>
+                  <div className="mut fs12">{sinResponder.map((j) => j.apodo || j.nombre).join(', ')}</div>
                 </div>
               )}
             </div>
           )}
           {admin && (
             <div className="card">
-              <p className="mut" style={{ marginTop: 0 }}>Marca la respuesta de cada uno (vuelve a tocar para quitarla).</p>
+              <p className="mut mt0">Marca la respuesta de cada uno (vuelve a tocar para quitarla).</p>
               {perfiles.map((j) => {
                 const r = respDe(j.id)
                 return (
@@ -607,7 +607,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
           <p className="mut">Si hubo un gol en propia puerta, corrige el marcador a mano.</p>
           <div className="row">
             {editando && <button className="sec" onClick={() => { setEditando(false); cargar() }}>Cancelar</button>}
-            <button style={{ flex: 1 }} disabled={busy} onClick={guardarResultado}>
+            <button className="f1" disabled={busy} onClick={guardarResultado}>
               {p.estado === 'jugado' ? 'Guardar cambios' : '🏁 Guardar y cerrar partido'}
             </button>
           </div>
@@ -615,11 +615,11 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
       )}
 
       {admin && p.estado === 'jugado' && !editando && part.length > 0 && (
-        <button className="sec" style={{ width: '100%', marginTop: 14 }} onClick={() => setEditando(true)}>✏️ Editar resultado y goles</button>
+        <button className="sec w100 mt14" onClick={() => setEditando(true)}>✏️ Editar resultado y goles</button>
       )}
 
       {admin && (
-        <button className="sec peligro" style={{ width: '100%', marginTop: 28 }} onClick={borrar}>🗑️ Borrar partido</button>
+        <button className="sec peligro w100 mt28" onClick={borrar}>🗑️ Borrar partido</button>
       )}
     </>
   )

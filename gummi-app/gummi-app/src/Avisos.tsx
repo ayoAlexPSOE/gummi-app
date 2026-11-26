@@ -50,10 +50,10 @@ export default function Avisos({ onIr, onCambio }: { onIr: (destino: string | nu
       <h2>Avisos</h2>
       {lista.length === 0 && <div className="vacio"><span>🔔</span><b>Sin avisos</b><div className="mut">Aquí te llegarán las convocatorias, los equipos, las votaciones y tus logros.</div></div>}
       {lista.map((n) => (
-        <div key={n.id} className={'card' + (n.leida ? '' : ' unread')} style={{ cursor: 'pointer' }} onClick={() => abrir(n)}>
-          <div className="row" style={{ flexWrap: 'nowrap', alignItems: 'flex-start' }}>
+        <div key={n.id} className={'card clic ' + (n.leida ? '' : ' unread')} onClick={() => abrir(n)}>
+          <div className="row nowrap arriba">
             <span className="aviso-ic">{n.destino === 'votar' ? '🗳️' : n.destino === 'logros' ? '🏅' : '⚽'}</span>
-            <span style={{ flex: 1, minWidth: 0 }}>
+            <span className="f1 min0">
               <b>{n.titulo}</b>
               {n.cuerpo && <div className="mut">{n.cuerpo}</div>}
             </span>
@@ -62,9 +62,9 @@ export default function Avisos({ onIr, onCambio }: { onIr: (destino: string | nu
         </div>
       ))}
       {lista.length > 0 && (
-        <div className="row" style={{ marginTop: 14 }}>
-          {lista.some((n) => !n.leida) && <button className="sec" style={{ flex: 1 }} onClick={todasLeidas}>✓ Marcar leídas</button>}
-          <button className="sec" style={{ flex: 1 }} onClick={borrarTodas}>🗑️ Borrar todas</button>
+        <div className="row mt14">
+          {lista.some((n) => !n.leida) && <button className="sec f1" onClick={todasLeidas}>✓ Marcar leídas</button>}
+          <button className="sec f1" onClick={borrarTodas}>🗑️ Borrar todas</button>
         </div>
       )}
     </>

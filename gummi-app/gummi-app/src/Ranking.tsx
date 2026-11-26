@@ -213,7 +213,7 @@ export default function Ranking({ yo, vistaInicial }: { yo: any; vistaInicial?: 
           </button>
         ))}
       </div>
-      <h2 style={{ marginTop: 14 }}>{actual.titulo}</h2>
+      <h2 className="mt14">{actual.titulo}</h2>
       {actual.nota && <p className="mut">{actual.nota}</p>}
 
       {ordenados.length === 0 && (
@@ -243,7 +243,7 @@ export default function Ranking({ yo, vistaInicial }: { yo: any; vistaInicial?: 
             {puestos[i] <= 3 ? MEDALLAS[puestos[i] - 1] : puestos[i]}
           </span>
           <Avatar p={x.r} size={36} />
-          <span style={{ flex: 1, minWidth: 0 }}>
+          <span className="f1 min0">
             <b>{x.r.apodo || x.r.nombre}</b>
             {x.r.es_externo && <span className="tag" style={{ marginLeft: 6 }}>ext</span>}
             <div className="mut">{x.r.partidos} PJ · {x.r.victorias}V {x.r.empates}E {x.r.derrotas}D</div>

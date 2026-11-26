@@ -116,7 +116,7 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
               <div className="aviso reserva-aviso">🕓 Estás de <b>reserva nº {miReserva + 1}</b>. Si alguien se borra, entras tú y te avisamos.</div>
             )}
             {empezado ? (
-              <div className="mut" style={{ margin: '10px 0' }}>En juego ahora</div>
+              <div className="mut my10">En juego ahora</div>
             ) : (
               <div className="cuenta">
                 <div className="tile"><b>{c.d}</b><span className="mut">días</span></div>
@@ -144,7 +144,7 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
               </div>
             )}
             <div className="row hero-pie">
-              <button className="sec" style={{ flex: 1 }} onClick={() => onPartido(prox.id)}>Ver detalle</button>
+              <button className="sec f1" onClick={() => onPartido(prox.id)}>Ver detalle</button>
               {!empezado && <button className="sec ico" onClick={() => anadirCalendario(prox)} aria-label="Añadir al calendario" title="Añadir al calendario">🗓️</button>}
             </div>
           </div>
@@ -179,9 +179,9 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
           res = gf > gc ? 'V' : gf < gc ? 'D' : 'E'
         }
         return (
-          <div className="card" style={{ cursor: 'pointer' }} onClick={() => onPartido(ultimo.id)}>
+          <div className="card clic" onClick={() => onPartido(ultimo.id)}>
             <div className="row">
-              <span className="mut" style={{ flex: 1 }}>Último resultado · {fmt(ultimo.fecha)}</span>
+              <span className="mut f1">Último resultado · {fmt(ultimo.fecha)}</span>
               {res && <span className={'chip ' + res}>{res}</span>}
             </div>
             <div className="marcador sin-caja">
@@ -189,7 +189,7 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
               <div className="marcador-num">{ultimo.goles_a}<i>–</i>{ultimo.goles_b}</div>
               <div className="marcador-eq">{color(ultimo.color_b) ? <><span className="camiseta grande" style={{ ['--m' as any]: color(ultimo.color_b)!.hex }} /><b className="pequeno">{color(ultimo.color_b)!.plural}</b></> : <><span className="mut">Equipo</span><b>B</b></>}</div>
             </div>
-            <div className="mut" style={{ textAlign: 'center' }}>{mi ? (color(mi.equipo === 'A' ? ultimo.color_a : ultimo.color_b) ? `Jugaste con los ${nombreEquipo(mi.equipo, mi.equipo === 'A' ? ultimo.color_a : ultimo.color_b).toLowerCase()} · ` : `Jugaste en el equipo ${mi.equipo} · `) : ''}Ver detalle ›</div>
+            <div className="mut centro">{mi ? (color(mi.equipo === 'A' ? ultimo.color_a : ultimo.color_b) ? `Jugaste con los ${nombreEquipo(mi.equipo, mi.equipo === 'A' ? ultimo.color_a : ultimo.color_b).toLowerCase()} · ` : `Jugaste en el equipo ${mi.equipo} · `) : ''}Ver detalle ›</div>
           </div>
         )
       })()}

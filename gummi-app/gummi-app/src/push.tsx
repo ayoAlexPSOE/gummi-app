@@ -107,27 +107,27 @@ export function TarjetaAvisos({ compacta = false, onCerrar }: { compacta?: boole
   if (compacta && estado === 'activo') {
     return (
       <div className="card avisos-movil compacta listo">
-        <div className="row" style={{ flexWrap: 'nowrap', alignItems: 'flex-start' }}>
+        <div className="row nowrap arriba">
           <span className="avisos-ic">✅</span>
-          <span style={{ flex: 1, minWidth: 0 }}>
+          <span className="f1 min0">
             <b>¡Avisos activados!</b>
             <div className="mut">Ya está todo listo: te llegarán al móvil aunque tengas la app cerrada. Puedes cambiarlo cuando quieras en Perfil › Avisos.</div>
           </span>
         </div>
-        <div className="row" style={{ marginTop: 10, flexWrap: 'nowrap' }}>
-          <button className="sec" style={{ flex: 1 }} disabled={busy} onClick={probar}>Enviar prueba</button>
-          <button style={{ flex: 1 }} onClick={onCerrar}>Perfecto, cerrar</button>
+        <div className="row mt10 nowrap">
+          <button className="sec f1" disabled={busy} onClick={probar}>Enviar prueba</button>
+          <button className="f1" onClick={onCerrar}>Perfecto, cerrar</button>
         </div>
-        {msg && !msg.startsWith('✅') && <div className="mut" style={{ marginTop: 8 }}>{msg}</div>}
+        {msg && !msg.startsWith('✅') && <div className="mut mt8">{msg}</div>}
       </div>
     )
   }
 
   return (
     <div className={'card avisos-movil' + (compacta ? ' compacta' : '')}>
-      <div className="row" style={{ flexWrap: 'nowrap', alignItems: 'flex-start' }}>
+      <div className="row nowrap arriba">
         <span className="avisos-ic">{estado === 'activo' ? '🔔' : '📲'}</span>
-        <span style={{ flex: 1, minWidth: 0 }}>
+        <span className="f1 min0">
           <b>{estado === 'activo' ? 'Avisos activados en este móvil' : 'Avisos en el móvil'}</b>
           <div className="mut">
             {estado === 'activo' && 'Te llegarán partidos, equipos, votaciones y logros aunque tengas la app cerrada.'}
@@ -139,14 +139,14 @@ export function TarjetaAvisos({ compacta = false, onCerrar }: { compacta?: boole
         </span>
         {compacta && onCerrar && <button className="sec mini ico" onClick={onCerrar} aria-label="Ahora no">✕</button>}
       </div>
-      {estado === 'inactivo' && <button style={{ width: '100%', marginTop: 10 }} disabled={busy} onClick={activar}>🔔 Activar avisos</button>}
+      {estado === 'inactivo' && <button className="w100 mt10" disabled={busy} onClick={activar}>🔔 Activar avisos</button>}
       {estado === 'activo' && (
-        <div className="row" style={{ marginTop: 10, flexWrap: 'nowrap' }}>
-          <button className="sec" style={{ flex: 1 }} disabled={busy} onClick={probar}>Enviar prueba</button>
+        <div className="row mt10 nowrap">
+          <button className="sec f1" disabled={busy} onClick={probar}>Enviar prueba</button>
           <button className="sec" disabled={busy} onClick={desactivar}>Desactivar</button>
         </div>
       )}
-      {msg && <div className="mut" style={{ marginTop: 8 }}>{msg}</div>}
+      {msg && <div className="mut mt8">{msg}</div>}
     </div>
   )
 }

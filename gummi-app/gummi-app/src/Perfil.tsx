@@ -133,12 +133,12 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
 
       <div className="perfil-cab">
         <Avatar p={yo} size={96} />
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="f1 min0">
           <div className="perfil-nombre">{yo.apodo || yo.nombre}</div>
           {yo.apodo && <div className="mut">{yo.nombre}</div>}
-          <div className="row" style={{ marginTop: 6 }}>
+          <div className="row mt6">
             {yo.posicion && <span className={'tag pos-' + yo.posicion}>{nombrePos(yo.posicion)}</span>}
-            {(yo.posiciones_secundarias || []).map((s: string) => <span key={s} className={'tag pos-' + s} style={{ opacity: 0.7 }}>{nombrePos(s)}</span>)}
+            {(yo.posiciones_secundarias || []).map((s: string) => <span key={s} className={'tag o70 pos-' + s}>{nombrePos(s)}</span>)}
             {yo.rol === 'admin' && (
               <button type="button" className="tag admin-tag" onClick={onAdmin}>🔧 admin ›</button>
             )}
@@ -174,7 +174,7 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
             <T v={stats.empates} t="E" />
             <T v={stats.derrotas} t="D" />
           </div>
-          <div className="grid3" style={{ marginTop: 8 }}>
+          <div className="grid3 mt8">
             <T v={stats.goles} t="Goles" />
             <T v={stats.asistencias} t="Asist." />
             <T v={stats.mvps} t="MVP" />
@@ -186,14 +186,14 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
       {logros.length > 0 && (
         <div className="card">
           <b>🏅 Mis logros ({logros.length})</b>
-          <div className="row" style={{ marginTop: 8 }}>
+          <div className="row mt8">
             {logros.map((l) => (
               <span key={l.id} className="tag" title={l.descripcion}>{l.icono} {l.nombre}{l.n > 1 ? ` ×${l.n}` : ''}</span>
             ))}
           </div>
         </div>
       )}
-      <button className="sec" style={{ width: '100%', marginTop: 6 }} onClick={() => setFicha(true)}>Ver mi ficha completa ›</button>
+      <button className="sec w100 mt6" onClick={() => setFicha(true)}>Ver mi ficha completa ›</button>
 
       <h2>Avisos</h2>
       <TarjetaAvisos />
@@ -210,7 +210,7 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
           <div className="pos-grid">
             {POS.map(([id, t, ic]) => (
               <button type="button" key={id} className={'sec' + (pos === id ? ' on2' : '')} onClick={() => setPos(pos === id ? '' : id)}>
-                <span style={{ fontSize: 20 }}>{ic}</span>{t}
+                <span className="fs20">{ic}</span>{t}
               </button>
             ))}
           </div>
@@ -222,7 +222,7 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
                 {POS.filter(([id]) => id !== pos).map(([id, t, ic]) => (
                   <button type="button" key={id} className={'sec' + (sec.includes(id) ? ' on2' : '')}
                     onClick={() => setSec(sec.includes(id) ? sec.filter((x) => x !== id) : [...sec, id])}>
-                    <span style={{ fontSize: 20 }}>{ic}</span>{t}
+                    <span className="fs20">{ic}</span>{t}
                   </button>
                 ))}
               </div>
@@ -236,20 +236,20 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
               </div>
             </>
           )}
-          <button type="submit" disabled={busy} style={{ marginTop: 6 }}>Guardar cambios</button>
+          <button type="submit" disabled={busy} className="mt6">Guardar cambios</button>
         </form>
       </div>
 
       <details className="card">
         <summary>🔒 Cambiar contraseña</summary>
-        <form style={{ marginTop: 10 }} onSubmit={(e) => { e.preventDefault(); cambiarPass() }}>
+        <form className="mt10" onSubmit={(e) => { e.preventDefault(); cambiarPass() }}>
           <input type="password" autoComplete="new-password" placeholder="Nueva contraseña" value={pass1} onChange={(e) => setPass1(e.target.value)} />
           <input type="password" autoComplete="new-password" placeholder="Repite la contraseña" value={pass2} onChange={(e) => setPass2(e.target.value)} />
           <button type="submit">Cambiar contraseña</button>
         </form>
       </details>
 
-      <button className="sec" style={{ width: '100%', marginTop: 14 }} onClick={async () => { if (await confirmar('¿Cerrar sesión en este móvil?', { si: 'Cerrar sesión' })) supabase.auth.signOut() }}>Cerrar sesión</button>
+      <button className="sec w100 mt14" onClick={async () => { if (await confirmar('¿Cerrar sesión en este móvil?', { si: 'Cerrar sesión' })) supabase.auth.signOut() }}>Cerrar sesión</button>
     </>
   )
 }
