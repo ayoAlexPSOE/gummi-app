@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import { configuracion, invalidar, perfilesActivos } from './datos'
-import { horario, convocados, respuestaLocal, PLAZAS_DEFECTO } from './util'
+import { ESTADOS, horario, convocados, respuestaLocal, PLAZAS_DEFECTO } from './util'
 import HorarioPicker, { Horario, aTimestamps, desdePartido } from './HorarioPicker'
 import Avatar from './Avatar'
 import { Cargando, anadirCalendario, compartir, vibra } from './movil'
@@ -10,12 +10,6 @@ import { compartirImagen } from './imagen'
 
 type Eq = 'A' | 'B'
 
-const ESTADOS: Record<string, string> = {
-  convocatoria: 'Convocatoria',
-  equipos: 'Equipos hechos',
-  jugado: 'Jugado',
-  cerrado: 'Cerrado',
-}
 const POSICIONES = ['defensa', 'medio', 'banda', 'delantero']
 const NOTA_DEFECTO = 5
 

@@ -2,12 +2,11 @@ import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import { configuracion } from './datos'
 import { color } from './equipos'
-import { horario, convocados, respuestaLocal, PLAZAS_DEFECTO } from './util'
+import { ESTADOS, horario, convocados, respuestaLocal, PLAZAS_DEFECTO } from './util'
 import PartidoDetalle from './PartidoDetalle'
 import { Cargando, useAtras, vibra } from './movil'
 
 const OPCIONES: [string, string, string][] = [['voy', 'Voy', '✅'], ['duda', 'Duda', '🤔'], ['no_voy', 'No voy', '❌']]
-export const ESTADOS: Record<string, string> = { convocatoria: 'Convocatoria', equipos: 'Equipos hechos', jugado: 'Jugado', cerrado: 'Cerrado' }
 
 // El partido abierto se recuerda al refrescar (tirar hacia abajo) y se olvida al cambiar de pestaña.
 let recordado: number | null = null

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import { configuracion, perfilesActivos } from './datos'
 import Avatar from './Avatar'
+import { fecha } from './util'
 import { Cargando, vibra } from './movil'
 
 const NOTAS = Array.from({ length: 11 }, (_, i) => i)
@@ -25,8 +26,7 @@ function Selector({ valor, onChange }: { valor: string; onChange: (v: string) =>
   )
 }
 
-const fmt = (iso: string) =>
-  new Date(iso).toLocaleString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+const fmt = (iso: string) => fecha(iso, 'diaHora')
 
 export default function Votar({ yo }: { yo: any }) {
   const [cfg, setCfg] = useState<any>(null)

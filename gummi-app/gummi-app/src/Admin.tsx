@@ -3,10 +3,8 @@ import { supabase } from './supabase'
 import { invalidar, perfilesActivos } from './datos'
 import { Cargando } from './movil'
 import { POSICIONES } from './equipos'
-import { horario } from './util'
+import { ESTADOS, horario } from './util'
 import HorarioPicker, { Horario, horarioVacio, aTimestamps } from './HorarioPicker'
-
-const ESTADO: Record<string, string> = { convocatoria: 'Convocatoria', equipos: 'Equipos', jugado: 'Jugado', cerrado: 'Cerrado' }
 
 export default function Admin({ yo, onBack, onPartido, onTab }: {
   yo: any
@@ -190,7 +188,7 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
                 {horario(p)}
                 {p.goles_a != null && <b> · {p.goles_a}-{p.goles_b}</b>}
               </span>
-              <span className="tag">{ESTADO[p.estado] || p.estado}</span>
+              <span className="tag">{ESTADOS[p.estado] || p.estado}</span>
             </div>
           ))}
         </div>

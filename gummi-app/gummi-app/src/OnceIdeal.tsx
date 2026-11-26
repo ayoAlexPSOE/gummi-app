@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import Avatar from './Avatar'
+import { fecha } from './util'
 
-const fmt = (iso: string) =>
-  new Date(iso).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })
+const fmt = (iso: string) => fecha(iso, 'corta')
 
 // Puntos de ataque: quien marca o asiste va delante; los defensas, atrás.
 const ataque = (r: any) =>

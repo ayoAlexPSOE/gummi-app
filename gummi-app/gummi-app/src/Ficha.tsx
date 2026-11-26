@@ -3,7 +3,7 @@ import { supabase } from './supabase'
 import { perfilesActivos, ranking } from './datos'
 import { nombreEquipo } from './equipos'
 import Numero from './Numero'
-import { traerTodo } from './util'
+import { fecha, traerTodo } from './util'
 import Avatar from './Avatar'
 import { Cargando } from './movil'
 import { nombrePos } from './equipos'
@@ -134,7 +134,7 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
 
   const pct = stats.partidos > 0 ? Math.round((100 * stats.victorias) / stats.partidos) : null
   const gpp = stats.partidos > 0 ? (stats.goles / stats.partidos).toFixed(2) : null
-  const fmt = (iso: string) => new Date(iso).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
+  const fmt = (iso: string) => fecha(iso, 'dia')
   const textoRacha =
     historial.length === 0
       ? ''

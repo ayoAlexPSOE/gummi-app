@@ -3,7 +3,7 @@ import { supabase } from './supabase'
 import { configuracion, perfilesActivos, ranking } from './datos'
 import { color, nombreEquipo } from './equipos'
 import { TarjetaAvisos } from './push'
-import { horario, convocados, respuestaLocal, PLAZAS_DEFECTO } from './util'
+import { fecha, horario, convocados, respuestaLocal, PLAZAS_DEFECTO } from './util'
 import Numero from './Numero'
 import Avatar from './Avatar'
 import { Cargando, anadirCalendario, vibra } from './movil'
@@ -77,10 +77,7 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
     else cargar()
   }
 
-  const fmt = (iso: string, largo = false) =>
-    new Date(iso).toLocaleString('es-ES', largo
-      ? { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }
-      : { weekday: 'short', day: 'numeric', month: 'short' })
+  const fmt = (iso: string) => fecha(iso, 'corta')
 
   const pct = d.yoStats && d.yoStats.partidos > 0 ? Math.round((100 * d.yoStats.victorias) / d.yoStats.partidos) : null
 

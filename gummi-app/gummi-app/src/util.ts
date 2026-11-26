@@ -50,3 +50,15 @@ export function respuestaLocal(conv: any[], partidoId: number, jugadorId: string
   const voy_desde = respuesta === 'voy' ? (previa?.respuesta === 'voy' ? previa.voy_desde || previa.updated_at : new Date().toISOString()) : null
   return [...resto, { partido_id: partidoId, jugador_id: jugadorId, respuesta, voy_desde }]
 }
+
+// Nombres de los estados del partido
+export const ESTADOS: Record<string, string> = { convocatoria: 'Convocatoria', equipos: 'Equipos hechos', jugado: 'Jugado', cerrado: 'Cerrado' }
+
+// Fechas: 'dia' = "26 nov" · 'corta' = "jue, 26 nov" · 'diaHora' = "jue, 26 nov, 14:00"
+export function fecha(iso: string, tipo: 'dia' | 'corta' | 'diaHora' = 'corta') {
+  const o: Intl.DateTimeFormatOptions =
+    tipo === 'dia' ? { day: 'numeric', month: 'short' }
+    : tipo === 'corta' ? { weekday: 'short', day: 'numeric', month: 'short' }
+    : { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }
+  return new Date(iso).toLocaleString('es-ES', o)
+}
