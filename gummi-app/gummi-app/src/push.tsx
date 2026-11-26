@@ -100,7 +100,8 @@ export function TarjetaAvisos({ compacta = false, onCerrar }: { compacta?: boole
   }
 
   if (estado === 'cargando') return null
-  if (compacta && (estado === 'activo' || estado === 'no-soportado' || estado === 'denegado')) return null
+  // En Inicio la tarjeta desaparece cuando ya están activos, salvo justo después de activarlos (para confirmarlo)
+  if (compacta && ((estado === 'activo' && !msg) || estado === 'no-soportado' || estado === 'denegado')) return null
 
   return (
     <div className={'card avisos-movil' + (compacta ? ' compacta' : '')}>
@@ -119,7 +120,7 @@ export function TarjetaAvisos({ compacta = false, onCerrar }: { compacta?: boole
         {compacta && onCerrar && <button className="sec mini ico" onClick={onCerrar} aria-label="Ahora no">✕</button>}
       </div>
       {estado === 'inactivo' && <button style={{ width: '100%', marginTop: 10 }} disabled={busy} onClick={activar}>🔔 Activar avisos</button>}
-      {estado === 'activo' && !compacta && (
+      {estado === 'activo' && (
         <div className="row" style={{ marginTop: 10, flexWrap: 'nowrap' }}>
           <button className="sec" style={{ flex: 1 }} disabled={busy} onClick={probar}>Enviar prueba</button>
           <button className="sec" disabled={busy} onClick={desactivar}>Desactivar</button>
