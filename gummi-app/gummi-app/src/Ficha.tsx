@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import Numero from './Numero'
 import { traerTodo } from './util'
 import Avatar from './Avatar'
 
@@ -137,7 +138,7 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
 
   const Tile = ({ valor, titulo }: { valor: any; titulo: string }) => (
     <div className="tile">
-      <b>{valor ?? '–'}</b>
+      <b>{typeof valor === 'number' ? <Numero v={valor} /> : (valor ?? '–')}</b>
       <span className="mut">{titulo}</span>
     </div>
   )

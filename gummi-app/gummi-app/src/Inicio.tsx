@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import { horario } from './util'
+import Numero from './Numero'
 
 const OPCIONES: [string, string, string][] = [['voy', 'Voy', '✅'], ['duda', 'Duda', '🤔'], ['no_voy', 'No voy', '❌']]
 
@@ -145,11 +146,11 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
         <>
           <h2>Tus números</h2>
           <div className="grid3">
-            <div className="tile"><b>{d.yoStats.partidos}</b><span className="mut">Partidos</span></div>
-            <div className="tile"><b>{pct !== null ? pct + '%' : '–'}</b><span className="mut">Victorias</span></div>
-            <div className="tile"><b>{d.yoStats.mvps}</b><span className="mut">MVP</span></div>
-            <div className="tile"><b>{d.yoStats.goles}</b><span className="mut">Goles</span></div>
-            <div className="tile"><b>{d.yoStats.asistencias}</b><span className="mut">Asistencias</span></div>
+            <div className="tile"><b><Numero v={d.yoStats.partidos} /></b><span className="mut">Partidos</span></div>
+            <div className="tile"><b><Numero v={pct} sufijo="%" /></b><span className="mut">Victorias</span></div>
+            <div className="tile"><b><Numero v={d.yoStats.mvps} /></b><span className="mut">MVP</span></div>
+            <div className="tile"><b><Numero v={d.yoStats.goles} /></b><span className="mut">Goles</span></div>
+            <div className="tile"><b><Numero v={d.yoStats.asistencias} /></b><span className="mut">Asistencias</span></div>
           </div>
         </>
       )}

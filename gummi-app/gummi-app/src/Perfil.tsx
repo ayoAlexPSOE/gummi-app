@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from './supabase'
+import Numero from './Numero'
 import Avatar from './Avatar'
 import Ficha from './Ficha'
 
@@ -126,7 +127,7 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
 
   const pct = stats && stats.partidos > 0 ? Math.round((100 * stats.victorias) / stats.partidos) : null
   const T = ({ v, t }: { v: any; t: string }) => (
-    <div className="tile"><b>{v ?? '–'}</b><span className="mut">{t}</span></div>
+    <div className="tile"><b>{typeof v === 'number' ? <Numero v={v} /> : (v ?? '–')}</b><span className="mut">{t}</span></div>
   )
 
   return (

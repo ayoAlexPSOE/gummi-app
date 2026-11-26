@@ -25,8 +25,8 @@ function Login() {
 
   return (
     <div className="app">
-      <main>
-        <div className="brand-big">GUMMI<i>⚽</i></div>
+      <main className="vista login">
+        <div className="brand-big"><span className="brand-tx">GUMMI</span><i>⚽</i></div>
         <p className="mut">Inicia sesión con la cuenta que te ha creado el admin.</p>
         <form onSubmit={entrar}>
           <input placeholder="Usuario" autoCapitalize="none" autoCorrect="off" value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -95,7 +95,7 @@ export default function App() {
   return (
     <div className="app">
       <header>
-        <b className="brand">GUMMI<i>⚽</i></b>
+        <b className="brand"><span className="brand-tx">GUMMI</span><i>⚽</i></b>
         <span className="quien" style={{ cursor: 'pointer' }} onClick={() => setTab('perfil')}>
           <b>{yo?.apodo || yo?.nombre}{yo?.rol === 'admin' ? ' · admin' : ''}</b>
           <Avatar p={yo} size={32} />
@@ -104,7 +104,7 @@ export default function App() {
           🔔{sinLeer > 0 && <span className="badge">{sinLeer}</span>}
         </button>
       </header>
-      <main>
+      <main key={tab} className="vista">
         {!yo ? <p className="c">Cargando perfil…</p>
           : tab === 'inicio' ? <Inicio yo={yo} onPartido={(id) => irA('partido', id)} onVotar={() => setTab('votar')} />
           : tab === 'partidos' ? <Partidos yo={yo} abrirInicial={irPartido} onUsado={() => setIrPartido(null)} />
