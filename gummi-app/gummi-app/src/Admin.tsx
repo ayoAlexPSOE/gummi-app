@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import { Cargando } from './movil'
+import { POSICIONES } from './equipos'
 import { horario } from './util'
 import HorarioPicker, { Horario, horarioVacio, aTimestamps } from './HorarioPicker'
 
@@ -220,10 +221,7 @@ export default function Admin({ yo, onBack, onPartido, onTab }: {
           <input placeholder="Nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} />
           <select value={pos} onChange={(e) => setPos(e.target.value)}>
             <option value="">Posición (opcional)</option>
-            <option value="portero">Portero</option>
-            <option value="defensa">Defensa</option>
-            <option value="medio">Medio</option>
-            <option value="delantero">Delantero</option>
+            {POSICIONES.map(([id, t]) => <option key={id} value={id}>{t}</option>)}
           </select>
           <button type="submit">Añadir</button>
         </form>

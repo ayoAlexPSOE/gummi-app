@@ -4,6 +4,7 @@ import Ficha from './Ficha'
 import Avatar from './Avatar'
 import OnceIdeal from './OnceIdeal'
 import { useAtras } from './movil'
+import { POSICIONES, abrevPos } from './equipos'
 
 export default function Jugadores({ yo }: { yo: any }) {
   const admin = yo.rol === 'admin'
@@ -100,7 +101,7 @@ export default function Jugadores({ yo }: { yo: any }) {
               <Avatar p={j} size={32} />
               <span className="jug-nombre" onClick={() => setFicha(j.id)}>{j.apodo || j.nombre}{j.id === yo.id && <span className="mut"> (tú)</span>}</span>
               {j.dorsal != null && <span className="dorsal-mini">{j.dorsal}</span>}
-              {j.posicion && <span className={'tag pos-' + j.posicion}>{j.posicion.slice(0, 3)}</span>}
+              {j.posicion && <span className={'tag pos-' + j.posicion}>{abrevPos(j.posicion)}</span>}
               {j.es_externo && <span className="tag">ext</span>}
               {j.rol === 'admin' && <span className="tag">adm</span>}
               {admin && <span className="media-badge">{n?.nota != null ? Math.round(Number(n.nota)) : '–'}</span>}
@@ -140,10 +141,7 @@ export default function Jugadores({ yo }: { yo: any }) {
                     <input placeholder="Apodo (opcional)" value={eApodo} onChange={(e) => setEApodo(e.target.value)} />
                     <select value={ePos} onChange={(e) => setEPos(e.target.value)}>
                       <option value="">Posición</option>
-                      <option value="portero">Portero</option>
-                      <option value="defensa">Defensa</option>
-                      <option value="medio">Medio</option>
-                      <option value="delantero">Delantero</option>
+                      {POSICIONES.map(([id, t]) => <option key={id} value={id}>{t}</option>)}
                     </select>
                     <div className="row">
                       <button type="submit">Guardar</button>

@@ -19,10 +19,11 @@
   --suave:cubic-bezier(.22,1,.36,1);
 }
 * { box-sizing:border-box; }
-html { -webkit-text-size-adjust:100%; }
+html { -webkit-text-size-adjust:100%; background:var(--bg); }
 body {
   margin:0; -webkit-tap-highlight-color:transparent; overscroll-behavior-y:none;
-  background:var(--bg); color:var(--txt);
+  /* sin fondo propio: si lo tuviera, taparía las estrellas (que van detrás, en body::before) */
+  background:transparent; color:var(--txt);
   font-family:Inter,system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased;
 }
 
@@ -32,8 +33,8 @@ body::before { content:''; position:fixed; inset:0; z-index:-2; pointer-events:n
   background:url('./estrellas.svg') center / cover no-repeat; }
 body::after { content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
   background:
-    radial-gradient(120% 60% at 50% 0%, #04082600 0%, #04082640 60%, #040826a6 100%),
-    linear-gradient(180deg, #04082626, #04082659); }
+    radial-gradient(120% 60% at 50% 0%, #04082600 0%, #04082626 60%, #04082680 100%),
+    linear-gradient(180deg, #04082600, #04082633); }
 
 .app { max-width:560px; margin:0 auto; min-height:100dvh; display:flex; flex-direction:column; }
 .app > main:first-child { padding-top:calc(6px + env(safe-area-inset-top)); }
@@ -94,7 +95,7 @@ h2::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,#3d
    (tarjetas, filas de plantilla, casillas) un cristal "falso" un poco más opaco que pinta mucho más rápido. */
 .card, .tile, .jug, .once, .perfil-cab {
   background:var(--cristal); border:1px solid var(--line); box-shadow:var(--sombra); }
-.card, .jug { background:linear-gradient(165deg,#1a2a8ab3 0%,#0b1450a6 55%,#070e3d99 100%); }
+.card, .jug { background:linear-gradient(165deg,#1a2a8a99 0%,#0b145080 55%,#070e3d73 100%); }
 .once, .perfil-cab { backdrop-filter:blur(12px) saturate(1.3); -webkit-backdrop-filter:blur(12px) saturate(1.3); }
 .card { border-radius:var(--r); padding:14px 16px; margin:12px 0; position:relative; transition:transform .25s var(--suave), border-color .25s; }
 .card[style*="cursor: pointer"]:active, .card.alerta:active { transform:scale(.98); }
@@ -116,6 +117,7 @@ p.c { color:var(--mut); animation:aparece .6s .2s both; }
 .tag.pos-portero { background:#ffc83d1f; border-color:#ffc83d59; color:#ffd76a; }
 .tag.pos-defensa { background:#4da3ff1f; border-color:#4da3ff59; color:#8fc6ff; }
 .tag.pos-medio { background:#2ee59d1f; border-color:#2ee59d59; color:#79f2bf; }
+.tag.pos-banda { background:#b678ff1f; border-color:#b678ff59; color:#d4b3ff; }
 .tag.pos-delantero { background:#ff4d6a1f; border-color:#ff4d6a59; color:#ff94a6; }
 
 /* ---------- Formularios y botones ---------- */
@@ -203,8 +205,8 @@ img.avatar { background:#081048; }
   background:radial-gradient(120% 90% at 0% 0%, #3ddcff2e, transparent 55%), radial-gradient(90% 80% at 100% 100%, #ff6fe029, transparent 55%), var(--cristal); }
 .perfil-cab .avatar { box-shadow:0 0 0 3px #040826, 0 0 0 5px #3ddcffaa, 0 0 30px #3ddcff66; animation:pop .6s var(--muelle) both; }
 .perfil-nombre { font-family:var(--titulo); font-size:30px; font-weight:800; line-height:1.05; text-transform:uppercase; letter-spacing:-.3px; }
-.pos-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
-.pos-grid button { display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 2px; font-size:12px; min-height:60px; }
+.pos-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:5px; }
+.pos-grid button { display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 1px; font-size:11px; min-height:60px; letter-spacing:0; }
 details summary { cursor:pointer; font-weight:600; min-height:28px; }
 details[open] > *:not(summary) { animation:entra .35s var(--suave) both; }
 label.mut { margin-top:6px; }
@@ -414,6 +416,23 @@ button.guardar-fijo { width:100%; margin-top:12px; position:sticky; bottom:calc(
 
 .dorsal-mini { font-family:var(--titulo); font-weight:800; font-size:13px; color:transparent; -webkit-text-stroke:1px var(--acc); min-width:18px; text-align:center; }
 .aviso-ic { font-size:22px; line-height:1.2; }
+
+/* Colores de camiseta */
+.camiseta { display:inline-block; width:16px; height:15px; margin-right:6px; vertical-align:-2px; background:var(--m); flex:none;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 22'%3E%3Cpath d='M8 1 L1 5 L3.5 10 L6 9 V21 H18 V9 L20.5 10 L23 5 L16 1 C15 3 13.6 4 12 4 C10.4 4 9 3 8 1 Z'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 22'%3E%3Cpath d='M8 1 L1 5 L3.5 10 L6 9 V21 H18 V9 L20.5 10 L23 5 L16 1 C15 3 13.6 4 12 4 C10.4 4 9 3 8 1 Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  filter:drop-shadow(0 0 1px #ffffffaa); }
+.camiseta.grande { width:30px; height:28px; margin:0 0 2px; filter:drop-shadow(0 0 1.5px #ffffffcc) drop-shadow(0 3px 6px #0008); }
+.marcador-eq b.pequeno { font-size:15px; color:var(--txt) !important; text-transform:uppercase; letter-spacing:.4px; }
+.equipo-cab b { display:flex; align-items:center; }
+.equipo-aviso { display:flex; align-items:center; gap:10px; }
+.card.camisetas { padding:12px 14px; }
+.camiseta-fila { margin-top:10px; }
+.muestras { display:flex; gap:5px; flex-wrap:wrap; margin-top:5px; }
+.muestra { width:32px; height:32px; min-height:0; padding:0; border-radius:50%; background:var(--m); border:2px solid #ffffff33; box-shadow:none; position:relative; }
+.muestra.on { border-color:#fff; box-shadow:0 0 0 3px var(--acc), 0 0 14px #3ddcffaa; transform:scale(1.08); }
+.muestra.choca { opacity:.35; }
+.muestra.choca::after { content:''; position:absolute; left:50%; top:4px; bottom:4px; width:2px; margin-left:-1px; background:#ff4d6a; transform:rotate(45deg); }
 
 /* Accesibilidad / ahorro: sin animaciones si el móvil lo pide */
 @media (prefers-reduced-motion:reduce) {

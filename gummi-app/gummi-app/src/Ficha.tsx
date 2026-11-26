@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { nombreEquipo } from './equipos'
 import Numero from './Numero'
 import { traerTodo } from './util'
 import Avatar from './Avatar'
 import { Cargando } from './movil'
+import { nombrePos } from './equipos'
 
 const MIN_PAREJA = 3
 
@@ -158,9 +160,9 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
         {perfil.dorsal != null && <div className="perfil-info"><div className="dorsal">{perfil.dorsal}</div></div>}
       </div>
       <div className="row" style={{ marginBottom: 10 }}>
-        {perfil.posicion && <span className={'tag pos-' + perfil.posicion}>{perfil.posicion}</span>}
+        {perfil.posicion && <span className={'tag pos-' + perfil.posicion}>{nombrePos(perfil.posicion)}</span>}
         {(perfil.posiciones_secundarias || []).map((s: string) => (
-          <span key={s} className={'tag pos-' + s} style={{ opacity: 0.7 }}>{s}</span>
+          <span key={s} className={'tag pos-' + s} style={{ opacity: 0.7 }}>{nombrePos(s)}</span>
         ))}
         {perfil.pierna && <span className="tag">🦶 {perfil.pierna}</span>}
         {perfil.es_externo && <span className="tag">externo</span>}
@@ -238,7 +240,7 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
               <span className={'chip ' + h.res}>{h.res}</span>
               <span style={{ flex: 1 }}>
                 {fmt(h.p.fecha)} · {h.gf}-{h.gc}
-                <div className="mut">Equipo {h.equipo}</div>
+                <div className="mut">{nombreEquipo(h.equipo, h.equipo === 'A' ? h.p.color_a : h.p.color_b)}</div>
               </span>
               <span className="mut">
                 {h.ev.g > 0 && `⚽${h.ev.g} `}

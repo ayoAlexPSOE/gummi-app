@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { color, nombreEquipo } from './equipos'
 import { horario } from './util'
 import Numero from './Numero'
 import Avatar from './Avatar'
@@ -118,7 +119,14 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
               </div>
             )}
             {prox.estado === 'equipos' && miEq && (
-              <div className="aviso">⚽ Equipos listos: juegas en el <b>equipo {miEq.equipo}</b></div>
+              <div className="aviso equipo-aviso">
+                {(() => {
+                  const c = color(miEq.equipo === 'A' ? prox.color_a : prox.color_b)
+                  return c
+                    ? <><span className="camiseta grande" style={{ ['--m' as any]: c.hex }} /><span>Equipos listos: juegas con los <b>{c.plural.toLowerCase()}</b>. ¡Lleva camiseta {c.nombre.toLowerCase()}!</span></>
+                    : <span>⚽ Equipos listos: juegas en el <b>equipo {miEq.equipo}</b></span>
+                })()}
+              </div>
             )}
             {prox.estado === 'convocatoria' && (
               <div className="grid3">
@@ -169,11 +177,11 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
               {res && <span className={'chip ' + res}>{res}</span>}
             </div>
             <div className="marcador sin-caja">
-              <div className="marcador-eq"><span className="mut">Equipo</span><b>A</b></div>
+              <div className="marcador-eq">{color(ultimo.color_a) ? <><span className="camiseta grande" style={{ ['--m' as any]: color(ultimo.color_a)!.hex }} /><b className="pequeno">{color(ultimo.color_a)!.plural}</b></> : <><span className="mut">Equipo</span><b>A</b></>}</div>
               <div className="marcador-num">{ultimo.goles_a}<i>–</i>{ultimo.goles_b}</div>
-              <div className="marcador-eq"><span className="mut">Equipo</span><b>B</b></div>
+              <div className="marcador-eq">{color(ultimo.color_b) ? <><span className="camiseta grande" style={{ ['--m' as any]: color(ultimo.color_b)!.hex }} /><b className="pequeno">{color(ultimo.color_b)!.plural}</b></> : <><span className="mut">Equipo</span><b>B</b></>}</div>
             </div>
-            <div className="mut" style={{ textAlign: 'center' }}>{mi ? `Jugaste en el equipo ${mi.equipo} · ` : ''}Ver detalle ›</div>
+            <div className="mut" style={{ textAlign: 'center' }}>{mi ? (color(mi.equipo === 'A' ? ultimo.color_a : ultimo.color_b) ? `Jugaste con los ${nombreEquipo(mi.equipo, mi.equipo === 'A' ? ultimo.color_a : ultimo.color_b).toLowerCase()} · ` : `Jugaste en el equipo ${mi.equipo} · `) : ''}Ver detalle ›</div>
           </div>
         )
       })()}

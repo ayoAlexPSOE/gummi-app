@@ -8,7 +8,7 @@ const fmt = (iso: string) =>
 // Puntos de ataque: quien marca o asiste va delante; los defensas, atrás.
 const ataque = (r: any) =>
   r.goles * 10 + r.asistencias * 4 +
-  ({ delantero: 3, medio: 2, defensa: 0, portero: 0 } as any)[r.posicion] +
+  (({ delantero: 3, banda: 2.5, medio: 2, defensa: 0, portero: 0 } as any)[r.posicion] || 0) +
   (r.posicion ? 0 : 1) + Number(r.nota) / 10
 
 export default function OnceIdeal({ perfiles, onFicha }: { perfiles: any[]; onFicha: (id: string) => void }) {

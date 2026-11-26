@@ -4,13 +4,9 @@ import Numero from './Numero'
 import Avatar from './Avatar'
 import Ficha from './Ficha'
 import { useAtras, vibra } from './movil'
+import { POSICIONES, nombrePos } from './equipos'
 
-const POS: [string, string, string][] = [
-  ['portero', 'Portero', '🧤'],
-  ['defensa', 'Defensa', '🛡️'],
-  ['medio', 'Medio', '🎯'],
-  ['delantero', 'Delantero', '⚡'],
-]
+const POS = POSICIONES
 const PIERNAS: [string, string][] = [['derecha', 'Derecha'], ['izquierda', 'Izquierda'], ['ambas', 'Ambas']]
 
 // Recorta al cuadrado y reduce a 320 px para que la foto pese poco.
@@ -143,8 +139,8 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
           <div className="perfil-nombre">{yo.apodo || yo.nombre}</div>
           {yo.apodo && <div className="mut">{yo.nombre}</div>}
           <div className="row" style={{ marginTop: 6 }}>
-            {yo.posicion && <span className={'tag pos-' + yo.posicion}>{yo.posicion}</span>}
-            {(yo.posiciones_secundarias || []).map((s: string) => <span key={s} className={'tag pos-' + s} style={{ opacity: 0.7 }}>{s}</span>)}
+            {yo.posicion && <span className={'tag pos-' + yo.posicion}>{nombrePos(yo.posicion)}</span>}
+            {(yo.posiciones_secundarias || []).map((s: string) => <span key={s} className={'tag pos-' + s} style={{ opacity: 0.7 }}>{nombrePos(s)}</span>)}
             {yo.rol === 'admin' && (
               <button type="button" className="tag admin-tag" onClick={onAdmin}>🔧 admin ›</button>
             )}

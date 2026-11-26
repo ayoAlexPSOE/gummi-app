@@ -4,6 +4,7 @@ import { horario } from './util'
 import HorarioPicker, { Horario, aTimestamps, desdePartido } from './HorarioPicker'
 import Avatar from './Avatar'
 import { Cargando, anadirCalendario, compartir, vibra } from './movil'
+import { COLORES, color, elegirColores, nombreEquipo, seParecen } from './equipos'
 
 type Eq = 'A' | 'B'
 
@@ -13,7 +14,7 @@ const ESTADOS: Record<string, string> = {
   jugado: 'Jugado',
   cerrado: 'Cerrado',
 }
-const POSICIONES = ['defensa', 'medio', 'delantero']
+const POSICIONES = ['defensa', 'medio', 'banda', 'delantero']
 const NOTA_DEFECTO = 5
 
 // Reparte a los jugadores en dos equipos lo más igualados posible
@@ -42,8 +43,8 @@ function generarEquipos(jug: any[], notaDe: (id: string) => number): Record<stri
     let sumB = 0
     let porA = 0
     let porB = 0
-    const posA = [0, 0, 0]
-    const posB = [0, 0, 0]
+    const posA = [0, 0, 0, 0]
+    const posB = [0, 0, 0, 0]
     for (let i = 0; i < n; i++) {
       if (mask & (1 << i)) {
         cuenta++
@@ -59,7 +60,7 @@ function generarEquipos(jug: any[], notaDe: (id: string) => number): Record<stri
     if (cuenta !== tamA) continue
     let coste = Math.abs(sumA / tamA - sumB / tamB)
     if (totalPorteros >= 2) coste += 3 * Math.abs(porA - porB)
-    for (let k = 0; k < 3; k++) coste += 0.08 * Math.abs(posA[k] - posB[k])
+    for (let k = 0; k < 4; k++) coste += 0.08 * Math.abs(posA[k] - posB[k])
     candidatos.push({ mask, coste })
   }
 
@@ -91,6 +92,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
   const [gb, setGb] = useState('')
   const [manual, setManual] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [colores, setColores] = useState<[string, string] | null>(null) // colores en el borrador
   const [editDatos, setEditDatos] = useState<{ hor: Horario; lugar: string } | null>(null)
   const [mvp, setMvp] = useState<any[]>([])
 
@@ -195,6 +197,8 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
     if (confirmados.length < 2) return alert('Hacen falta al menos 2 jugadores con "Voy".')
     if (confirmados.length > 20) return alert('Demasiados jugadores para repartir (máximo 20).')
     vibra(20)
+    // Si el partido ya tiene colores se mantienen; si no, se eligen solos.
+    if (!colores) setColores(p.color_a && p.color_b ? [p.color_a, p.color_b] : elegirColores())
     setBorrador(generarEquipos(confirmados, notaDe))
     setTimeout(() => document.getElementById('equipos')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
   }
@@ -218,13 +222,58 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
     if (del.error) { setBusy(false); return alert(del.error.message) }
     const ins = await supabase.from('participaciones').insert(filas)
     if (ins.error) { setBusy(false); return alert(ins.error.message) }
-    if (p.estado === 'convocatoria') {
-      await supabase.from('partidos').update({ estado: 'equipos' }).eq('id', id)
+    const cambios: any = p.estado === 'convocatoria' ? { estado: 'equipos' } : {}
+    if (colores) { cambios.color_a = colores[0]; cambios.color_b = colores[1] }
+    if (Object.keys(cambios).length) {
+      const u = await supabase.from('partidos').update(cambios).eq('id', id)
+      // Sin el script 14 todavía: se guarda sin colores
+      if (u.error && /color_/.test(u.error.message) && cambios.estado) await supabase.from('partidos').update({ estado: 'equipos' }).eq('id', id)
     }
+    vibra(25)
     setBorrador(null)
+    setColores(null)
     await cargar()
     setBusy(false)
   }
+
+  // Colores de camiseta: en el borrador se guardan con los equipos; si ya están hechos, al momento.
+  const colorDe = (eq: Eq): string | null => (colores ? colores[eq === 'A' ? 0 : 1] : eq === 'A' ? p.color_a : p.color_b) || null
+  const cambiarColor = async (eq: Eq, nuevo: string) => {
+    vibra(8)
+    const otro = colorDe(eq === 'A' ? 'B' : 'A')
+    let a = eq === 'A' ? nuevo : colorDe('A') || ''
+    let b = eq === 'B' ? nuevo : colorDe('B') || ''
+    // Si choca con el otro equipo, el otro pasa a un color que se distinga
+    if (otro && seParecen(nuevo, otro)) {
+      const alt = COLORES.find((x) => !seParecen(x.id, nuevo))!.id
+      if (eq === 'A') b = alt; else a = alt
+    }
+    if (borrador) { setColores([a, b]); return }
+    const u = await supabase.from('partidos').update({ color_a: a || null, color_b: b || null }).eq('id', id)
+    if (u.error) return alert(/color_/.test(u.error.message) ? 'Falta ejecutar en Supabase el script 14_banda_colores.sql.' : u.error.message)
+    setP({ ...p, color_a: a || null, color_b: b || null })
+  }
+  const selectorColores = () => (
+    <div className="card camisetas">
+      <b>👕 Camisetas</b>
+      {(['A', 'B'] as Eq[]).map((eq) => {
+        const mio = colorDe(eq)
+        const otro = colorDe(eq === 'A' ? 'B' : 'A')
+        return (
+          <div key={eq} className="camiseta-fila">
+            <span className="mut">{nombreEquipo(eq, mio)}</span>
+            <div className="muestras">
+              {COLORES.map((x) => (
+                <button key={x.id} type="button" className={'muestra' + (mio === x.id ? ' on' : '') + (otro && seParecen(x.id, otro) && mio !== x.id ? ' choca' : '')}
+                  style={{ ['--m' as any]: x.hex }} onClick={() => cambiarColor(eq, x.id)} aria-label={x.nombre} title={x.nombre} />
+              ))}
+            </div>
+          </div>
+        )
+      })}
+      <div className="mut" style={{ fontSize: 12 }}>Los tachados se confunden con el color del otro equipo.</div>
+    </div>
+  )
 
   // ---------- resultado, goles y asistencias ----------
   const ajustar = (jid: string, campo: 'g' | 'a', delta: number) => {
@@ -289,10 +338,11 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
         if (e.tipo === 'gol') m[e.jugador_id] = (m[e.jugador_id] || 0) + 1
         return m
       }, {})).map(([j, n]: any) => `${nombre(j)}${n > 1 ? ' ×' + n : ''}`).join(', ')
-      return `${cab}\n🏁 Equipo A ${p.goles_a} – ${p.goles_b} Equipo B${goleadores ? '\n⚽ ' + goleadores : ''}${p.votacion_hasta && new Date(p.votacion_hasta).getTime() > Date.now() ? '\n🗳️ ¡Votación abierta 48 h!' : ''}`
+      return `${cab}\n🏁 ${nombreEquipo('A', p.color_a)} ${p.goles_a} – ${p.goles_b} ${nombreEquipo('B', p.color_b)}${goleadores ? '\n⚽ ' + goleadores : ''}${p.votacion_hasta && new Date(p.votacion_hasta).getTime() > Date.now() ? '\n🗳️ ¡Votación abierta 48 h!' : ''}`
     }
     if (part.length > 0) {
-      return `${cab}\n🔵 Equipo A: ${lista(idsGuardados('A'))}\n🟣 Equipo B: ${lista(idsGuardados('B'))}`
+      const eqTxt = (eq: Eq) => `${color(colorDe(eq))?.emoji || (eq === 'A' ? '🅰️' : '🅱️')} ${nombreEquipo(eq, colorDe(eq))}: ${lista(idsGuardados(eq))}`
+      return `${cab}\n${eqTxt('A')}\n${eqTxt('B')}`
     }
     const van = confirmados.map((j) => j.apodo || j.nombre)
     const dudan = perfiles.filter((j) => respDe(j.id) === 'duda').map((j) => j.apodo || j.nombre)
@@ -305,9 +355,9 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
   const jugado = p.estado === 'jugado' || p.estado === 'cerrado'
 
   const renderEquipo = (letra: Eq, ids: string[], editable: boolean) => (
-    <div className={'card equipo eq-' + letra} key={letra}>
+    <div className={'card equipo eq-' + letra} key={letra} style={color(colorDe(letra)) ? { ['--eq' as any]: color(colorDe(letra))!.ui } : undefined}>
       <div className="equipo-cab">
-        <b>Equipo {letra}</b>
+        <b>{color(colorDe(letra)) && <span className="camiseta" style={{ ['--m' as any]: color(colorDe(letra))!.hex }} />}{nombreEquipo(letra, colorDe(letra))}</b>
         <span className="mut">{ids.length}{admin && !jugado ? ` · ${media(ids)}` : ''}</span>
       </div>
       {ids.map((jid) => {
@@ -381,9 +431,9 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
 
       {jugado && p.goles_a != null && (
         <div className="marcador">
-          <div className="marcador-eq"><span className="mut">Equipo</span><b>A</b></div>
+          <div className="marcador-eq" style={color(p.color_a) ? { ['--eq' as any]: color(p.color_a)!.ui } : undefined}>{color(p.color_a) ? <><span className="camiseta grande" style={{ ['--m' as any]: color(p.color_a)!.hex }} /><b className="pequeno">{color(p.color_a)!.plural}</b></> : <><span className="mut">Equipo</span><b>A</b></>}</div>
           <div className="marcador-num">{p.goles_a}<i>–</i>{p.goles_b}</div>
-          <div className="marcador-eq"><span className="mut">Equipo</span><b>B</b></div>
+          <div className="marcador-eq" style={color(p.color_b) ? { ['--eq' as any]: color(p.color_b)!.ui } : undefined}>{color(p.color_b) ? <><span className="camiseta grande" style={{ ['--m' as any]: color(p.color_b)!.hex }} /><b className="pequeno">{color(p.color_b)!.plural}</b></> : <><span className="mut">Equipo</span><b>B</b></>}</div>
         </div>
       )}
 
@@ -411,17 +461,21 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
             {renderEquipo('A', idsBorrador('A'), true)}
             {renderEquipo('B', idsBorrador('B'), true)}
           </div>
+          {selectorColores()}
           <div className="grid3">
             <button className="sec" onClick={generar}>🔀 Otra</button>
-            <button className="sec" onClick={() => setBorrador(null)}>Cancelar</button>
+            <button className="sec" onClick={() => { setBorrador(null); setColores(null) }}>Cancelar</button>
             <button disabled={busy} onClick={guardarEquipos}>Guardar</button>
           </div>
         </>
       ) : part.length > 0 ? (
-        <div className="equipos-grid">
-          {renderEquipo('A', idsGuardados('A'), false)}
-          {renderEquipo('B', idsGuardados('B'), false)}
-        </div>
+        <>
+          <div className="equipos-grid">
+            {renderEquipo('A', idsGuardados('A'), false)}
+            {renderEquipo('B', idsGuardados('B'), false)}
+          </div>
+          {admin && p.estado !== 'cerrado' && selectorColores()}
+        </>
       ) : (
         !puedeEditarEquipos && (p.estado === 'convocatoria') && <p className="mut" style={{ marginTop: 14 }}>Los equipos se harán cuando se cierre la convocatoria.</p>
       )}
@@ -487,7 +541,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
           <div className="card">
             {(['A', 'B'] as Eq[]).map((eq) => (
               <div key={eq}>
-                <div className="mut editor-eq">Equipo {eq}</div>
+                <div className="mut editor-eq">{nombreEquipo(eq, colorDe(eq))}</div>
                 {part.filter((x) => x.equipo === eq).map((x) => {
                   const c = cont[x.jugador_id] || { g: 0, a: 0 }
                   return (
@@ -510,13 +564,13 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
             ))}
           </div>
           <div className="marcador editable">
-            <div className="marcador-eq"><span className="mut">Equipo</span><b>A</b></div>
+            <div className="marcador-eq" style={color(p.color_a) ? { ['--eq' as any]: color(p.color_a)!.ui } : undefined}>{color(p.color_a) ? <><span className="camiseta grande" style={{ ['--m' as any]: color(p.color_a)!.hex }} /><b className="pequeno">{color(p.color_a)!.plural}</b></> : <><span className="mut">Equipo</span><b>A</b></>}</div>
             <div className="marcador-num">
               <input type="number" inputMode="numeric" min={0} value={ga} onChange={(e) => { setManual(true); setGa(e.target.value) }} aria-label="Goles equipo A" />
               <i>–</i>
               <input type="number" inputMode="numeric" min={0} value={gb} onChange={(e) => { setManual(true); setGb(e.target.value) }} aria-label="Goles equipo B" />
             </div>
-            <div className="marcador-eq"><span className="mut">Equipo</span><b>B</b></div>
+            <div className="marcador-eq" style={color(p.color_b) ? { ['--eq' as any]: color(p.color_b)!.ui } : undefined}>{color(p.color_b) ? <><span className="camiseta grande" style={{ ['--m' as any]: color(p.color_b)!.hex }} /><b className="pequeno">{color(p.color_b)!.plural}</b></> : <><span className="mut">Equipo</span><b>B</b></>}</div>
           </div>
           <p className="mut">Si hubo un gol en propia puerta, corrige el marcador a mano.</p>
           <div className="row">

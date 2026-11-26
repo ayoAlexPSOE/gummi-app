@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { color } from './equipos'
 import { horario } from './util'
 import PartidoDetalle from './PartidoDetalle'
 import { Cargando, useAtras, vibra } from './movil'
@@ -100,7 +101,14 @@ export default function Partidos({ yo, abrirInicial, onUsado }: { yo: any; abrir
             ))}
           </div>
         )}
-        {p.estado === 'equipos' && miEq && <div className="aviso" style={{ margin: '8px 0 0' }}>Juegas en el <b>equipo {miEq.equipo}</b></div>}
+        {p.estado === 'equipos' && miEq && (() => {
+          const c = color(miEq.equipo === 'A' ? p.color_a : p.color_b)
+          return (
+            <div className="aviso equipo-aviso" style={{ margin: '8px 0 0' }}>
+              {c ? <><span className="camiseta" style={{ ['--m' as any]: c.hex }} /><span>Juegas con los <b>{c.plural.toLowerCase()}</b></span></> : <span>Juegas en el <b>equipo {miEq.equipo}</b></span>}
+            </div>
+          )
+        })()}
       </div>
     )
   }
