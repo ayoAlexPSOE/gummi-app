@@ -20,7 +20,7 @@ body {
 
 /* Cabecera */
 header { display:flex; gap:10px; align-items:center; padding:10px 16px; position:sticky; top:0; z-index:5;
-  background:linear-gradient(#040826f2,#040826d9); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); }
+  background:linear-gradient(#040826cc,#04082699); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); }
 .brand { font-family:var(--titulo); font-size:26px; font-weight:800; letter-spacing:1.5px; font-style:italic; display:flex; align-items:center; gap:6px; }
 .brand i { font-style:normal; color:var(--acc); font-size:20px; }
 header .quien { flex:1; display:flex; align-items:center; justify-content:flex-end; gap:8px; color:var(--mut); font-size:13px; min-width:0; }
@@ -32,7 +32,7 @@ header button.bell { background:none; border:0; padding:4px 8px; font-size:20px;
 main { flex:1; padding:4px 16px 96px; }
 
 /* Menú inferior */
-nav { position:fixed; bottom:0; left:0; right:0; display:flex; background:#060d33ee; backdrop-filter:blur(10px);
+nav { position:fixed; bottom:0; left:0; right:0; display:flex; background:#060d33cc; backdrop-filter:blur(12px);
   border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom); z-index:6; max-width:560px; margin:0 auto; }
 nav button { flex:1; border-radius:0; background:none; color:var(--mut); padding:8px 2px; font-size:11px; font-weight:600; letter-spacing:.3px;
   display:flex; flex-direction:column; align-items:center; gap:2px; min-height:58px; border:0; position:relative; transition:color .2s; }
@@ -48,9 +48,9 @@ h2::before { content:''; width:5px; height:20px; background:var(--acc); border-r
 .brand-big i { font-style:normal; color:var(--acc); }
 
 /* Tarjetas */
-.card { background:linear-gradient(180deg,var(--card2),var(--card)); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin:10px 0; animation:entra .28s ease both; }
+.card { background:linear-gradient(180deg,#101b6399,#0b134880); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin:10px 0; animation:entra .28s ease both; }
 .card.unread { border-left:4px solid var(--acc); }
-.card.alerta { border-color:#ffc83d66; background:linear-gradient(180deg,#2a2410,var(--card)); cursor:pointer; }
+.card.alerta { border-color:#ffc83d66; background:linear-gradient(180deg,#2a2410b3,#0b134880); cursor:pointer; }
 .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 .mut { color:var(--mut); font-size:13px; }
 .c { text-align:center; padding:40px 0; }
@@ -81,13 +81,13 @@ form { display:flex; flex-direction:column; gap:8px; }
 
 /* Estadísticas */
 .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-.tile { background:linear-gradient(180deg,var(--card2),var(--card)); border:1px solid var(--line); border-radius:12px; padding:12px 6px; text-align:center; }
+.tile { background:linear-gradient(180deg,#101b6399,#0b134880); border:1px solid var(--line); border-radius:12px; padding:12px 6px; text-align:center; }
 .tile b { display:block; font-family:var(--titulo); font-size:32px; font-weight:800; line-height:1.05; color:var(--acc); }
 .chip { display:inline-flex; width:28px; height:28px; border-radius:8px; align-items:center; justify-content:center; font-family:var(--titulo); font-weight:800; font-size:15px; color:#fff; flex:none; transform:skewX(-8deg); }
 .chip.V { background:#18a34a; } .chip.E { background:#6b78c4; } .chip.D { background:#d83a4a; }
 
 /* Inicio */
-.hero { position:relative; overflow:hidden; background:linear-gradient(165deg,#152273 0%,#070e3d 60%,#060d33 100%); border:1px solid #3a52c4; border-radius:18px; padding:16px; margin:12px 0; animation:entra .3s ease both; }
+.hero { position:relative; overflow:hidden; background:linear-gradient(165deg,#152273b3 0%,#070e3d99 60%,#060d3399 100%); border:1px solid #3a52c4; border-radius:18px; padding:16px; margin:12px 0; animation:entra .3s ease both; }
 .hero::before { content:''; position:absolute; inset:0; pointer-events:none; opacity:.55;
   background:
     repeating-linear-gradient(90deg, transparent 0 46px, #ffffff08 46px 92px),
@@ -124,7 +124,7 @@ button.grande.sel { background:var(--acc); color:var(--acc-t); box-shadow:0 0 18
 /* Avatares y perfil */
 .avatar { object-fit:cover; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; background:var(--acc); color:var(--acc-t); font-family:var(--titulo); font-weight:800; flex:none; border:2px solid #3ddcff66; }
 img.avatar { background:#081048; }
-.perfil-cab { display:flex; align-items:center; gap:14px; margin:14px 0 6px; padding:14px; border-radius:16px; border:1px solid #3a52c4; background:linear-gradient(165deg,#152273,#070e3d); }
+.perfil-cab { display:flex; align-items:center; gap:14px; margin:14px 0 6px; padding:14px; border-radius:16px; border:1px solid #3a52c4; background:linear-gradient(165deg,#152273b3,#070e3d99); }
 .perfil-nombre { font-family:var(--titulo); font-size:30px; font-weight:800; line-height:1.05; text-transform:uppercase; }
 .grid4 { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
 .pos-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
@@ -139,7 +139,7 @@ label.mut { margin-top:6px; }
 @media (max-width:420px) { .perfil-cab { flex-wrap:wrap; } .perfil-info { max-width:100%; width:100%; text-align:left; display:flex; flex-wrap:wrap; gap:4px 14px; align-items:center; } .perfil-info .dorsal { font-size:34px; } }
 
 /* Plantilla: filas finas */
-.jug { background:linear-gradient(180deg,var(--card2),var(--card)); border:1px solid var(--line); border-radius:12px; margin:6px 0; padding:6px 10px; animation:entra .25s ease both; }
+.jug { background:linear-gradient(180deg,#101b6399,#0b134880); border:1px solid var(--line); border-radius:12px; margin:6px 0; padding:6px 10px; animation:entra .25s ease both; }
 .jug-fila { display:flex; align-items:center; gap:8px; min-height:40px; }
 .jug-nombre { flex:1; font-weight:600; cursor:pointer; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .jug .tag { font-size:10px; padding:1px 6px; }
@@ -148,7 +148,7 @@ button.ico { padding:0 10px; min-height:32px; font-size:18px; line-height:1; }
 .jug-extra { border-top:1px solid var(--line); margin-top:6px; padding:8px 0 4px; }
 
 /* Once ideal */
-.once { background:linear-gradient(180deg,#0b1450,#070e3d); border:1px solid #3a52c4; border-radius:16px; padding:10px; margin:12px 0; animation:entra .3s ease both; }
+.once { background:linear-gradient(180deg,#0b1450a6,#070e3d99); border:1px solid #3a52c4; border-radius:16px; padding:10px; margin:12px 0; animation:entra .3s ease both; }
 .once-t { font-family:var(--titulo); font-size:20px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; }
 .campo { position:relative; border-radius:12px; padding:18px 4px 8px; display:flex; flex-direction:column; gap:6px; overflow:hidden;
   background:repeating-linear-gradient(0deg,#143d27 0 34px,#11351f 34px 68px); border:1px solid #1f5a39; }
@@ -190,20 +190,13 @@ button.admin-tag { background:#3ddcff22; color:var(--acc); border:1px solid #3dd
 .hero-h { color:var(--acc); white-space:nowrap; }
 
 /* Fondo de estadio: arcos de luz detrás de todo, tenues para que las letras se lean */
-/* Móvil: el estadio ocupa la parte de arriba (centrado en el campo) y se funde con el fondo */
+/* Fondo: estadio a pantalla completa, fijo, con un velo suave para que se lea el texto */
 body::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
   background:
-    linear-gradient(180deg, #04082680 0%, #04082640 30%, #040826b3 65%, #040826 98%) center top / 210vw 118.5vw no-repeat,
-    url('./estadio.jpg') center top / 210vw auto no-repeat,
+    linear-gradient(180deg, #04082633 0%, #04082640 50%, #04082680 100%),
+    url('./estadio.jpg') 50% 40% / cover no-repeat,
     var(--bg); }
-/* Pantallas anchas: la imagen a lo ancho */
-@media (min-width:700px) {
-  body::before { background:
-    linear-gradient(180deg, #04082699 0%, #04082666 30%, #040826d9 70%, #040826 100%),
-    url('./estadio.jpg') center top / cover no-repeat,
-    var(--bg); }
-}
-.card, .tile, .jug, .once, .hero, .perfil-cab { backdrop-filter:blur(6px); }
+.card, .tile, .jug, .once, .hero, .perfil-cab { backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
 
 button.gen-equipos { width:100%; margin:12px 0 4px; padding:14px; display:flex; flex-direction:column; align-items:center; gap:2px; font-size:18px; font-family:var(--titulo); font-weight:800; letter-spacing:.8px; text-transform:uppercase; box-shadow:0 0 22px #3ddcff44; }
 button.gen-equipos span { font-family:Inter,system-ui,sans-serif; font-size:12px; font-weight:500; letter-spacing:0; text-transform:none; opacity:.85; }
