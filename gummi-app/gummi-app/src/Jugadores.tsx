@@ -23,7 +23,7 @@ export default function Jugadores({ yo }: { yo: any }) {
   useAtras(ficha !== null, () => setFicha(null))
 
   const cargar = async () => {
-    const { data } = await supabase.from('perfiles').select('*').order('nombre')
+    const { data } = await supabase.from('perfiles').select('*').eq('activo', true).order('nombre')
     setLista(data || [])
     if (admin) {
       const n = await supabase.rpc('notas_jugadores')
