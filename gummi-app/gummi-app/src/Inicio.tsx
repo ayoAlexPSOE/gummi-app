@@ -98,7 +98,7 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
               const [dia, h] = horario(prox, true).split(' · ')
               return <>{dia}<br /><span className="hero-h">{h}</span></>
             })()}</div>
-            <div className="mut">📍 {prox.lugar || 'Sin lugar'}</div>
+            <div className="mut">📍 {prox.lugar || 'Lugar por confirmar'}</div>
             {(() => {
               const van = d.conv.filter((c: any) => c.partido_id === prox.id && c.respuesta === 'voy')
                 .map((c: any) => d.perfiles.find((j: any) => j.id === c.jugador_id)).filter(Boolean)

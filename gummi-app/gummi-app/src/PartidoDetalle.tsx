@@ -397,7 +397,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
       </div>
       <h2 className="titulo-partido">{horario(p, true)}</h2>
       <div className="mut">
-        📍 {p.lugar || 'Sin lugar'}
+        📍 {p.lugar || 'Lugar por confirmar'}
         {admin && !editDatos && <button className="sec mini" style={{ marginLeft: 10 }} onClick={editarDatos}>Editar</button>}
       </div>
       {admin && editDatos && (

@@ -82,7 +82,7 @@ export default function Partidos({ yo, abrirInicial, onUsado }: { yo: any; abrir
         <div className="row" style={{ flexWrap: 'nowrap' }}>
           <span style={{ flex: 1, minWidth: 0 }}>
             <b className="partido-dia">{horario(p)}</b>
-            <div className="mut">{p.lugar || 'Sin lugar'}{!hayRes ? ` · ${voy} ${voy === 1 ? 'va' : 'van'}` : ''}</div>
+            <div className="mut">{[p.lugar, !hayRes ? `${voy} ${voy === 1 ? 'va' : 'van'}` : ''].filter(Boolean).join(' · ')}</div>
           </span>
           {hayRes ? (
             <span className="marcador-mini">
