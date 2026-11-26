@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import Media from './Media'
 import { aviso, confirmar } from './dialogos'
 import { invalidar, perfilesActivos } from './datos'
 import Ficha from './Ficha'
@@ -104,11 +105,11 @@ export default function Jugadores({ yo }: { yo: any }) {
             <div className="jug-fila">
               <Avatar p={j} size={32} />
               <span className="jug-nombre" onClick={() => setFicha(j.id)}>{j.apodo || j.nombre}{j.id === yo.id && <span className="mut"> (tú)</span>}</span>
-              {j.dorsal != null && <span className="dorsal-mini">{j.dorsal}</span>}
+              {j.dorsal != null && <span className="dorsal-mini" title="Dorsal">#{j.dorsal}</span>}
               {j.posicion && <span className={'tag pos-' + j.posicion}>{abrevPos(j.posicion)}</span>}
               {j.es_externo && <span className="tag">ext</span>}
               {j.rol === 'admin' && <span className="tag">adm</span>}
-              {admin && <span className="media-badge">{n?.nota != null ? Math.round(Number(n.nota)) : '–'}</span>}
+              {admin && <Media nota={n?.nota} />}
               {admin && (
                 <button className="sec mini ico" onClick={() => setAbierto(desplegado ? null : j.id)} aria-label="Opciones">⋯</button>
               )}

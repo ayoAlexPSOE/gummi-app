@@ -145,7 +145,7 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
           </div>
         </div>
         <div className="perfil-info">
-          {yo.dorsal != null && <div className="dorsal">{yo.dorsal}</div>}
+          {yo.dorsal != null && <div className="dorsal" title="Dorsal"><small>DORSAL</small>{yo.dorsal}</div>}
           <div>Socio desde {new Date(yo.created_at).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' })}</div>
           {stats && stats.partidos > 0 && <div>⚽ {(stats.goles / stats.partidos).toFixed(2)} goles/partido</div>}
           {stats && stats.partidos > 0 && <div>🏆 {Math.round((100 * stats.victorias) / stats.partidos)}% victorias</div>}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import Media from './Media'
 import { perfilesActivos, ranking } from './datos'
 import { nombreEquipo } from './equipos'
 import Numero from './Numero'
@@ -162,7 +163,7 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
           <div className="perfil-nombre">{perfil.apodo || perfil.nombre}</div>
           {perfil.apodo && <div className="mut">{perfil.nombre}</div>}
         </div>
-        {perfil.dorsal != null && <div className="perfil-info"><div className="dorsal">{perfil.dorsal}</div></div>}
+        {perfil.dorsal != null && <div className="perfil-info"><div className="dorsal" title="Dorsal"><small>DORSAL</small>{perfil.dorsal}</div></div>}
       </div>
       <div className="row" style={{ marginBottom: 10 }}>
         {perfil.posicion && <span className={'tag pos-' + perfil.posicion}>{nombrePos(perfil.posicion)}</span>}
@@ -172,7 +173,7 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
         {perfil.pierna && <span className="tag">🦶 {perfil.pierna}</span>}
         {perfil.es_externo && <span className="tag">externo</span>}
         {nota?.nota != null && (
-          <span className="tag">Media {Math.round(Number(nota.nota))} (solo tú)</span>
+          <span className="media-ficha"><Media nota={nota.nota} grande /><span className="mut">solo tú la ves</span></span>
         )}
       </div>
 
