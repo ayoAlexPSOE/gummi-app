@@ -115,7 +115,7 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
             {empezado ? (
               <div className="mut" style={{ margin: '10px 0' }}>En juego ahora</div>
             ) : (
-              <div className="grid3" style={{ margin: '12px 0' }}>
+              <div className="cuenta">
                 <div className="tile"><b>{c.d}</b><span className="mut">días</span></div>
                 <div className="tile"><b>{c.h}</b><span className="mut">horas</span></div>
                 <div className="tile"><b>{c.m}</b><span className="mut">min</span></div>
@@ -132,15 +132,15 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
               </div>
             )}
             {prox.estado === 'convocatoria' && (
-              <div className="grid3">
+              <div className="respuesta">
                 {OPCIONES.map(([v, t, ic]) => (
-                  <button key={v} className={'grande' + (mia?.respuesta === v ? ' sel' : ' sec')} onClick={() => responder(prox.id, v)}>
-                    <div style={{ fontSize: 20 }}>{ic}</div>{t}
+                  <button key={v} className={'resp-' + v + (mia?.respuesta === v ? ' sel' : ' sec')} onClick={() => responder(prox.id, v)} aria-pressed={mia?.respuesta === v}>
+                    <span>{ic}</span>{t}
                   </button>
                 ))}
               </div>
             )}
-            <div className="row" style={{ marginTop: 10, flexWrap: 'nowrap' }}>
+            <div className="row hero-pie">
               <button className="sec" style={{ flex: 1 }} onClick={() => onPartido(prox.id)}>Ver detalle</button>
               {!empezado && <button className="sec ico" onClick={() => anadirCalendario(prox)} aria-label="Añadir al calendario" title="Añadir al calendario">🗓️</button>}
             </div>

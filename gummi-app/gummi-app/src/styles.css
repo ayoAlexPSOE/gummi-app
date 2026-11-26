@@ -463,6 +463,21 @@ button.login-entrar { min-height:56px; border-radius:16px; font-size:18px; lette
 .login-pie { text-align:center; color:var(--mut); font-size:13px; margin:0; animation:aparece .6s .4s both; }
 @media (max-height:640px) { .login { gap:14px; } .login-logo { width:min(46vw, 190px); } }
 
+/* Inicio: bloque del próximo partido más compacto */
+.hero { padding:16px; }
+.hero-t { font-size:27px; }
+.cuenta { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin:10px 0; }
+.cuenta .tile { padding:6px 4px; border-radius:12px; display:flex; align-items:baseline; justify-content:center; gap:5px; }
+.cuenta .tile b { display:inline; font-size:22px; }
+.cuenta .tile .mut { font-size:12px; }
+.respuesta { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+.respuesta button { min-height:44px; padding:0 4px; font-size:15px; display:flex; align-items:center; justify-content:center; gap:6px; border-radius:12px; }
+.respuesta button span { font-size:15px; transition:transform .35s var(--muelle); }
+.respuesta button.sel span { transform:scale(1.15); }
+.hero-pie { margin-top:8px; flex-wrap:nowrap; }
+.hero-pie button { min-height:40px; font-size:15px; }
+.hero-pie button.ico:not(.mini) { min-height:40px; }
+
 /* Accesibilidad / ahorro: sin animaciones si el móvil lo pide */
 @media (prefers-reduced-motion:reduce) {
   *, *::before, *::after { animation:none !important; transition:none !important; }
