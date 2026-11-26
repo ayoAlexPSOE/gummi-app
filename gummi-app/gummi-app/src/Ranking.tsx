@@ -37,8 +37,30 @@ const CATEGORIAS: Cat[] = [
 
 const MEDALLAS = ['🥇', '🥈', '🥉']
 
+// Premios de temporada: se calculan con las estadísticas de esa temporada.
+type Premio = { id: string; icono: string; titulo: string; unidad: string; valor: (r: any) => number | null }
+const PREMIOS: Premio[] = [
+  { id: 'bota', icono: '⚽', titulo: 'Bota de oro', unidad: 'goles', valor: (r) => r.goles },
+  { id: 'asist', icono: '🅰️', titulo: 'Rey de las asistencias', unidad: 'asistencias', valor: (r) => r.asistencias },
+  { id: 'mvp', icono: '👑', titulo: 'MVP de la temporada', unidad: 'MVP', valor: (r) => r.mvps },
+  { id: 'decisivo', icono: '⚡', titulo: 'El más decisivo', unidad: 'goles + asist.', valor: (r) => r.goles + r.asistencias },
+  { id: 'ganador', icono: '📈', titulo: 'Ganador nato', unidad: '% victorias', valor: (r) => r.pctOk ? Math.round((100 * r.victorias) / r.partidos) : null },
+  { id: 'fijo', icono: '👟', titulo: 'Siempre presente', unidad: 'partidos', valor: (r) => r.partidos },
+]
+function calcularPremios(filas: any[]) {
+  const maxPJ = Math.max(0, ...filas.map((r) => r.partidos))
+  const minPJ = Math.max(MIN_PARTIDOS, Math.ceil(maxPJ * 0.4)) // para el % de victorias hay que haber jugado bastante
+  const conPct = filas.map((r) => ({ ...r, pctOk: r.partidos >= minPJ }))
+  return PREMIOS.map((pr) => {
+    const vals = conPct.map((r) => ({ r, v: pr.valor(r) })).filter((x) => x.v !== null && (x.v as number) > 0)
+    if (!vals.length) return { ...pr, ganadores: [] as any[], v: null as number | null, minPJ }
+    const mejor = Math.max(...vals.map((x) => x.v as number))
+    return { ...pr, ganadores: vals.filter((x) => x.v === mejor).map((x) => x.r), v: mejor, minPJ }
+  })
+}
+
 export default function Ranking({ yo, vistaInicial }: { yo: any; vistaInicial?: string }) {
-  const [vista, setVista] = useState(vistaInicial === 'logros' ? 'logros' : 'tabla')
+  const [vista, setVista] = useState(vistaInicial === 'logros' || vistaInicial === 'premios' ? vistaInicial : 'tabla')
   const [filas, setFilas] = useState<any[] | null>(null)
   const [cat, setCat] = useState('goles')
   const [ficha, setFicha] = useState<string | null>(null)
@@ -87,6 +109,7 @@ export default function Ranking({ yo, vistaInicial }: { yo: any; vistaInicial?: 
   const selectorVista = (
     <div className="row" style={{ margin: '12px 0 4px' }}>
       <button className={'sec' + (vista === 'tabla' ? ' on2' : '')} onClick={() => setVista('tabla')}>Clasificación</button>
+      <button className={'sec' + (vista === 'premios' ? ' on2' : '')} onClick={() => setVista('premios')}>🏆 Premios</button>
       <button className={'sec' + (vista === 'logros' ? ' on2' : '')} onClick={() => setVista('logros')}>🏅 Logros</button>
     </div>
   )
@@ -109,6 +132,60 @@ export default function Ranking({ yo, vistaInicial }: { yo: any; vistaInicial?: 
   }
   if (!filas) return <Cargando />
 
+  const selectorTemporada = (
+    <select value={sel} onChange={(e) => setSel(e.target.value)} className="sel-temporada" aria-label="Temporada">
+      {temporadas.map((t) => (
+        <option key={t.id} value={String(t.id)}>
+          {t.nombre}{t.activa ? ' (actual)' : ''}
+        </option>
+      ))}
+      <option value="todas">Histórico (todas)</option>
+    </select>
+  )
+
+  if (vista === 'premios') {
+    const temp = temporadas.find((t) => String(t.id) === sel)
+    const cerrada = temp && !temp.activa
+    const premios = calcularPremios(filas)
+    const hay = premios.some((p) => p.ganadores.length)
+    return (
+      <>
+        {selectorVista}
+        {selectorTemporada}
+        <div className={'card premios-cab' + (cerrada ? ' cerrada' : '')}>
+          <span className="premios-trofeo">🏆</span>
+          <span>
+            <b>{sel === 'todas' ? 'Leyendas de la peña' : cerrada ? `Palmarés ${temp.nombre}` : `Así va la carrera${temp ? ' · ' + temp.nombre : ''}`}</b>
+            <div className="mut">
+              {sel === 'todas' ? 'Los mejores de todas las temporadas juntas.'
+                : cerrada ? 'Temporada cerrada: estos son los campeones.'
+                : 'Los premios se deciden al cerrar la temporada. Todavía hay tiempo para remontar.'}
+            </div>
+          </span>
+        </div>
+        {!hay && <div className="vacio"><span>🏆</span><b>Aún no hay premios que repartir</b><div className="mut">En cuanto se juegue el primer partido empieza la carrera.</div></div>}
+        {hay && premios.map((pr) => (
+          <div key={pr.id} className={'card premio' + (pr.ganadores.some((g) => g.id === yo.id) ? ' yo' : '')}>
+            <span className="premio-ic">{pr.icono}</span>
+            <span className="premio-txt">
+              <span className="mut">{pr.titulo}</span>
+              {pr.ganadores.length ? (
+                <span className="premio-gan">
+                  {pr.ganadores.slice(0, 3).map((g) => (
+                    <span key={g.id} className="premio-jug" onClick={() => setFicha(g.id)}><Avatar p={g} size={26} />{g.apodo || g.nombre}</span>
+                  ))}
+                  {pr.ganadores.length > 3 && <span className="mut">y {pr.ganadores.length - 3} más</span>}
+                </span>
+              ) : <span className="mut">Desierto</span>}
+              {pr.id === 'ganador' && pr.ganadores.length > 0 && <span className="mut premio-nota">Mínimo {pr.minPJ} partidos jugados</span>}
+            </span>
+            {pr.v !== null && <span className="premio-v"><b>{pr.v}{pr.id === 'ganador' ? '%' : ''}</b><span className="mut">{pr.id === 'ganador' ? 'victorias' : pr.unidad}</span></span>}
+          </div>
+        ))}
+      </>
+    )
+  }
+
   const actual = CATEGORIAS.find((c) => c.id === cat) as Cat
   const ordenados = filas
     .map((r) => ({ r, v: actual.valor(r) }))
@@ -129,14 +206,7 @@ export default function Ranking({ yo, vistaInicial }: { yo: any; vistaInicial?: 
   return (
     <>
       {selectorVista}
-      <select value={sel} onChange={(e) => setSel(e.target.value)} style={{ margin: '8px 0 4px', width: '100%' }} aria-label="Temporada">
-        {temporadas.map((t) => (
-          <option key={t.id} value={String(t.id)}>
-            {t.nombre}{t.activa ? ' (actual)' : ''}
-          </option>
-        ))}
-        <option value="todas">Histórico (todas)</option>
-      </select>
+      {selectorTemporada}
       <div className="cats">
         {CATEGORIAS.map((c) => (
           <button key={c.id} className={'sec' + (cat === c.id ? ' on2' : '')} onClick={() => setCat(c.id)}>

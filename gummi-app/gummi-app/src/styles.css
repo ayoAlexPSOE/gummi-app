@@ -484,6 +484,21 @@ button.login-entrar { min-height:56px; border-radius:16px; font-size:18px; lette
 .card.plazas { padding:12px 14px; gap:12px; }
 .card.plazas .contador { flex:none; }
 
+/* Premios de temporada */
+.sel-temporada { width:100%; margin:8px 0 4px; }
+.card.premios-cab { display:flex; gap:12px; align-items:center; border-color:#ffc83d59; background:linear-gradient(150deg,#ffc83d26,#0b145099 60%); }
+.premios-trofeo { font-size:34px; filter:drop-shadow(0 0 12px #ffc83d88); animation:flota2 3s ease-in-out infinite; }
+.card.premio { display:flex; align-items:center; gap:12px; padding:12px 14px; margin:8px 0; }
+.card.premio.yo { border-color:#3ddcff73; }
+.premio-ic { font-size:26px; width:34px; text-align:center; flex:none; }
+.premio-txt { flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
+.premio-gan { display:flex; flex-wrap:wrap; gap:6px; }
+.premio-jug { display:inline-flex; align-items:center; gap:6px; font-weight:700; cursor:pointer; }
+.premio-nota { font-size:11.5px; }
+.premio-v { text-align:right; display:flex; flex-direction:column; align-items:flex-end; flex:none; }
+.premio-v b { font-family:var(--titulo); font-size:24px; font-weight:800; line-height:1; }
+.premio-v .mut { font-size:11px; }
+
 /* Accesibilidad / ahorro: sin animaciones si el móvil lo pide */
 @media (prefers-reduced-motion:reduce) {
   *, *::before, *::after { animation:none !important; transition:none !important; }
