@@ -116,7 +116,7 @@ export default function Partidos({ yo, abrirInicial, onUsado }: { yo: any; abrir
   return (
     <>
       {partidos.length === 0 && (
-        <div className="vacio"><span>📅</span><b>Todavía no hay partidos</b><div className="mut">Cuando el admin cree uno, aparecerá aquí.</div></div>
+        <div className="vacio"><span>🗓️</span><b>Todavía no hay partidos</b><div className="mut">Cuando el admin cree uno, aparecerá aquí.</div></div>
       )}
       {proximos.length > 0 && <h2>Próximos</h2>}
       {proximos.map(tarjeta)}

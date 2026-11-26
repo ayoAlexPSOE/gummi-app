@@ -142,13 +142,13 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
             )}
             <div className="row" style={{ marginTop: 10, flexWrap: 'nowrap' }}>
               <button className="sec" style={{ flex: 1 }} onClick={() => onPartido(prox.id)}>Ver detalle</button>
-              {!empezado && <button className="sec ico" onClick={() => anadirCalendario(prox)} aria-label="Añadir al calendario" title="Añadir al calendario">📅</button>}
+              {!empezado && <button className="sec ico" onClick={() => anadirCalendario(prox)} aria-label="Añadir al calendario" title="Añadir al calendario">🗓️</button>}
             </div>
           </div>
         )
       })() : (
         <div className="hero">
-          <div className="vacio" style={{ padding: '14px 0' }}><span>📅</span><b>No hay ningún partido convocado</b><div className="mut">Cuando el admin cree uno, aparecerá aquí.</div></div>
+          <div className="vacio" style={{ padding: '14px 0' }}><span>🗓️</span><b>No hay ningún partido convocado</b><div className="mut">Cuando el admin cree uno, aparecerá aquí.</div></div>
         </div>
       )}
 

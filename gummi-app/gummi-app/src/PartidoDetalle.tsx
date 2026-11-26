@@ -392,7 +392,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
         <button className="sec mini" onClick={onBack}>← Volver</button>
         <span className={'tag estado-' + p.estado}>{ESTADOS[p.estado]}</span>
         <span style={{ flex: 1 }} />
-        {proximo && <button className="sec mini ico" onClick={() => anadirCalendario(p)} aria-label="Añadir al calendario" title="Añadir al calendario">📅</button>}
+        {proximo && <button className="sec mini ico" onClick={() => anadirCalendario(p)} aria-label="Añadir al calendario" title="Añadir al calendario">🗓️</button>}
         <button className="sec mini ico" onClick={() => compartir(textoCompartir())} aria-label="Compartir" title="Compartir por WhatsApp">📤</button>
       </div>
       <h2 className="titulo-partido">{horario(p, true)}</h2>
