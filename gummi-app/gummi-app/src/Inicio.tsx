@@ -8,6 +8,9 @@ import { fecha, horario, convocados, respuestaLocal, PLAZAS_DEFECTO } from './ut
 import Numero from './Numero'
 import Avatar from './Avatar'
 import { Cargando, anadirCalendario, vibra } from './movil'
+import OnceIdeal from './OnceIdeal'
+
+const esPC = () => typeof window !== 'undefined' && window.matchMedia?.('(min-width: 1000px)').matches
 
 const OPCIONES: [string, string, string][] = [['voy', 'Voy', '✅'], ['duda', 'Duda', '🤔'], ['no_voy', 'No voy', '❌']]
 
@@ -40,6 +43,7 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
     setD({
       lista, cfg: cf.data, perfiles: pf.data || [], conv: (cv as any).data || [], part: (pa as any).data || [],
       misVotos: new Set([...(vo.data || []), ...(mv.data || [])].map((x: any) => x.partido_id)),
+      rk: rk.data || [],
       yoStats: (rk.data || []).find((r: any) => r.jugador_id === yo.id) || null,
     })
   }
@@ -82,8 +86,12 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
 
   const pct = d.yoStats && d.yoStats.partidos > 0 ? Math.round((100 * d.yoStats.victorias) / d.yoStats.partidos) : null
 
+  const pc = esPC()
+  const top = [...(d.rk || [])].filter((r: any) => r.goles > 0).sort((a: any, b: any) => b.goles - a.goles || b.asistencias - a.asistencias).slice(0, 5)
+  const perfilDe = (id: string) => d.perfiles.find((j: any) => j.id === id)
   return (
-    <>
+    <div className="inicio">
+    <div className="inicio-izq">
       {prox ? (() => {
         const mia = d.conv.find((c: any) => c.partido_id === prox.id && c.jugador_id === yo.id)
         const { titulares, reservas } = convocados(d.conv, prox.id, d.cfg?.plazas ?? PLAZAS_DEFECTO)
@@ -194,6 +202,8 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
         )
       })()}
 
+    </div>
+    <div className="inicio-der">
       {d.yoStats && d.yoStats.partidos > 0 && (
         <>
           <h2>Tus números</h2>
@@ -206,6 +216,24 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
           </div>
         </>
       )}
-    </>
+      {/* Solo en PC: hay sitio para el top y el once ideal sin cambiar de pestaña */}
+      {pc && top.length > 0 && (
+        <>
+          <h2>Goleadores</h2>
+          <div className="card top-inicio">
+            {top.map((r: any, i: number) => (
+              <div key={r.jugador_id} className={'top-fila' + (r.jugador_id === yo.id ? ' yo' : '')}>
+                <span className="top-pos">{['🥇', '🥈', '🥉'][i] || i + 1}</span>
+                <Avatar p={perfilDe(r.jugador_id)} size={28} />
+                <span className="f1 min0">{perfilDe(r.jugador_id)?.apodo || perfilDe(r.jugador_id)?.nombre || '?'}</span>
+                <b>{r.goles}</b><span className="mut fs12">goles</span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      {pc && <OnceIdeal perfiles={d.perfiles} onFicha={() => {}} />}
+    </div>
+    </div>
   )
 }

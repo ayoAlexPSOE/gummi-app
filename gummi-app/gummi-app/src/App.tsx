@@ -242,11 +242,18 @@ export default function App() {
       </main>
       <Dialogos />
       <nav>
+        <img className="nav-logo solo-pc" src={logo} alt="Gummi" onClick={() => irTab('inicio')} />
         {([['inicio', '🏠', 'Inicio'], ['partidos', '⚽', 'Partidos'], ['votar', '🗳️', 'Votar'], ['ranking', '🏆', 'Ranking'], ['jugadores', '👥', 'Plantilla']] as const).map(([id, ic, tx]) => (
           <button key={id} className={tab === id ? 'on' : ''} aria-current={tab === id ? 'page' : undefined} onClick={() => { if (id === 'ranking' && tab !== 'ranking') setVistaRanking('tabla'); irTab(id) }}>
             <span className="ic">{ic}</span>{tx}
           </button>
         ))}
+        <button className={'solo-pc' + (tab === 'avisos' ? ' on' : '')} onClick={() => irTab('avisos')}>
+          <span className="ic">🔔</span>Avisos{sinLeer > 0 && <span className="nav-badge">{sinLeer}</span>}
+        </button>
+        <button className={'solo-pc nav-perfil' + (tab === 'perfil' || tab === 'admin' ? ' on' : '')} onClick={() => irTab('perfil')}>
+          <Avatar p={yo} size={26} />{yo?.apodo || yo?.nombre || 'Perfil'}
+        </button>
       </nav>
     </div>
   )
