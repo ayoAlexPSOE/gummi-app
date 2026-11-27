@@ -107,7 +107,7 @@ export default function Jugadores({ yo }: { yo: any }) {
               <span className="jug-nombre" onClick={() => setFicha(j.id)}>{j.apodo || j.nombre}{j.id === yo.id && <span className="mut"> (tú)</span>}</span>
               {j.dorsal != null && <span className="dorsal-mini" title="Dorsal">#{j.dorsal}</span>}
               {j.posicion && <span className={'tag pos-' + j.posicion}>{abrevPos(j.posicion)}</span>}
-              {j.es_externo && <span className="tag">ext</span>}
+              {j.es_externo && <span className="tag">externo</span>}
               {j.rol === 'admin' && <span className="tag">adm</span>}
               {admin && <Media nota={n?.nota} />}
               {admin && (

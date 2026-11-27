@@ -94,6 +94,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
   const [mvp, setMvp] = useState<any[]>([])
   const [plazas, setPlazas] = useState(PLAZAS_DEFECTO)
   const [haciendoImg, setHaciendoImg] = useState(false)
+  const [nuevoExt, setNuevoExt] = useState('')
 
   const cargar = async () => {
     const [pp, pr, cv, pa, ev] = await Promise.all([
@@ -334,6 +335,25 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
     onBack()
   }
 
+  // ---------- externo nuevo desde la convocatoria ----------
+  const anadirExterno = async (e: any) => {
+    e.preventDefault()
+    const nombreExt = nuevoExt.trim()
+    if (!nombreExt) return
+    setBusy(true)
+    const ins = await supabase.from('perfiles').insert({ nombre: nombreExt, es_externo: true }).select('id').single()
+    if (ins.error) { setBusy(false); return aviso(ins.error.message, 'error') }
+    await supabase.from('convocatorias').upsert(
+      { partido_id: id, jugador_id: ins.data.id, respuesta: 'voy', updated_at: new Date().toISOString() },
+      { onConflict: 'partido_id,jugador_id' }
+    )
+    setBusy(false)
+    setNuevoExt('')
+    invalidar('perfiles')
+    aviso(`✅ ${nombreExt} añadido y apuntado`, 'ok')
+    cargar()
+  }
+
   // ---------- imagen para compartir ----------
   const imagen = async () => {
     setHaciendoImg(true)
@@ -549,7 +569,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
                     <span className="conv-nombre">
                       <Avatar p={j} size={26} />
                       <span>{j.apodo || j.nombre}</span>
-                      {j.es_externo && <span className="tag">ext</span>}
+                      {j.es_externo && <span className="tag">externo</span>}
                       {reservaDe(j.id) >= 0 && <span className="tag tag-reserva" title="Reserva">R{reservaDe(j.id) + 1}</span>}
                     </span>
                     <span className="seg">
@@ -560,6 +580,12 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
                   </div>
                 )
               })}
+              {/* Invitado sin cuenta: se crea como externo y queda apuntado a este partido */}
+              <form className="externo-nuevo" onSubmit={anadirExterno}>
+                <input placeholder="＋ Añadir externo (nombre)" value={nuevoExt} onChange={(e) => setNuevoExt(e.target.value)} aria-label="Nombre del externo" />
+                <button type="submit" disabled={!nuevoExt.trim() || busy}>Añadir</button>
+              </form>
+              <p className="mut fs12 mb0">Un externo no necesita cuenta: se guardan sus partidos y, si un día se la creas, lo vinculas desde Plantilla y conserva todo.</p>
             </div>
           )}
         </>

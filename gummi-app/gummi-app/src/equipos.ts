@@ -5,7 +5,7 @@ export const POSICIONES: [string, string, string, string][] = [
   ['portero', 'Portero', '🧤', 'POR'],
   ['defensa', 'Defensa', '🛡️', 'DEF'],
   ['medio', 'Medio', '🎯', 'MED'],
-  ['banda', 'Banda', '🏃', 'BAN'],
+  ['banda', 'Extremo', '🏃', 'EXT'],
   ['delantero', 'Delantero', '⚡', 'DEL'],
 ]
 export const nombrePos = (p?: string | null) => POSICIONES.find((x) => x[0] === p)?.[1] || p || ''

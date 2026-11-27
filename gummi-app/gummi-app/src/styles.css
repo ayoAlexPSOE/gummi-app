@@ -547,6 +547,10 @@ button.peligro-lleno { background:linear-gradient(135deg,#ff6a82,#d8304c); color
 .guia details > .mut { margin:-4px 0 12px; font-size:12.5px; }
 .firma { text-align:center; color:var(--mut); font-size:12px; opacity:.75; margin:6px 0 0; letter-spacing:.3px; }
 
+/* Externo nuevo en la convocatoria */
+.externo-nuevo { display:flex; gap:8px; margin:12px 0 6px; flex-direction:row; }
+.externo-nuevo input { flex:1; min-width:0; }
+
 /* Logros compactos */
 .logros-cab { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:10px 0 8px; }
 .logros-cab .mut { font-size:13.5px; }

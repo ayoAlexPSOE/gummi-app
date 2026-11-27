@@ -175,12 +175,12 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
             <T v={stats.empates} t="E" />
             <T v={stats.derrotas} t="D" />
           </div>
-          <div className="grid3 mt8">
+          <div className="grid4 mt8">
             <T v={stats.goles} t="Goles" />
             <T v={stats.asistencias} t="Asist." />
             <T v={stats.mvps} t="MVP" />
+            <T v={pct !== null ? `${pct}%` : '–'} t="Victorias" />
           </div>
-          {pct !== null && <p className="mut">{pct}% de victorias</p>}
         </>
       )}
 

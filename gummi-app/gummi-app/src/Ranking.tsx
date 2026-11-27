@@ -34,6 +34,15 @@ const CATEGORIAS: Cat[] = [
     nota: `Hace falta haber jugado al menos ${MIN_PARTIDOS} partidos.`,
   },
   { id: 'partidos', titulo: 'Partidos', corto: 'Partidos', icono: '👟', unidad: 'partidos', valor: (r) => r.partidos },
+  {
+    id: 'gp',
+    titulo: 'Goles por partido',
+    corto: 'Gol/PJ',
+    icono: '🎯',
+    unidad: 'por partido',
+    valor: (r) => (r.partidos >= MIN_PARTIDOS ? Math.round((100 * r.goles) / r.partidos) / 100 : null),
+    nota: `Hace falta haber jugado al menos ${MIN_PARTIDOS} partidos.`,
+  },
 ]
 
 const MEDALLAS = ['🥇', '🥈', '🥉']
@@ -245,7 +254,7 @@ export default function Ranking({ yo, vistaInicial }: { yo: any; vistaInicial?: 
           <Avatar p={x.r} size={36} />
           <span className="f1 min0">
             <b>{x.r.apodo || x.r.nombre}</b>
-            {x.r.es_externo && <span className="tag" style={{ marginLeft: 6 }}>ext</span>}
+            {x.r.es_externo && <span className="tag" style={{ marginLeft: 6 }}>externo</span>}
             <div className="mut">{x.r.partidos} PJ · {x.r.victorias}V {x.r.empates}E {x.r.derrotas}D</div>
           </span>
           <span className="rank-val">
