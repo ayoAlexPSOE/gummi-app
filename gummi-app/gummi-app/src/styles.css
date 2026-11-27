@@ -433,10 +433,12 @@ button.guardar-fijo { width:100%; margin-top:12px; position:sticky; bottom:calc(
 .brand-logo { height:46px; margin:-4px 0; width:auto; display:block; filter:drop-shadow(0 0 10px #3ddcff40); animation:aparece .6s both; }
 
 /* ---------- Entrada (login) ---------- */
-.login { min-height:100dvh; max-width:440px; margin:0 auto; display:flex; flex-direction:column; justify-content:center; gap:22px;
-  padding:calc(24px + env(safe-area-inset-top)) 22px calc(24px + env(safe-area-inset-bottom)); }
+/* Sin centrar en vertical ni depender del alto de pantalla: al abrir el teclado el alto cambia
+   y eso hacía que la pantalla se recolocara sin parar. */
+.login { min-height:100svh; max-width:440px; margin:0 auto; display:flex; flex-direction:column; justify-content:flex-start; gap:20px;
+  padding:calc(40px + env(safe-area-inset-top)) 22px calc(24px + env(safe-area-inset-bottom)); }
 .login-cab { text-align:center; animation:entra .7s var(--suave) both; }
-.login-logo { width:min(66vw, 270px); height:auto; display:block; margin:0 auto;
+.login-logo { width:min(56vw, 240px); height:auto; display:block; margin:0 auto;
   filter:drop-shadow(0 0 28px #3ddcff55) drop-shadow(0 12px 30px #000a); animation:flota2 5s ease-in-out infinite; }
 .login-lema { margin:14px 0 0; color:var(--mut); font-size:14px; font-weight:600; letter-spacing:3px; text-transform:uppercase; }
 .login-form { display:flex; flex-direction:column; gap:12px; padding:20px 18px; border-radius:26px;
@@ -451,7 +453,8 @@ button.login-ver:active { transform:translateY(-50%) scale(.9); }
 button.login-entrar { min-height:56px; border-radius:16px; font-size:18px; letter-spacing:.5px; margin-top:4px; }
 .login-cargando { display:inline-block; animation:rueda .8s linear infinite; }
 .login-pie { text-align:center; color:var(--mut); font-size:13px; margin:0; animation:aparece .6s .4s both; }
-@media (max-height:640px) { .login { gap:14px; } .login-logo { width:min(46vw, 190px); } }
+.login:focus-within .login-logo { animation:none; } /* quieto mientras escribes */
+.login-err-hueco:empty { display:none; }
 
 /* Inicio: bloque del próximo partido más compacto */
 .cuenta { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin:10px 0; }
@@ -531,6 +534,18 @@ button.peligro-lleno { background:linear-gradient(135deg,#ff6a82,#d8304c); color
 .p12 { padding:12px; } .o70 { opacity:.7; } .centro { text-align:center; }
 .fs12 { font-size:12px; } .fs20 { font-size:20px; } .fs26 { font-size:26px; }
 .row.nowrap, .nowrap { flex-wrap:nowrap; } .arriba { align-items:flex-start; }
+
+/* Guía de instalación (entrada) */
+.guia { display:flex; flex-direction:column; gap:8px; padding:16px; border-radius:22px; background:#0b145099; border:1px solid var(--line); animation:entra .7s .2s var(--suave) both; }
+.guia-tit { font-size:15px; }
+.guia details { background:#04082699; border:1px solid var(--line); border-radius:14px; padding:2px 14px; }
+.guia summary { min-height:46px; display:flex; align-items:center; gap:8px; font-weight:700; list-style:none; cursor:pointer; }
+.guia summary::-webkit-details-marker { display:none; }
+.guia summary::before { content:'▸'; color:var(--acc); transition:transform .25s var(--suave); display:inline-block; }
+.guia details[open] summary::before { transform:rotate(90deg); }
+.guia ol { margin:4px 0 12px; padding-left:20px; display:flex; flex-direction:column; gap:6px; font-size:14px; line-height:1.45; color:#dfe5ff; }
+.guia details > .mut { margin:-4px 0 12px; font-size:12.5px; }
+.firma { text-align:center; color:var(--mut); font-size:12px; opacity:.75; margin:6px 0 0; letter-spacing:.3px; }
 
 /* Accesibilidad / ahorro: sin animaciones si el móvil lo pide */
 @media (prefers-reduced-motion:reduce) {

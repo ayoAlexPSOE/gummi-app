@@ -8,6 +8,7 @@ import Ficha from './Ficha'
 import { useAtras, vibra } from './movil'
 import { POSICIONES, nombrePos } from './equipos'
 import { TarjetaAvisos } from './push'
+import { FIRMA } from './version'
 
 const POS = POSICIONES
 const PIERNAS: [string, string][] = [['derecha', 'Derecha'], ['izquierda', 'Izquierda'], ['ambas', 'Ambas']]
@@ -250,6 +251,7 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
       </details>
 
       <button className="sec w100 mt14" onClick={async () => { if (await confirmar('¿Cerrar sesión en este móvil?', { si: 'Cerrar sesión' })) supabase.auth.signOut() }}>Cerrar sesión</button>
+      <p className="firma">Gummi · {FIRMA}</p>
     </>
   )
 }

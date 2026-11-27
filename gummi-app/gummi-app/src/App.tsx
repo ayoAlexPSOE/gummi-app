@@ -12,7 +12,8 @@ import Perfil from './Perfil'
 import Admin from './Admin'
 import Avatar from './Avatar'
 import { Cargando, useAtras } from './movil'
-import { refrescarSuscripcion } from './push'
+import { GuiaInstalar, refrescarSuscripcion } from './push'
+import { FIRMA } from './version'
 import logo from './logo.webp'
 import logoCab from './logo-cab.webp'
 
@@ -20,18 +21,19 @@ function Login() {
   const [email, setEmail] = useState('')
   const [pass, setPass] = useState('')
   const [err, setErr] = useState('')
+  const [intento, setIntento] = useState(0) // cambia solo al pulsar Entrar (el aviso de error no se re-anima al escribir)
   const [busy, setBusy] = useState(false)
   const [ver, setVer] = useState(false)
 
   const entrar = async (e: any) => {
     e.preventDefault()
     const usuario = email.trim().toLowerCase()
-    if (!usuario || !pass) return setErr('Escribe tu usuario y contraseña')
+    if (!usuario || !pass) { setIntento((n) => n + 1); return setErr('Escribe tu usuario y contraseña') }
     const correo = usuario.includes('@') ? usuario : `${usuario}@gummi.app`
     setBusy(true)
     const { error } = await supabase.auth.signInWithPassword({ email: correo, password: pass })
     setBusy(false)
-    if (error) setErr(/fetch|network/i.test(error.message) ? 'Sin conexión. Inténtalo de nuevo.' : 'Usuario o contraseña incorrectos')
+    if (error) { setIntento((n) => n + 1); setErr(/fetch|network/i.test(error.message) ? 'Sin conexión. Inténtalo de nuevo.' : 'Usuario o contraseña incorrectos') }
   }
 
   return (
@@ -43,17 +45,19 @@ function Login() {
       <form className="login-form" onSubmit={entrar} noValidate>
         <label className="login-campo">
           <span className="login-ic" aria-hidden>👤</span>
-          <input placeholder="Usuario" aria-label="Usuario" autoCapitalize="none" autoCorrect="off" spellCheck={false} autoComplete="username" name="username" enterKeyHint="next" value={email} onChange={(e) => { setEmail(e.target.value); setErr('') }} />
+          <input placeholder="Usuario" aria-label="Usuario" autoCapitalize="none" autoCorrect="off" spellCheck={false} autoComplete="username" name="username" enterKeyHint="next" value={email} onChange={(e) => setEmail(e.target.value)} />
         </label>
         <label className="login-campo">
           <span className="login-ic" aria-hidden>🔒</span>
-          <input type={ver ? 'text' : 'password'} placeholder="Contraseña" aria-label="Contraseña" autoComplete="current-password" name="password" enterKeyHint="go" value={pass} onChange={(e) => { setPass(e.target.value); setErr('') }} />
+          <input type={ver ? 'text' : 'password'} placeholder="Contraseña" aria-label="Contraseña" autoComplete="current-password" name="password" enterKeyHint="go" value={pass} onChange={(e) => setPass(e.target.value)} />
           <button type="button" className="login-ver" onClick={() => setVer(!ver)} aria-label={ver ? 'Ocultar contraseña' : 'Ver contraseña'}>{ver ? '🙈' : '👁️'}</button>
         </label>
-        {err && <div className="err login-err" key={err + Date.now()}>{err}</div>}
+        <div className="login-err-hueco" aria-live="polite">{err && <div className="err login-err" key={intento}>{err}</div>}</div>
         <button type="submit" className="login-entrar" disabled={busy}>{busy ? <span className="login-cargando">⚽</span> : 'Entrar'}</button>
       </form>
       <p className="login-pie">¿No tienes cuenta? Pídesela al admin de la peña.</p>
+      <GuiaInstalar />
+      <p className="firma">{FIRMA}</p>
       <Dialogos />
     </div>
   )

@@ -150,3 +150,58 @@ export function TarjetaAvisos({ compacta = false, onCerrar }: { compacta?: boole
     </div>
   )
 }
+
+// ---------- Guía para instalar la app (pantalla de entrada) ----------
+// En Android, Chrome avisa de que se puede instalar: guardamos ese aviso para ofrecer un botón.
+let avisoInstalar: any = null
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (e: any) => {
+    e.preventDefault()
+    avisoInstalar = e
+    window.dispatchEvent(new Event('gummi-instalable'))
+  })
+}
+
+export function GuiaInstalar() {
+  const [puede, setPuede] = useState(!!avisoInstalar)
+  useEffect(() => {
+    const f = () => setPuede(true)
+    window.addEventListener('gummi-instalable', f)
+    return () => window.removeEventListener('gummi-instalable', f)
+  }, [])
+  if (instalada()) return null // ya la tiene instalada: no hace falta la guía
+
+  const ios = esIOS()
+  const android = /android/i.test(navigator.userAgent)
+  const instalar = async () => {
+    if (!avisoInstalar) return
+    avisoInstalar.prompt()
+    try { await avisoInstalar.userChoice } catch { /* */ }
+    avisoInstalar = null
+    setPuede(false)
+  }
+
+  return (
+    <div className="guia">
+      <b className="guia-tit">📲 Instala la app y recibe avisos</b>
+      <details open={android}>
+        <summary>🤖 Android</summary>
+        {puede && <button type="button" className="w100 mt8" onClick={instalar}>Instalar Gummi ahora</button>}
+        <ol>
+          <li>Abre esta web en <b>Chrome</b>.</li>
+          <li>Toca el menú <b>⋮</b> (arriba a la derecha) → <b>«Instalar app»</b> o <b>«Añadir a pantalla de inicio»</b>.</li>
+          <li>Abre <b>Gummi</b> desde el icono nuevo, entra con tu usuario y pulsa <b>«Activar avisos»</b> (acepta el permiso).</li>
+        </ol>
+      </details>
+      <details open={ios}>
+        <summary>🍎 iPhone</summary>
+        <ol>
+          <li>Abre esta web en <b>Safari</b> (no vale Chrome).</li>
+          <li>Pulsa <b>Compartir</b> (el cuadrado con la flecha) → <b>«Añadir a pantalla de inicio»</b>.</li>
+          <li>Abre la app <b>desde el icono nuevo</b>, entra con tu usuario y pulsa <b>«Activar avisos»</b>.</li>
+        </ol>
+        <p className="mut">Necesita iOS 16.4 o superior.</p>
+      </details>
+    </div>
+  )
+}
