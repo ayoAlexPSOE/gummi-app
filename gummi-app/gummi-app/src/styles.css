@@ -547,6 +547,26 @@ button.peligro-lleno { background:linear-gradient(135deg,#ff6a82,#d8304c); color
 .guia details > .mut { margin:-4px 0 12px; font-size:12.5px; }
 .firma { text-align:center; color:var(--mut); font-size:12px; opacity:.75; margin:6px 0 0; letter-spacing:.3px; }
 
+/* Logros compactos */
+.logros-cab { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:10px 0 8px; }
+.logros-cab .mut { font-size:13.5px; }
+.logros-lista { display:flex; flex-direction:column; gap:6px; }
+.logro { border-radius:14px; background:var(--cristal); border:1px solid var(--line); overflow:hidden; }
+.logro.mio { border-color:#3ddcff66; }
+.logro.nadie .logro-ic { filter:grayscale(1) opacity(.5); }
+button.logro-fila { width:100%; display:flex; align-items:center; gap:10px; padding:8px 12px; min-height:56px; background:none; box-shadow:none; color:var(--txt); text-align:left; font-weight:400; border-radius:0; }
+button.logro-fila:active { transform:none; background:#ffffff0a; }
+.logro-ic { font-size:24px; width:30px; text-align:center; flex:none; }
+.logro-txt { flex:1; min-width:0; display:flex; flex-direction:column; }
+.logro-txt b { font-size:15px; }
+.logro-txt .mut { font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.logro.abierto .logro-txt .mut { white-space:normal; }
+.logro-check { color:var(--acc); }
+.logro-quien { flex:none; display:flex; align-items:center; }
+.logro-quien .pila-fotos .avatar { margin-left:-6px; box-shadow:0 0 0 2px #0b1450; }
+.logro-quien .pila-fotos .avatar:first-child { margin-left:0; }
+.logro-det { display:flex; flex-wrap:wrap; gap:6px; padding:0 12px 12px 52px; animation:entra .3s var(--suave) both; }
+
 /* Accesibilidad / ahorro: sin animaciones si el móvil lo pide */
 @media (prefers-reduced-motion:reduce) {
   *, *::before, *::after { animation:none !important; transition:none !important; }
