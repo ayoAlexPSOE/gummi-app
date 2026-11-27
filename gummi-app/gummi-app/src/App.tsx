@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { supabase } from './supabase'
 import { invalidar } from './datos'
 import { Dialogos } from './dialogos'
+import Bienvenida from './Bienvenida'
 import Jugadores from './Jugadores'
 import Partidos, { olvidarPartido } from './Partidos'
 import Votar from './Votar'
@@ -202,6 +203,16 @@ export default function App() {
 
   if (session === undefined) return <Cargando />
   if (!session) return <Login />
+
+  // Primer acceso (bienvenida === null; undefined significa que aún no está el script 19)
+  if (yo && yo.bienvenida === null) {
+    return (
+      <>
+        <Bienvenida yo={yo} onListo={cargarYo} />
+        <Dialogos />
+      </>
+    )
+  }
 
   return (
     <div className="app">

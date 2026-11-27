@@ -345,6 +345,19 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
     onBack()
   }
 
+  // ---------- cerrar la votación antes de las 48 h (admin) ----------
+  const cerrarVotacion = async () => {
+    const votaron = new Set((votosP?.votos || []).map((v) => v.votante_id)).size
+    if (!(await confirmar(`¿Cerrar ya la votación?${votosP ? ` Han votado ${votaron} de ${part.length}.` : ''} Se calcula el MVP y se avisa a todos.`, { si: 'Cerrar votación' }))) return
+    setBusy(true)
+    const { error } = await supabase.rpc('cerrar_votacion', { p_partido: id })
+    setBusy(false)
+    if (error) return aviso(/cerrar_votacion/.test(error.message) ? 'Falta ejecutar en Supabase el script 19_avisos.sql' : error.message, 'error')
+    invalidar('ranking')
+    aviso('✅ Votación cerrada', 'ok')
+    cargar()
+  }
+
   // ---------- externo nuevo desde la convocatoria ----------
   const anadirExterno = async (e: any) => {
     e.preventDefault()
@@ -509,7 +522,9 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
         </div>
       )}
       {jugado && p.votacion_hasta && new Date(p.votacion_hasta).getTime() > Date.now() && (
-        <div className="aviso">🗳️ Votación abierta hasta el {new Date(p.votacion_hasta).toLocaleString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}. Ve a la pestaña <b>Votar</b>.</div>
+        <div className="aviso">🗳️ Votación abierta hasta el {new Date(p.votacion_hasta).toLocaleString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}. Ve a la pestaña <b>Votar</b>.
+          {admin && <button className="sec mini w100 mt8" disabled={busy} onClick={cerrarVotacion}>🔒 Cerrar la votación ya (sale el MVP)</button>}
+        </div>
       )}
 
       {/* ---- Votos del partido (solo admin) ---- */}

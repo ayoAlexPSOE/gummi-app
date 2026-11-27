@@ -14,7 +14,7 @@ const POS = POSICIONES
 const PIERNAS: [string, string][] = [['derecha', 'Derecha'], ['izquierda', 'Izquierda'], ['ambas', 'Ambas']]
 
 // Recorta al cuadrado y reduce a 320 px para que la foto pese poco.
-async function reducir(file: File): Promise<Blob> {
+export async function reducir(file: File): Promise<Blob> {
   const bmp = await createImageBitmap(file)
   const lado = Math.min(bmp.width, bmp.height)
   const c = document.createElement('canvas')

@@ -90,10 +90,14 @@ export function anadirCalendario(p: { id: number; fecha: string; fecha_fin?: str
 
 // ---------- Indicador de carga ----------
 export function Cargando({ texto = 'Cargando…' }: { texto?: string }) {
+  // Esqueleto: la forma de la pantalla en gris mientras llegan los datos
   return (
-    <div className="cargando" role="status">
-      <span className="balon">⚽</span>
-      <span>{texto}</span>
+    <div className="esqueleto" role="status" aria-label={texto}>
+      <div className="esq esq-grande" />
+      <div className="esq esq-linea" style={{ width: '45%' }} />
+      <div className="esq esq-tarjeta" />
+      <div className="esq esq-tarjeta" />
+      <div className="esq esq-tarjeta corta" />
     </div>
   )
 }

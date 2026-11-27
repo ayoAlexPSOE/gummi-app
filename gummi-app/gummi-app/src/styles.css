@@ -575,6 +575,36 @@ button.comentario-borrar { margin-left:auto; min-height:30px; min-width:30px; pa
 .comentario-nuevo textarea:focus { outline:0; border-color:var(--acc); box-shadow:0 0 0 3px #3ddcff33; }
 .comentario-pie { display:flex; align-items:center; justify-content:space-between; }
 
+/* Bienvenida (primer acceso) */
+.bienvenida { max-width:440px; margin:0 auto; min-height:100svh; display:flex; flex-direction:column; align-items:stretch; gap:18px;
+  padding:calc(28px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom)); }
+.bienv-logo { width:150px; margin:0 auto; display:block; }
+.bienv-pasos { display:flex; gap:6px; justify-content:center; }
+.bienv-pasos span { width:34px; height:5px; border-radius:3px; background:#ffffff26; transition:background .3s; }
+.bienv-pasos span.hecho { background:var(--acc); }
+.bienv-pasos span.actual { background:var(--grad); box-shadow:0 0 10px #3ddcff88; }
+.bienv-card { display:flex; flex-direction:column; gap:12px; padding:22px 18px; border-radius:24px; background:var(--cristal); border:1px solid var(--line);
+  box-shadow:var(--sombra); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); animation:entra .45s var(--suave) both; }
+.bienv-card h1 { margin:0; font-family:var(--titulo); font-size:26px; line-height:1.15; }
+.bienv-card > .mut { margin:0 0 4px; font-size:14.5px; line-height:1.45; }
+.bienv-foto { display:flex; flex-direction:column; align-items:center; gap:6px; margin:4px 0; }
+button.bienv-avatar { position:relative; background:none; box-shadow:none; padding:0; border-radius:50%; min-height:0; }
+.bienv-avatar .avatar { box-shadow:0 0 0 3px #040826, 0 0 0 5px #3ddcffaa, 0 0 30px #3ddcff55; }
+.bienv-cam { position:absolute; right:-2px; bottom:-2px; width:34px; height:34px; border-radius:50%; background:var(--grad); display:flex; align-items:center; justify-content:center; font-size:16px; box-shadow:0 0 0 3px #040826; }
+.bienv-dorsal { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.bienv-dorsal input { width:90px; text-align:center; font-family:var(--titulo); font-size:22px; font-weight:800; }
+.bienv-atras { align-self:center; }
+.bienv-card .card.avisos-movil { margin:0; }
+
+/* Esqueletos de carga */
+.esqueleto { display:flex; flex-direction:column; gap:12px; padding:12px 0; animation:aparece .3s .1s both; }
+.esq { border-radius:16px; background:linear-gradient(100deg,#ffffff0a 30%,#ffffff1c 50%,#ffffff0a 70%); background-size:300% 100%; animation:brilloEsq 1.4s ease-in-out infinite; }
+.esq-grande { height:170px; border-radius:24px; }
+.esq-linea { height:20px; border-radius:8px; margin-top:8px; }
+.esq-tarjeta { height:68px; }
+.esq-tarjeta.corta { width:70%; }
+@keyframes brilloEsq { from { background-position:100% 0; } to { background-position:0 0; } }
+
 /* Logros compactos */
 .logros-cab button { flex:none; white-space:nowrap; }
 .logros-cab { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:10px 0 8px; }
