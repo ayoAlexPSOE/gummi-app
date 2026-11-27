@@ -561,6 +561,20 @@ button.peligro-lleno { background:linear-gradient(135deg,#ff6a82,#d8304c); color
 .voto-chip b { color:var(--c); }
 .txt { color:var(--txt); }
 
+/* Comentarios del partido */
+.comentarios { display:flex; flex-direction:column; gap:12px; }
+.comentario { display:flex; gap:10px; align-items:flex-start; }
+.comentario-cuerpo { flex:1; min-width:0; background:#ffffff0a; border:1px solid var(--line); border-radius:4px 14px 14px 14px; padding:8px 12px; }
+.comentario.yo .comentario-cuerpo { background:#3ddcff14; border-color:#3ddcff40; }
+.comentario-cab { display:flex; align-items:center; gap:8px; }
+.comentario-cab .mut { font-size:12px; }
+button.comentario-borrar { margin-left:auto; min-height:30px; min-width:30px; padding:0; font-size:13px; background:none; border:0; opacity:.6; }
+.comentario-texto { margin:2px 0 0; white-space:pre-wrap; word-break:break-word; line-height:1.4; }
+.comentario-nuevo { display:flex; flex-direction:column; gap:6px; border-top:1px solid var(--line); padding-top:12px; }
+.comentario-nuevo textarea { font:inherit; font-size:16px; padding:10px 12px; border-radius:12px; border:1px solid var(--line); background:#060d33b3; color:var(--txt); resize:vertical; min-height:56px; }
+.comentario-nuevo textarea:focus { outline:0; border-color:var(--acc); box-shadow:0 0 0 3px #3ddcff33; }
+.comentario-pie { display:flex; align-items:center; justify-content:space-between; }
+
 /* Logros compactos */
 .logros-cab button { flex:none; white-space:nowrap; }
 .logros-cab { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:10px 0 8px; }

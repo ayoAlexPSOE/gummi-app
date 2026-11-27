@@ -5,6 +5,7 @@ import { configuracion, invalidar, perfilesActivos } from './datos'
 import { ESTADOS, horario, convocados, respuestaLocal, PLAZAS_DEFECTO } from './util'
 import HorarioPicker, { Horario, aTimestamps, desdePartido } from './HorarioPicker'
 import Avatar from './Avatar'
+import Comentarios from './Comentarios'
 import { Cargando, anadirCalendario, compartir, vibra } from './movil'
 import { COLORES, color, elegirColores, nombreEquipo, seParecen } from './equipos'
 import { compartirImagen } from './imagen'
@@ -703,6 +704,8 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
       {admin && p.estado === 'jugado' && !editando && part.length > 0 && (
         <button className="sec w100 mt14" onClick={() => setEditando(true)}>✏️ Editar resultado y goles</button>
       )}
+
+      {jugado && <Comentarios partidoId={id} yo={yo} perfiles={perfiles} />}
 
       {admin && (
         <button className="sec peligro w100 mt28" onClick={borrar}>🗑️ Borrar partido</button>

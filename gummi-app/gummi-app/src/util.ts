@@ -62,3 +62,12 @@ export function fecha(iso: string, tipo: 'dia' | 'corta' | 'diaHora' = 'corta') 
     : { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }
   return new Date(iso).toLocaleString('es-ES', o)
 }
+
+// "ahora", "hace 5 min", "hace 3 h", "hace 2 d"
+export const hace = (iso: string) => {
+  const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
+  if (m < 1) return 'ahora'
+  if (m < 60) return `hace ${m} min`
+  if (m < 1440) return `hace ${Math.floor(m / 60)} h`
+  return `hace ${Math.floor(m / 1440)} d`
+}

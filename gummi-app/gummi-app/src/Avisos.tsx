@@ -2,14 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import { confirmar } from './dialogos'
 import { Cargando } from './movil'
-
-const hace = (iso: string) => {
-  const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
-  if (m < 1) return 'ahora'
-  if (m < 60) return `hace ${m} min`
-  if (m < 1440) return `hace ${Math.floor(m / 60)} h`
-  return `hace ${Math.floor(m / 1440)} d`
-}
+import { hace } from './util'
 
 export default function Avisos({ onIr, onCambio }: { onIr: (destino: string | null, ref: number | null) => void; onCambio: () => void }) {
   const [lista, setLista] = useState<any[] | null>(null)
