@@ -95,6 +95,7 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
   const [plazas, setPlazas] = useState(PLAZAS_DEFECTO)
   const [haciendoImg, setHaciendoImg] = useState(false)
   const [nuevoExt, setNuevoExt] = useState('')
+  const [votosP, setVotosP] = useState<{ votos: any[]; mvp: any[]; permitido: boolean } | null>(null) // solo admin
 
   const cargar = async () => {
     const [pp, pr, cv, pa, ev] = await Promise.all([
@@ -109,6 +110,14 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
     setConv(cv.data || [])
     setPart(pa.data || [])
     configuracion().then((cf) => { if (!cf.error && cf.data?.plazas) setPlazas(cf.data.plazas) })
+    // Admin: votos de este partido (quién ha votado qué), si tiene activado verlos
+    if (yo.rol === 'admin' && (pp.data?.estado === 'jugado' || pp.data?.estado === 'cerrado')) {
+      Promise.all([
+        configuracion(),
+        supabase.from('votos').select('votante_id,votado_id,nota').eq('partido_id', id),
+        supabase.from('votos_mvp').select('votante_id,votado_id').eq('partido_id', id),
+      ]).then(([cf, v, m]) => setVotosP({ votos: v.data || [], mvp: m.data || [], permitido: !!cf.data?.admin_ve_votos }))
+    }
     setEventos(ev.data || [])
 
     const c: Record<string, { g: number; a: number }> = {}
@@ -500,6 +509,57 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
       )}
       {jugado && p.votacion_hasta && new Date(p.votacion_hasta).getTime() > Date.now() && (
         <div className="aviso">🗳️ Votación abierta hasta el {new Date(p.votacion_hasta).toLocaleString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}. Ve a la pestaña <b>Votar</b>.</div>
+      )}
+
+      {/* ---- Votos del partido (solo admin) ---- */}
+      {admin && votosP && (
+        <details className="card votos-admin" open>
+          <summary>🔒 Votos del partido <span className="mut">· solo los ves tú</span></summary>
+          {!votosP.permitido ? (
+            <p className="mut">Tienes desactivado ver quién vota a quién. Actívalo en Perfil › 🔧 admin › Votaciones.</p>
+          ) : votosP.votos.length === 0 && votosP.mvp.length === 0 ? (
+            <p className="mut">Todavía no ha votado nadie.</p>
+          ) : (
+            <>
+              <div className="mut fs12 my4">
+                Han votado {new Set(votosP.votos.map((v) => v.votante_id)).size} de {part.filter((x) => !perfilDe(x.jugador_id)?.es_externo).length}
+              </div>
+              {part
+                .map((x) => {
+                  const recibidos = votosP.votos.filter((v) => v.votado_id === x.jugador_id)
+                  const media = recibidos.length ? recibidos.reduce((s, v) => s + Number(v.nota), 0) / recibidos.length : null
+                  return { jid: x.jugador_id, recibidos, media }
+                })
+                .filter((x) => x.recibidos.length > 0)
+                .sort((a, b) => (b.media ?? -1) - (a.media ?? -1))
+                .map(({ jid, recibidos, media }) => (
+                  <div key={jid} className="voto-admin">
+                    <span className="conv-nombre"><Avatar p={perfilDe(jid)} size={26} /><span>{nombre(jid)}</span></span>
+                    <span className="voto-admin-media">{media !== null ? media.toFixed(1) : '–'}<small>{recibidos.length} {recibidos.length === 1 ? 'voto' : 'votos'}</small></span>
+                    {recibidos.length > 0 && (
+                      <div className="voto-admin-lista">
+                        {recibidos.sort((a, b) => Number(b.nota) - Number(a.nota)).map((v) => (
+                          <span key={v.votante_id} className="voto-chip" style={{ ['--c' as any]: `hsl(${Number(v.nota) * 12} 75% 55%)` }}>
+                            {nombre(v.votante_id)} <b>{Number(v.nota)}</b>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              {votosP.mvp.length > 0 && (
+                <div className="mt14">
+                  <b>👑 Votos al MVP</b>
+                  {Object.entries(votosP.mvp.reduce((m: any, v: any) => { (m[v.votado_id] ||= []).push(v.votante_id); return m }, {}))
+                    .sort((a: any, b: any) => b[1].length - a[1].length)
+                    .map(([jid, quienes]: any) => (
+                      <div key={jid} className="mut fs12 my4"><b className="txt">{nombre(jid)}</b> · {quienes.length} ({quienes.map(nombre).join(', ')})</div>
+                    ))}
+                </div>
+              )}
+            </>
+          )}
+        </details>
       )}
 
       {/* ---- Equipos ---- */}

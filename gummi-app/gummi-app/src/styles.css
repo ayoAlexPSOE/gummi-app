@@ -551,7 +551,18 @@ button.peligro-lleno { background:linear-gradient(135deg,#ff6a82,#d8304c); color
 .externo-nuevo { display:flex; gap:8px; margin:12px 0 6px; flex-direction:row; }
 .externo-nuevo input { flex:1; min-width:0; }
 
+/* Votos del partido (admin) */
+.votos-admin summary { font-weight:700; min-height:32px; }
+.voto-admin { display:grid; grid-template-columns:1fr auto; gap:4px 10px; align-items:center; padding:8px 0; border-top:1px solid var(--line); }
+.voto-admin-media { font-family:var(--titulo); font-weight:800; font-size:20px; text-align:right; display:flex; flex-direction:column; line-height:1; }
+.voto-admin-media small { font-family:Inter,sans-serif; font-size:11px; font-weight:500; color:var(--mut); margin-top:2px; }
+.voto-admin-lista { grid-column:1 / -1; display:flex; flex-wrap:wrap; gap:4px; }
+.voto-chip { font-size:12px; padding:2px 8px; border-radius:99px; background:#ffffff0d; border:1px solid color-mix(in srgb, var(--c) 45%, transparent); }
+.voto-chip b { color:var(--c); }
+.txt { color:var(--txt); }
+
 /* Logros compactos */
+.logros-cab button { flex:none; white-space:nowrap; }
 .logros-cab { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:10px 0 8px; }
 .logros-cab .mut { font-size:13.5px; }
 .logros-lista { display:flex; flex-direction:column; gap:6px; }
