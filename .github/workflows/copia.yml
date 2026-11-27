@@ -1,0 +1,38 @@
+# Copia de seguridad semanal de la base de datos (Supabase), cifrada.
+# Necesita dos secretos en GitHub (Settings > Secrets and variables > Actions):
+#   SUPABASE_DB_URL  -> la "Session pooler" connection string de Supabase (con la contraseña puesta)
+#   BACKUP_PASSWORD  -> una contraseña que elijas tú para cifrar la copia
+# La copia queda 90 días en la pestaña Actions de GitHub (cada ejecución > Artifacts).
+name: Copia de seguridad
+
+on:
+  schedule:
+    - cron: '17 4 * * 1'   # cada lunes a las 5:17 (hora de España en invierno)
+  workflow_dispatch:        # botón "Run workflow" para hacerla cuando quieras
+
+jobs:
+  copia:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Volcar la base de datos
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$DB_URL" ]; then echo "Falta el secreto SUPABASE_DB_URL"; exit 1; fi
+          docker run --rm -e DB_URL="$DB_URL" -v "$PWD:/out" postgres:17 \
+            sh -c 'pg_dump "$DB_URL" --schema=public --schema=auth --no-owner --no-privileges -Fc -f /out/gummi.dump'
+          ls -la gummi.dump
+      - name: Cifrar
+        env:
+          PASS: ${{ secrets.BACKUP_PASSWORD }}
+        run: |
+          if [ -z "$PASS" ]; then echo "Falta el secreto BACKUP_PASSWORD"; exit 1; fi
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$PASS" --symmetric --cipher-algo AES256 \
+            -o "gummi-$(date +%Y-%m-%d).dump.gpg" gummi.dump
+          rm gummi.dump
+      - name: Guardar la copia
+        uses: actions/upload-artifact@v4
+        with:
+          name: copia-gummi
+          path: gummi-*.dump.gpg
+          retention-days: 90
