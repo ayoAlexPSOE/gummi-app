@@ -140,7 +140,7 @@ export default function Votar({ yo }: { yo: any }) {
     part
       .filter((x) => x.partido_id === pid && x.jugador_id !== yo.id)
       .map((x) => perfiles.find((j) => j.id === x.jugador_id))
-      .filter((j) => j && !j.es_externo)
+      .filter(Boolean) // externos incluidos (se les puede votar desde el script 22)
 
   return (
     <>
