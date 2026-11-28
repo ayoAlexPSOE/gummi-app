@@ -118,17 +118,19 @@ export default function Jugadores({ yo }: { yo: any }) {
               <div className="jug-extra">
                 <div className="mut">
                   {n?.fuente === 'votos' && `${n.num_votos} votos recibidos`}
-                  {n?.fuente === 'manual' && 'Media puesta a mano'}
+                  {n?.fuente === 'mixta' && `${n.num_votos} votos recibidos + tu nota`}
+                  {n?.fuente === 'manual' && 'Solo tu nota (aún sin votos)'}
                   {n?.ajuste != null && Number(n.ajuste) !== 0 &&
                     ` · salió de ${Math.round(Number(n.nota_votos))} ${Number(n.ajuste) > 0 ? '+' : ''}${Number(n.ajuste).toFixed(1)}`}
                 </div>
+                <div className="mut fs12 mt6">Tu nota (0-99) pesa la mitad de su media de partida; la otra mitad, la votación inicial.</div>
                 <div className="row mt6">
-                  {(j.es_externo || n?.fuente !== 'votos') && (
+                  {(
                     <input
                       key={j.id + ':' + (manual?.nota ?? '')}
                       style={{ width: 110 }}
                       inputMode="decimal"
-                      placeholder="Media manual"
+                      placeholder="Tu nota 0-99"
                       defaultValue={manual ? String(Number(manual.nota)) : ''}
                       onBlur={(e) => guardarManual(j.id, e.target.value)}
                     />
