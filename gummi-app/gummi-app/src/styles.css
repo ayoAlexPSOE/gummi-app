@@ -632,6 +632,18 @@ button.bienv-avatar { position:relative; background:none; box-shadow:none; paddi
 .esq-tarjeta.corta { width:70%; }
 @keyframes brilloEsq { from { background-position:100% 0; } to { background-position:0 0; } }
 
+/* Editor: añadir/quitar jugadores del equipo */
+.editor-anadir { width:100%; margin:6px 0 10px; min-height:44px; font-size:15px; color:var(--acc); border-style:dashed; }
+button.editor-quitar { margin-left:auto; min-height:30px; min-width:30px; padding:0; font-size:12px; opacity:.6; }
+
+/* Más partidos convocados (Inicio) */
+.mas-partidos .partido-mini { display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid var(--line); cursor:pointer; }
+.mas-partidos .partido-mini:first-of-type { border-top:0; padding-top:2px; }
+.partido-mini .pm-dia { flex:1; min-width:0; }
+.partido-mini .pm-dia b { display:block; }
+.partido-mini .pm-dia b::first-letter { text-transform:uppercase; }
+.partido-mini .seg button { width:40px; min-height:40px; }
+
 /* Recuento del MVP */
 .mvp-recuento summary { font-weight:700; min-height:32px; cursor:pointer; }
 .mvp-barra { display:grid; grid-template-columns:minmax(0, 1.1fr) 1fr 26px; align-items:center; gap:10px; padding:5px 0; }

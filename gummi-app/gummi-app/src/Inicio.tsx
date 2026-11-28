@@ -163,6 +163,33 @@ export default function Inicio({ yo, onPartido, onVotar }: { yo: any; onPartido:
         </div>
       )}
 
+      {proximos.length > 1 && (
+        <>
+          <h2>Más adelante</h2>
+          <div className="card mas-partidos">
+            {proximos.slice(1).map((p: any) => {
+              const mia = d.conv.find((x: any) => x.partido_id === p.id && x.jugador_id === yo.id)
+              const { titulares } = convocados(d.conv, p.id, d.cfg?.plazas ?? PLAZAS_DEFECTO)
+              return (
+                <div key={p.id} className="partido-mini" onClick={() => onPartido(p.id)}>
+                  <span className="pm-dia">
+                    <b>{horario(p)}</b>
+                    <span className="mut">{[p.lugar, `${titulares.length} ${titulares.length === 1 ? 'va' : 'van'}`].filter(Boolean).join(' · ')}</span>
+                  </span>
+                  {p.estado === 'convocatoria' && (
+                    <span className="seg" onClick={(e) => e.stopPropagation()}>
+                      {OPCIONES.map(([v, t, ic]) => (
+                        <button key={v} className={mia?.respuesta === v ? 'on' : ''} onClick={() => responder(p.id, v)} aria-pressed={mia?.respuesta === v} aria-label={t}>{ic}</button>
+                      ))}
+                    </span>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
+
       {bannerAvisos && <TarjetaAvisos compacta onCerrar={cerrarBanner} />}
 
       {pendientes.length > 0 && (

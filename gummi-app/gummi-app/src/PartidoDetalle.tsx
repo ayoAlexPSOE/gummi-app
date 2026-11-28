@@ -323,6 +323,31 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
     setBusy(false)
   }
 
+  // Añadir o quitar a alguien de un equipo ya hecho (llegó tarde, se cambió, faltó…)
+  const anadirAlEquipo = async (jid: string, eq: Eq) => {
+    if (!jid) return
+    setBusy(true)
+    const { error } = await supabase.from('participaciones').insert({ partido_id: id, jugador_id: jid, equipo: eq, posicion: perfilDe(jid)?.posicion || null })
+    if (!error) {
+      // si no estaba apuntado como "Voy", se le apunta para que cuadre todo
+      await supabase.from('convocatorias').upsert({ partido_id: id, jugador_id: jid, respuesta: 'voy', updated_at: new Date().toISOString() }, { onConflict: 'partido_id,jugador_id' })
+    }
+    setBusy(false)
+    if (error) return aviso(error.message, 'error')
+    vibra(15)
+    aviso(`✅ ${nombre(jid)} añadido a ${nombreEquipo(eq, colorDe(eq)).toLowerCase()}`, 'ok')
+    cargar()
+  }
+  const quitarDelEquipo = async (jid: string) => {
+    if (!(await confirmar(`¿Quitar a ${nombre(jid)} de este partido? Se borrarán sus goles y asistencias de este partido.`, { si: 'Quitar', peligro: true }))) return
+    setBusy(true)
+    await supabase.from('eventos').delete().eq('partido_id', id).eq('jugador_id', jid)
+    const { error } = await supabase.from('participaciones').delete().eq('partido_id', id).eq('jugador_id', jid)
+    setBusy(false)
+    if (error) return aviso(error.message, 'error')
+    cargar()
+  }
+
   const editarDatos = () => setEditDatos({ hor: desdePartido(p), lugar: p.lugar || '' })
   const guardarDatos = async () => {
     if (!editDatos || !editDatos.hor.fecha) return
@@ -693,7 +718,9 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
                   const c = cont[x.jugador_id] || { g: 0, a: 0 }
                   return (
                     <div key={x.jugador_id} className="fila editor-fila">
-                      <span className="conv-nombre"><Avatar p={perfilDe(x.jugador_id)} size={24} /><span>{nombre(x.jugador_id)}</span></span>
+                      <span className="conv-nombre"><Avatar p={perfilDe(x.jugador_id)} size={24} /><span>{nombre(x.jugador_id)}</span>
+                        <button className="sec mini ico editor-quitar" disabled={busy} onClick={() => quitarDelEquipo(x.jugador_id)} aria-label={`Quitar a ${nombre(x.jugador_id)}`}>✕</button>
+                      </span>
                       <span className="contador">
                         <button className="sec" onClick={() => ajustar(x.jugador_id, 'g', -1)} disabled={!c.g} aria-label="Quitar gol">−</button>
                         <span className={c.g ? 'on' : ''}>⚽{c.g}</span>
@@ -707,6 +734,19 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
                     </div>
                   )
                 })}
+                {(() => {
+                  const fuera = perfiles.filter((j) => !part.some((x) => x.jugador_id === j.id))
+                  if (!fuera.length) return null
+                  const van = fuera.filter((j) => respDe(j.id) === 'voy')
+                  const resto = fuera.filter((j) => respDe(j.id) !== 'voy')
+                  return (
+                    <select className="editor-anadir" value="" disabled={busy} onChange={(e) => anadirAlEquipo(e.target.value, eq)} aria-label={`Añadir jugador a ${nombreEquipo(eq, colorDe(eq))}`}>
+                      <option value="">＋ Añadir a {nombreEquipo(eq, colorDe(eq)).toLowerCase()}…</option>
+                      {van.length > 0 && <optgroup label="Apuntados sin equipo">{van.map((j) => <option key={j.id} value={j.id}>{j.apodo || j.nombre}</option>)}</optgroup>}
+                      <optgroup label="Resto de la plantilla">{resto.map((j) => <option key={j.id} value={j.id}>{j.apodo || j.nombre}{j.es_externo ? ' (externo)' : ''}</option>)}</optgroup>
+                    </select>
+                  )
+                })()}
               </div>
             ))}
           </div>
