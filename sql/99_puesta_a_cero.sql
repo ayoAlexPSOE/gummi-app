@@ -13,16 +13,19 @@
 --   * Logros conseguidos, avisos y temporadas (se crea una nueva).
 --
 -- Cómo usarlo:
---   1) Cambia la lista de usuarios a conservar (sin @gummi.app) y el nombre
---      de la temporada.
---   2) Ejecútalo entero. Si algún usuario de la lista no existe, o si no
+--   1) Crea antes en Authentication > Add user la cuenta que vaya a ser admin
+--      (si aún no existe).
+--   2) Cambia la lista de usuarios a conservar (sin @gummi.app), quién será
+--      el admin y el nombre de la temporada.
+--   3) Ejecútalo entero. Si algún usuario de la lista no existe, o si no
 --      incluye al admin, se para sin borrar nada.
 -- =====================================================================
 
 do $$
 declare
   -- 👇 CAMBIA ESTO
-  v_conservar text[] := array['alexc', 'OTRO_USUARIO'];
+  v_conservar text[] := array['alexc', 'OTRO_USUARIO'];   -- cuentas que se quedan
+  v_admin     text   := 'alexc';                          -- cuál de ellas será admin
   v_temporada text   := '2026/27';
   -- 👆
   v_correos   text[];
@@ -41,6 +44,12 @@ begin
   select array_agg(pr.id) into v_ids
   from public.perfiles pr join auth.users au on au.id = pr.user_id
   where lower(au.email) = any (v_correos);
+
+  if lower(v_admin) <> all (array(select lower(u) from unnest(v_conservar) u)) then
+    raise exception 'El admin (%) tiene que estar también en la lista de cuentas a conservar. No se ha borrado nada.', v_admin;
+  end if;
+  update public.perfiles set rol = 'admin'
+  where user_id = (select id from auth.users where lower(email) = lower(v_admin) || '@gummi.app');
 
   if not exists (select 1 from public.perfiles where id = any (v_ids) and rol = 'admin') then
     raise exception 'En la lista no hay ningún admin: te quedarías sin acceso. No se ha borrado nada.';
