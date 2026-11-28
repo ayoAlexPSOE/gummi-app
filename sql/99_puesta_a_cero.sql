@@ -26,7 +26,7 @@ declare
   -- 👇 CAMBIA ESTO
   v_conservar text[] := array['alexc', 'OTRO_USUARIO'];   -- cuentas que se quedan
   v_admin     text   := 'alexc';                          -- cuál de ellas será admin
-  v_temporada text   := '2026/27';
+  v_temporada text   := 'Temporada 0';
   -- 👆
   v_correos   text[];
   v_ids       uuid[];
