@@ -678,3 +678,7 @@ button.logro-fila:active { transform:none; background:#ffffff0a; }
 @media (prefers-reduced-motion:reduce) {
   *, *::before, *::after { animation:none !important; transition:none !important; }
 }
+
+/* Admin viendo la app como un jugador */
+.vista-jugador { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:8px max(16px, env(safe-area-inset-left)) 0; padding:8px 10px 8px 14px; border-radius:12px; font-size:13px; background:#ffb02e1f; border:1px solid #ffb02e66; color:#ffd58a; }
+.vista-jugador button { flex:none; min-height:34px; }

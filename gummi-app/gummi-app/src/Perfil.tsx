@@ -26,7 +26,7 @@ export async function reducir(file: File): Promise<Blob> {
   )
 }
 
-export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardado: () => void; onAdmin?: () => void }) {
+export default function Perfil({ yo, onGuardado, onAdmin, onVistaJugador }: { yo: any; onGuardado: () => void; onAdmin?: () => void; onVistaJugador?: () => void }) {
   const extras = yo.foto_url !== undefined // false si aún no se ha ejecutado 11_perfil.sql
   const [nombre, setNombre] = useState(yo.nombre || '')
   const [apodo, setApodo] = useState(yo.apodo || '')
@@ -142,6 +142,9 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
             {(yo.posiciones_secundarias || []).map((s: string) => <span key={s} className={'tag o70 pos-' + s}>{nombrePos(s)}</span>)}
             {yo.rol === 'admin' && (
               <button type="button" className="tag admin-tag" onClick={onAdmin}>🔧 admin ›</button>
+            )}
+            {onVistaJugador && (
+              <button type="button" className="tag admin-tag" onClick={onVistaJugador}>👁️ ver como jugador</button>
             )}
           </div>
         </div>

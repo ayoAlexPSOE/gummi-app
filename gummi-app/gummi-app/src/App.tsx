@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from './supabase'
 import { invalidar } from './datos'
 import { Dialogos } from './dialogos'
@@ -66,13 +66,23 @@ function Login() {
 
 export default function App() {
   const [session, setSession] = useState<any>(undefined)
-  const [yo, setYo] = useState<any>(null)
+  const [yoReal, setYo] = useState<any>(null)
+  // Vista de jugador: el admin ve la app como la ve cualquiera (solo cambia lo que se enseña)
+  const [vistaJugador, setVistaJugadorEstado] = useState(() => { try { return localStorage.getItem('gummi-vista-jugador') === '1' } catch { return false } })
+  const esAdminReal = yoReal?.rol === 'admin'
+  const yo = useMemo(() => (yoReal && esAdminReal && vistaJugador ? { ...yoReal, rol: 'jugador' } : yoReal), [yoReal, esAdminReal, vistaJugador])
   const [tab, setTab] = useState('inicio')
   const [sinLeer, setSinLeer] = useState(0)
   const [irPartido, setIrPartido] = useState<number | null>(null)
   const [vistaRanking, setVistaRanking] = useState('tabla')
   const [vuelta, setVuelta] = useState(0) // al cambiar, la pantalla actual se recarga
   const refrescar = () => { invalidar(); setVuelta((v) => v + 1) }
+  const setVistaJugador = (v: boolean) => {
+    try { localStorage.setItem('gummi-vista-jugador', v ? '1' : '0') } catch { /* sin almacenamiento */ }
+    setVistaJugadorEstado(v)
+    if (v && tab === 'admin') setTab('perfil')
+    refrescar()
+  }
   const [tirando, setTirando] = useState(0) // 0-1: cuánto se ha tirado hacia abajo para refrescar
   const oculto = useRef(0)
 
@@ -226,6 +236,12 @@ export default function App() {
           🔔{sinLeer > 0 && <span className="badge">{sinLeer}</span>}
         </button>
       </header>
+      {esAdminReal && vistaJugador && (
+        <div className="vista-jugador">
+          <span>👁️ Estás viendo la app como un jugador</span>
+          <button className="mini" onClick={() => setVistaJugador(false)}>Volver a admin</button>
+        </div>
+      )}
       {tirando > 0 && (
         <div className={'tirar' + (tirando >= 1 ? ' listo' : '')} style={{ transform: `translate(-50%, ${Math.round(tirando * 56)}px) rotate(${Math.round(tirando * 300)}deg)`, opacity: tirando }}>⚽</div>
       )}
@@ -233,7 +249,7 @@ export default function App() {
         {!yo ? <Cargando texto="Cargando perfil…" />
           : tab === 'inicio' ? <Inicio yo={yo} onPartido={(id) => irA('partido', id)} onVotar={() => irTab('votar')} />
           : tab === 'partidos' ? <Partidos yo={yo} abrirInicial={irPartido} onUsado={() => setIrPartido(null)} />
-          : tab === 'perfil' ? <Perfil yo={yo} onGuardado={cargarYo} onAdmin={() => irTab('admin')} />
+          : tab === 'perfil' ? <Perfil yo={yo} onGuardado={cargarYo} onAdmin={() => irTab('admin')} onVistaJugador={esAdminReal && !vistaJugador ? () => setVistaJugador(true) : undefined} />
           : tab === 'admin' && yo.rol === 'admin' ? <Admin yo={yo} onBack={() => irTab('perfil')} onPartido={(id) => irA('partido', id)} onTab={irTab} />
           : tab === 'avisos' ? <Avisos onIr={irA} onCambio={contarAvisos} />
           : tab === 'votar' ? <Votar yo={yo} />
