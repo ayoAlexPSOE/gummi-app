@@ -632,6 +632,15 @@ button.bienv-avatar { position:relative; background:none; box-shadow:none; paddi
 .esq-tarjeta.corta { width:70%; }
 @keyframes brilloEsq { from { background-position:100% 0; } to { background-position:0 0; } }
 
+/* Recuento del MVP */
+.mvp-recuento summary { font-weight:700; min-height:32px; cursor:pointer; }
+.mvp-barra { display:grid; grid-template-columns:minmax(0, 1.1fr) 1fr 26px; align-items:center; gap:10px; padding:5px 0; }
+.mvp-barra-fondo { height:8px; border-radius:4px; background:#ffffff14; overflow:hidden; }
+.mvp-barra-fondo span { display:block; height:100%; border-radius:4px; background:linear-gradient(90deg,#5a78ff,#3ddcff); }
+.mvp-barra.gana .mvp-barra-fondo span { background:linear-gradient(90deg,#ffa63d,#ffd76a); }
+.mvp-barra b { text-align:right; font-family:var(--titulo); }
+.mvp-barra.yo .conv-nombre span { color:var(--acc); }
+
 /* Logros compactos */
 .logros-cab button { flex:none; white-space:nowrap; }
 .logros-cab { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:10px 0 8px; }

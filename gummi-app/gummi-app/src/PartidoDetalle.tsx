@@ -521,6 +521,19 @@ export default function PartidoDetalle({ id, yo, onBack }: { id: number; yo: any
           <span className="mut">{mvp[0].num_votos} {mvp[0].num_votos === 1 ? 'voto' : 'votos'}</span>
         </div>
       )}
+      {/* Recuento del MVP: cuántos votos sacó cada uno (sin decir quién votó a quién) */}
+      {jugado && mvp.length > 1 && (
+        <details className="card mvp-recuento">
+          <summary>📊 Recuento del MVP <span className="mut">· {mvp.reduce((s, m) => s + m.num_votos, 0)} votos</span></summary>
+          {mvp.map((m) => (
+            <div key={m.jugador_id} className={'mvp-barra' + (m.num_votos === mvp[0].num_votos ? ' gana' : '') + (m.jugador_id === yo.id ? ' yo' : '')}>
+              <span className="conv-nombre"><Avatar p={perfilDe(m.jugador_id)} size={24} /><span>{nombre(m.jugador_id)}</span></span>
+              <span className="mvp-barra-fondo"><span style={{ width: `${(100 * m.num_votos) / mvp[0].num_votos}%` }} /></span>
+              <b>{m.num_votos}</b>
+            </div>
+          ))}
+        </details>
+      )}
       {jugado && p.votacion_hasta && new Date(p.votacion_hasta).getTime() > Date.now() && (
         <div className="aviso">🗳️ Votación abierta hasta el {new Date(p.votacion_hasta).toLocaleString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}. Ve a la pestaña <b>Votar</b>.
           {admin && <button className="sec mini w100 mt8" disabled={busy} onClick={cerrarVotacion}>🔒 Cerrar la votación ya (sale el MVP)</button>}
