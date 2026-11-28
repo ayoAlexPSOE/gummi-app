@@ -136,7 +136,7 @@ export default function Perfil({ yo, onGuardado, onAdmin }: { yo: any; onGuardad
         <Avatar p={yo} size={96} />
         <div className="f1 min0">
           <div className="perfil-nombre">{yo.apodo || yo.nombre}</div>
-          {yo.apodo && <div className="mut">{yo.nombre}</div>}
+          {yo.apodo && yo.apodo !== yo.nombre && <div className="mut">{yo.nombre}</div>}
           <div className="row mt6">
             {yo.posicion && <span className={'tag pos-' + yo.posicion}>{nombrePos(yo.posicion)}</span>}
             {(yo.posiciones_secundarias || []).map((s: string) => <span key={s} className={'tag o70 pos-' + s}>{nombrePos(s)}</span>)}

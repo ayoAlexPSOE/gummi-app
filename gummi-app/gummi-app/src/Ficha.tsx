@@ -161,7 +161,6 @@ export default function Ficha({ id, yo, onBack }: { id: string; yo: any; onBack:
         <Avatar p={perfil} size={72} />
         <div className="f1 min0">
           <div className="perfil-nombre">{perfil.apodo || perfil.nombre}</div>
-          {perfil.apodo && <div className="mut">{perfil.nombre}</div>}
         </div>
         {perfil.dorsal != null && <div className="perfil-info"><div className="dorsal" title="Dorsal"><small>DORSAL</small>{perfil.dorsal}</div></div>}
       </div>
