@@ -48,6 +48,9 @@ begin
   if lower(v_admin) <> all (array(select lower(u) from unnest(v_conservar) u)) then
     raise exception 'El admin (%) tiene que estar también en la lista de cuentas a conservar. No se ha borrado nada.', v_admin;
   end if;
+  -- Las cuentas que se quedan vuelven a ver la configuración inicial al entrar
+  update public.perfiles set bienvenida = null where id = any (v_ids);
+
   update public.perfiles set rol = 'admin'
   where user_id = (select id from auth.users where lower(email) = lower(v_admin) || '@gummi.app');
 
